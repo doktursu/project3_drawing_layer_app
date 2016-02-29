@@ -2,6 +2,23 @@ var React = require('react');
 
 var DrawingModeOptions = React.createClass({
 
+    _drawingModeElonclick: function() {
+        var canvas = this.props.canvas;
+        console.log('clicked. canvas', canvas);
+      canvas.isDrawingMode = !canvas.isDrawingMode;
+      if (canvas.isDrawingMode) {
+        this.innerHTML = 'Cancel drawing mode';
+        // drawingOptionsEl.style.display = '';
+      }
+      else {
+        this.innerHTML = 'Enter drawing mode';
+        // drawingOptionsEl.style.display = 'none';
+      }
+    },
+
+    handleClick: function() {
+        console.log('clicked');
+    },
     
     render: function() {
         return (
@@ -40,7 +57,7 @@ var DrawingModeOptions = React.createClass({
                 <input type="range" id="drawing-shadow-offset" name="drawing-shadow-offset" min="0" max="50" />
                 <br/>
 
-                <button id="drawing-mode">Cancel drawing mode</button>
+                <button id="drawing-mode" onClick={this._drawingModeElonclick}>Cancel drawing mode</button>
                 <br/>
 
                 <button id="clear-canvas">Clear</button>

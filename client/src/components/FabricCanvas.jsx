@@ -7,6 +7,7 @@ var FabricCanvas = React.createClass({
         var canvas = new fabric.Canvas(id, {
           isDrawingMode: true
         });
+        this.props.setCurrentCanvas(canvas);
     },
 
     render: function() {
