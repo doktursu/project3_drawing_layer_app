@@ -12,7 +12,7 @@ module.exports = {
         // simulate retrieving data from a database
         var rawFrames = JSON.parse(localStorage.getItem('frames'));
         // simulate success callback
-        ChatServerActionCreators.receiveAll(rawFrames);
+        AppServerActionCreators.receiveAll(rawFrames);
     },
 
     createFrame: function(frame, layer) {

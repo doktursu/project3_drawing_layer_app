@@ -1,16 +1,24 @@
 var FabricCanvas = require('./FabricCanvas.jsx');
 var DrawingModeOptions = require('./DrawingModeOptions.jsx');
-var CanvasStore = require('../stores/CanvasStore.js');
+var FrameStore = require('../stores/FrameStore.js');
 var React = require('react');
 
 function getStateFromStore() {
-    return {canvas: CanvasStore.get()}
+    return {frames: FrameStore.getAll()}
 }
 
 var App = React.createClass({
 
     getInitialState: function() {
         return getStateFromStore();
+    },
+
+    componentDidMount: function() {
+        FrameStore.addChangeListener(this._onChange);
+    },
+
+    componentWillUnmount: function() {
+        FrameStore.removeChangeListener(this._onChange);
     },
 
     setCurrentCanvas: function(canvas) {
@@ -21,10 +29,14 @@ var App = React.createClass({
         return (
             <div>
                 <h1>Allo Allo</h1>
-                <FabricCanvas id={this.state.canvas.id} width={200} height={200} setCurrentCanvas={this.setCurrentCanvas} />
+                <FabricCanvas frame={this.state.frames['f_1']} width={200} height={200} setCurrentCanvas={this.setCurrentCanvas} />
                 <DrawingModeOptions canvas={this.state.currentCanvas} canvasId={1} />
             </div>
         );
+    },
+
+    _onChange: function() {
+        this.setState(getStateFromStore());
     }
 });
 
