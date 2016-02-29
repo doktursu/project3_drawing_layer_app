@@ -6,6 +6,18 @@ var DrawingModeOptions = React.createClass({
         var canvas = this.props.canvas;
         console.log('clicked. canvas', canvas);
       canvas.isDrawingMode = !canvas.isDrawingMode;
+
+      var freeDrawingBrushOptions = {
+        'color': 'red',
+        'width': 10
+      };
+
+      Object.keys(freeDrawingBrushOptions).forEach(function(key) {
+        var value = freeDrawingBrushOptions[key];
+        console.log(key, ':', value);
+        canvas.freeDrawingBrush[key] = value;
+      });
+
       if (canvas.isDrawingMode) {
         this.innerHTML = 'Cancel drawing mode';
         // drawingOptionsEl.style.display = '';

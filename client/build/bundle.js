@@ -102,12 +102,12 @@
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	var React = __webpack_require__(3);
 	
 	var FabricCanvas = React.createClass({
-	    displayName: "FabricCanvas",
+	    displayName: 'FabricCanvas',
 	
 	
 	    componentDidMount: function componentDidMount() {
@@ -115,15 +115,17 @@
 	        var canvas = new fabric.Canvas(id, {
 	            isDrawingMode: true
 	        });
+	        var json = '{"objects":[{"type":"rect","left":50,"top":50,"width":20,"height":20,"fill":"green","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"rx":0,"ry":0},{"type":"circle","left":100,"top":100,"width":100,"height":100,"fill":"red","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"radius":50}],"background":"rgba(0, 0, 0, 0)"}';
+	        canvas.loadFromJSON(json);
 	        this.props.setCurrentCanvas(canvas);
 	    },
 	
 	    render: function render() {
 	
 	        return React.createElement(
-	            "div",
-	            { "class": "fabric-canvas" },
-	            React.createElement("canvas", { id: this.props.id, width: this.props.width, height: this.props.height })
+	            'div',
+	            { 'class': 'fabric-canvas' },
+	            React.createElement('canvas', { id: this.props.id, width: this.props.width, height: this.props.height })
 	        );
 	    }
 	});
@@ -19738,6 +19740,18 @@
 	        var canvas = this.props.canvas;
 	        console.log('clicked. canvas', canvas);
 	        canvas.isDrawingMode = !canvas.isDrawingMode;
+	
+	        var freeDrawingBrushOptions = {
+	            'color': 'red',
+	            'width': 10
+	        };
+	
+	        Object.keys(freeDrawingBrushOptions).forEach(function (key) {
+	            var value = freeDrawingBrushOptions[key];
+	            console.log(key, ':', value);
+	            canvas.freeDrawingBrush[key] = value;
+	        });
+	
 	        if (canvas.isDrawingMode) {
 	            this.innerHTML = 'Cancel drawing mode';
 	            // drawingOptionsEl.style.display = '';
