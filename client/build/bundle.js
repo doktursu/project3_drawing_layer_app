@@ -47,10 +47,14 @@
 	'use strict';
 	
 	var App = __webpack_require__(1);
+	var AppExampleData = __webpack_require__(169);
 	var React = __webpack_require__(3);
 	var ReactDOM = __webpack_require__(168);
 	
 	window.onload = function () {
+	
+	    AppExampleData.init();
+	
 	    ReactDOM.render(React.createElement(App, null), document.querySelector('#react'));
 	};
 
@@ -20581,6 +20585,31 @@
 	
 	module.exports = __webpack_require__(5);
 
+
+/***/ },
+/* 169 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = {
+	
+	    init: function init() {
+	        localStorage.clear();
+	        localStorage.setItem('frames', JSON.stringify([{
+	            id: 'f_1',
+	            layerID: 'l_1',
+	            data: '{"objects":[{"type":"rect","left":50,"top":50,"width":20,"height":20,"fill":"green","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"rx":0,"ry":0},{"type":"circle","left":100,"top":100,"width":100,"height":100,"fill":"red","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"radius":50}],"background":"rgba(0, 0, 0, 0)"}',
+	            timestamp: Date.now()
+	        }, {
+	            id: 'f_2',
+	            layerID: 'l_2',
+	            data: '{"objects":[{"type":"rect","left":70,"top":50,"width":20,"height":20,"fill":"blue","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"rx":0,"ry":0},{"type":"circle","left":100,"top":100,"width":50,"height":100,"fill":"yellow","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"radius":50}],"background":"rgba(0, 0, 0, 0)"}',
+	            timestamp: Date.now()
+	        }]));
+	    }
+	
+	};
 
 /***/ }
 /******/ ]);
