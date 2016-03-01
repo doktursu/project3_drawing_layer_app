@@ -6,7 +6,8 @@ module.exports = {
         RECEIVE_RAW_CREATED_FRAME: null,
         RECEIVE_RAW_FRAMES: null,
         RECEIVE_RAW_OBJECTS: null,
-        CLICK_LAYER: null
+        CLICK_LAYER: null,
+        CHECK_VISIBLE: null
     })
 
 };

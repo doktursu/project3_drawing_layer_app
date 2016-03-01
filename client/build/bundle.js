@@ -20120,7 +20120,7 @@
 	var AppLayerActionCreators = __webpack_require__(163);
 	var React = __webpack_require__(3);
 	var classNames = __webpack_require__(170);
-	
+	var LayerListOptions = __webpack_require__(184);
 	var ReactPropTypes = React.PropTypes;
 	
 	var LayerListItem = React.createClass({
@@ -20147,7 +20147,8 @@
 	                null,
 	                'Layer!!! ',
 	                layer.index
-	            )
+	            ),
+	            React.createElement(LayerListOptions, { layer: layer })
 	        );
 	    },
 	
@@ -20175,6 +20176,13 @@
 	    clickLayer: function clickLayer(layerID) {
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.CLICK_LAYER,
+	            layerID: layerID
+	        });
+	    },
+	
+	    checkVisible: function checkVisible(layerID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.CHECK_VISIBLE,
 	            layerID: layerID
 	        });
 	    }
@@ -20513,7 +20521,8 @@
 	        RECEIVE_RAW_CREATED_FRAME: null,
 	        RECEIVE_RAW_FRAMES: null,
 	        RECEIVE_RAW_OBJECTS: null,
-	        CLICK_LAYER: null
+	        CLICK_LAYER: null,
+	        CHECK_VISIBLE: null
 	    })
 	
 	};
@@ -21158,6 +21167,7 @@
 	// var FabricCanvas = require('./FabricCanvas.jsx');
 	// var DrawingModeOptions = require('./DrawingModeOptions.jsx');
 	var LayerSection = __webpack_require__(161);
+	var FrameSelector = __webpack_require__(183);
 	
 	var ObjectStore = __webpack_require__(176);
 	var React = __webpack_require__(3);
@@ -21207,6 +21217,11 @@
 	        console.log(canvas);
 	    },
 	
+	    componentDidUpdate: function componentDidUpdate() {
+	        console.log('rerendering canvas');
+	        canvas.renderAll();
+	    },
+	
 	    // componentDidUpdate: function() {
 	    //     canvas.clear();
 	
@@ -21234,7 +21249,8 @@
 	                null,
 	                'Objects'
 	            ),
-	            React.createElement('canvas', { id: 'c', width: 300, height: 300 })
+	            React.createElement('canvas', { id: 'c', width: 300, height: 300 }),
+	            React.createElement(FrameSelector, { frames: [{ id: 1 }, { id: 2 }, { id: 3 }] })
 	        );
 	    },
 	
@@ -21279,6 +21295,15 @@
 	        } else {
 	            console.log(_objects[id], 'is not selectable');
 	            _objects[id].selectable = false;
+	        }
+	    }
+	}
+	
+	function _toggleAllInLayerVisibility(layerID) {
+	    for (var id in _objects) {
+	        if (_objects[id].layerIndex === layerID) {
+	            _objects[id].visible = !_objects[id].visible;
+	            console.log(_objects[id], 'set un/visible');
 	        }
 	    }
 	}
@@ -21332,6 +21357,11 @@
 	        case ActionTypes.CLICK_LAYER:
 	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
 	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
+	            ObjectStore.emitChange();
+	            break;
+	
+	        case ActionTypes.CHECK_VISIBLE:
+	            _toggleAllInLayerVisibility(action.layerID);
 	            ObjectStore.emitChange();
 	            break;
 	
@@ -21530,6 +21560,61 @@
 	    }
 	
 	};
+
+/***/ },
+/* 183 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var React = __webpack_require__(3);
+	
+	var FrameSelector = React.createClass({
+	    displayName: "FrameSelector",
+	
+	
+	    render: function render() {
+	
+	        var radioButtons = this.props.frames.map(function (frame) {
+	            return React.createElement("input", { type: "radio", name: "frame", value: frame.id });
+	        });
+	
+	        return React.createElement(
+	            "form",
+	            null,
+	            radioButtons
+	        );
+	    }
+	
+	});
+	
+	module.exports = FrameSelector;
+
+/***/ },
+/* 184 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppLayerActionCreators = __webpack_require__(163);
+	var React = __webpack_require__(3);
+	
+	var LayerListOptions = React.createClass({
+	    displayName: 'LayerListOptions',
+	
+	
+	    render: function render() {
+	        return React.createElement('input', { type: 'checkbox', checked: 'true', onChange: this._onChange });
+	    },
+	
+	    _onChange: function _onChange() {
+	        var checked = this.checked;
+	        AppLayerActionCreators.checkVisible(this.props.layer.id);
+	    }
+	
+	});
+	
+	module.exports = LayerListOptions;
 
 /***/ }
 /******/ ]);

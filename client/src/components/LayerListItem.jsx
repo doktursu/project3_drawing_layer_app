@@ -1,7 +1,7 @@
 var AppLayerActionCreators = require('../actions/AppLayerActionCreators');
 var React = require('react');
 var classNames = require('classnames');
-
+var LayerListOptions = require('./LayerListOptions.jsx');
 var ReactPropTypes = React.PropTypes;
 
 var LayerListItem = React.createClass({
@@ -21,6 +21,7 @@ var LayerListItem = React.createClass({
                 })}
                 onClick={this._onClick} width={200} height={300}>
                 <p>Layer!!! {layer.index}</p>
+                <LayerListOptions layer={layer} />
             </li>
         );
     },

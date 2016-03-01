@@ -30,6 +30,15 @@ function _markOnlyAllInLayerSelectable(layerID) {
     }
 }
 
+function _toggleAllInLayerVisibility(layerID) {
+    for (var id in _objects) {
+        if (_objects[id].layerIndex === layerID) {
+            _objects[id].visible = !_objects[id].visible
+            console.log(_objects[id], 'set un/visible');
+        }
+    }
+}
+
 var ObjectStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
@@ -79,6 +88,11 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
         case ActionTypes.CLICK_LAYER:
             AppDispatcher.waitFor([LayerStore.dispatchToken]);
             _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
+            ObjectStore.emitChange();
+            break;
+
+        case ActionTypes.CHECK_VISIBLE:
+            _toggleAllInLayerVisibility(action.layerID);
             ObjectStore.emitChange();
             break;
 

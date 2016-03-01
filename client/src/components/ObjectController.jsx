@@ -1,6 +1,7 @@
 // var FabricCanvas = require('./FabricCanvas.jsx');
 // var DrawingModeOptions = require('./DrawingModeOptions.jsx');
-var LayerSection = require('../components/LayerSection.jsx');
+var LayerSection = require('./LayerSection.jsx');
+var FrameSelector = require('./FrameSelector.jsx');
 
 
 var ObjectStore = require('../stores/ObjectStore.js');
@@ -51,6 +52,11 @@ var ObjectController = React.createClass({
         console.log(canvas);
     },
 
+    componentDidUpdate: function() {
+        console.log('rerendering canvas');
+        canvas.renderAll();
+    },
+
     // componentDidUpdate: function() {
     //     canvas.clear();
 
@@ -74,6 +80,7 @@ var ObjectController = React.createClass({
                 <LayerSection />
                 <h1>Objects</h1>
                 <canvas id="c" width={300} height={300} />
+                <FrameSelector frames={[{id:1},{id:2},{id:3}]} />
             </div>
         );
     },

@@ -10,6 +10,13 @@ module.exports = {
             type: ActionTypes.CLICK_LAYER,
             layerID: layerID
         });
+    },
+
+    checkVisible: function(layerID) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.CHECK_VISIBLE,
+            layerID: layerID
+        });
     }
 
 };
