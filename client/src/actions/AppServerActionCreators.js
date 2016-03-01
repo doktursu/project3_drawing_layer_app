@@ -5,7 +5,7 @@ var ActionTypes = AppConstants.ActionTypes;
 
 module.exports = {
 
-    receiveAll: function(rawFrames) {
+    receiveAllFrames: function(rawFrames) {
         AppDispatcher.dispatch({
             type: ActionTypes.RECEIVE_RAW_FRAMES,
             rawFrames: rawFrames
@@ -17,6 +17,13 @@ module.exports = {
             type: ActionTypes.RECEIVE_RAW_CREATED_MESSAGE,
             rawFrame: createdFrame
         });
-    }
+    },
+
+    receiveAllObjects: function(rawObjects) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.RECEIVE_RAW_OBJECTS,
+            rawObjects: rawObjects
+        });
+    },
 
 };

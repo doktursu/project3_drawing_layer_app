@@ -12,7 +12,7 @@ module.exports = {
         // simulate retrieving data from a database
         var rawFrames = JSON.parse(localStorage.getItem('frames'));
         // simulate success callback
-        AppServerActionCreators.receiveAll(rawFrames);
+        AppServerActionCreators.receiveAllFrames(rawFrames);
     },
 
     createFrame: function(frame, layer) {
@@ -34,6 +34,34 @@ module.exports = {
         setTime(function() {
             AppServerActionCreators.receiveCreatedFrames(createdFrames);
         }, 0);
-    }
+    },
+
+    getAllObjects: function() {
+        // simulate retrieving data from a database
+        var rawObjects = JSON.parse(localStorage.getItem('objects'));
+        // simulate success callback
+        AppServerActionCreators.receiveAllObjects(rawObjects);
+    },
+
+    // createObject: function(object, layer) {
+    //     // simulate writing to a database
+    //     var rawObjects = JSON.parse(localStorage.getItem('objects'));
+    //     var timestamp = Date.now();
+    //     var id = 'f_' + timestamp;
+    //     var layerID = frame.layerID || ('l_' + Date.now());
+    //     var createdObject = {
+    //         id: id,
+    //         layerID: layerID,
+    //         data: '',
+    //         timestamp: timestamp
+    //     };
+    //     rawObjects.push(createdFrame);
+    //     localStorage.setItem('objects', JSON.stringify(rawObjects));
+
+    //     //simulate success callback
+    //     setTime(function() {
+    //         AppServerActionCreators.receiveCreatedObjects(createdObjects);
+    //     }, 0);
+    // }
 
 };

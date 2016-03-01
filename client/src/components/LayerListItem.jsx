@@ -1,0 +1,35 @@
+var AppLayerActionCreators = require('../actions/AppLayerActionCreators');
+var React = require('react');
+var classNames = require('classnames');
+
+var ReactPropTypes = React.PropTypes;
+
+var LayerListItem = React.createClass({
+
+    propTypes: {
+        layer: ReactPropTypes.object,
+        currentLayerID: ReactPropTypes.number
+    },
+
+    render: function() {
+        var layer = this.props.layer;
+        return (
+            <li 
+                className={classNames({
+                    'layer-list-item': true,
+                    'layer-active': layer.id === this.props.currentLayerID
+                })}
+                onClick={this._onClick} width={200} height={300}>
+                <p>Layer!!! {layer.index}</p>
+            </li>
+        );
+    },
+
+    _onClick: function() {
+        AppLayerActionCreators.clickLayer(this.props.layer.id);
+    }
+
+});
+
+module.exports = LayerListItem;
+

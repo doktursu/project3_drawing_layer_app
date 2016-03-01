@@ -6,17 +6,18 @@ var assign = require('object-assign');
 var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-var _frames = {};
+var _canvases = {};
 
-function _addFrames(rawFrames) {
-    rawFrames.forEach(function(frame) {
-        if (!_frames[frame.id]) {
-            _frames[frame.id] = frame;
-        }
-    });
+function _addCanvases(rawCanvases) {
+    // rawCanvases.forEach(function(canvas) {
+    //     if (!_canvases[canvas.id]) {
+    //         _canvases[canvas.id] = canvas;
+    //     }
+    // });
+    _canvases = rawCanvases;
 }
 
-var FrameStore = assign({}, EventEmitter.prototype, {
+var CanvasStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
         this.emit(CHANGE_EVENT);
@@ -31,7 +32,7 @@ var FrameStore = assign({}, EventEmitter.prototype, {
     },
 
     getAll: function() {
-        return _frames;
+        return _canvases;
     },
 
     getAllOrdered: function() {
@@ -48,13 +49,13 @@ var FrameStore = assign({}, EventEmitter.prototype, {
 
 });
 
-FrameStore.dispatchToken = AppDispatcher.register(function(action) {
+CanvasStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
 
         case ActionTypes.RECEIVE_RAW_FRAMES:
-            _addFrames(action.rawFrames);
-            FrameStore.emitChange();
+            _addCanvases(action.rawCanvases);
+            CanvasStore.emitChange();
             break;
 
         default:
@@ -63,4 +64,4 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
 
 });
 
-module.exports = FrameStore;
+module.exports = CanvasStore;

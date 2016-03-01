@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "babel": "^6.5.2",
+    "chai": "^3.5.0",
+    "classnames": "^2.2.3",
     "flux": "^2.1.1",
     "keymirror": "^0.1.1",
     "object-assign": "^4.0.1",

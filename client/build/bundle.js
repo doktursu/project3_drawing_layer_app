@@ -47,17 +47,24 @@
 	'use strict';
 	
 	var App = __webpack_require__(1);
-	var AppExampleData = __webpack_require__(170);
-	var AppWebAPIUtils = __webpack_require__(172);
+	
+	var ObjectController = __webpack_require__(175);
+	var FabricObjectsExampleData = __webpack_require__(177);
+	
+	var AppExampleData = __webpack_require__(178);
+	var AppWebAPIUtils = __webpack_require__(179);
 	var React = __webpack_require__(3);
-	var ReactDOM = __webpack_require__(171);
+	var ReactDOM = __webpack_require__(181);
 	
 	window.onload = function () {
 	
 	    AppExampleData.init();
 	    AppWebAPIUtils.getAllFrames();
 	
-	    ReactDOM.render(React.createElement(App, null), document.querySelector('#react'));
+	    FabricObjectsExampleData.init();
+	    AppWebAPIUtils.getAllObjects();
+	
+	    ReactDOM.render(React.createElement(ObjectController, null), document.querySelector('#react'));
 	};
 
 /***/ },
@@ -68,11 +75,17 @@
 	
 	var FabricCanvas = __webpack_require__(2);
 	var DrawingModeOptions = __webpack_require__(160);
-	var FrameStore = __webpack_require__(161);
+	
+	var LayerSection = __webpack_require__(161);
+	
+	var FrameStore = __webpack_require__(174);
 	var React = __webpack_require__(3);
 	
 	function getStateFromStore() {
-	    return { frames: FrameStore.getAll() };
+	    return {
+	        frames: FrameStore.getAllOrdered(),
+	        canvases: {}
+	    };
 	}
 	
 	var App = React.createClass({
@@ -80,10 +93,35 @@
 	
 	
 	    getInitialState: function getInitialState() {
-	        return getStateFromStore();
+	        return {
+	            frames: FrameStore.getAllOrdered(),
+	            canvases: {}
+	        };
 	    },
 	
 	    componentDidMount: function componentDidMount() {
+	
+	        var nextCanvases = this.state.frames.reduce(function (canvases, frame) {
+	            var id = String(frame.id);
+	            console.log('id', id);
+	            console.log('element', document.getElementById(id));
+	            var canvas = new fabric.Canvas(id, {
+	                isDrawingMode: false,
+	                selection: false
+	            });
+	            var json = frame.data;
+	            canvas.loadFromJSON(json);
+	            canvas.forEachObject(function (o) {
+	                o.selectable = false;
+	            });
+	            // console.log('new canvas', canvas);
+	            canvases[id] = canvas;
+	            return canvases;
+	        }, {});
+	        console.log('canvases added', nextCanvases);
+	        // var nextCanvases = this.state.canvases.concat(canvases);
+	        // console.log('nextCanvases', nextCanvases);
+	        this.setState({ canvases: nextCanvases });
 	        FrameStore.addChangeListener(this._onChange);
 	    },
 	
@@ -91,20 +129,95 @@
 	        FrameStore.removeChangeListener(this._onChange);
 	    },
 	
-	    setCurrentCanvas: function setCurrentCanvas(canvas) {
+	    setCurrentCanvas: function setCurrentCanvas(e) {
+	        var targetId = e.target.value;
+	        var canvas = this.state.canvases[targetId];
+	        var canvasEl = document.getElementById(targetId);
+	
+	        console.log('clicked', canvas);
+	        console.log('element', canvasEl);
 	        this.setState({ currentCanvas: canvas });
+	
+	        var canvas = this.state.canvases[targetId];
+	        if (canvas.selection) {
+	            console.log('disabled', targetId);
+	            this._disableSelection(canvas);
+	        } else {
+	            console.log('enabled', targetId);
+	            this._enableSelection(canvas);
+	        }
+	
+	        // for (var id in this.state.canvases) {
+	        //     var canvas = this.state.canvases[targetId];
+	        //     if (id === targetId) {
+	        //         console.log('enabled', id);
+	        //         this._enableSelection(canvas);
+	        //     } else {
+	        //         console.log('disabled', id);
+	        //         this._disableSelection(canvas);
+	        //     }
+	        // }
+	    },
+	
+	    _disableSelection: function _disableSelection(canvas) {
+	        canvas.selection = false;
+	        canvas.forEachObject(function (o) {
+	            o.selectable = false;
+	        });
+	    },
+	
+	    _enableSelection: function _enableSelection(canvas) {
+	        canvas.selection = true;
+	        canvas.forEachObject(function (o) {
+	            o.selectable = true;
+	        });
+	    },
+	
+	    addCanvas: function addCanvas(canvas) {
+	        // console.log('canvas in app', canvas);
+	        // var newCanvases = this.state.canvases.concat([canvas]);
+	        // console.log('canvases', newCanvases);
+	        // this.forceUpdate(
+	        //     () => {
+	        //         this.setState({canvases: newCanvases})
+	        //     }
+	        // );
 	    },
 	
 	    render: function render() {
+	        var _this = this;
+	
+	        var frameCanvases = this.state.frames.map(function (frame) {
+	            return React.createElement(FabricCanvas, {
+	                frame: frame,
+	                width: 200,
+	                height: 200,
+	                setCurrentCanvas: _this.setCurrentCanvas,
+	                addCanvas: _this.addCanvas
+	            });
+	        });
+	
+	        var canvasButtons = [];
+	        for (var id in this.state.canvases) {
+	            var button = React.createElement('input', { type: 'submit', onClick: this.setCurrentCanvas, value: id });
+	            canvasButtons.push(button);
+	        }
+	
 	        return React.createElement(
 	            'div',
 	            null,
+	            React.createElement(LayerSection, null),
 	            React.createElement(
 	                'h1',
 	                null,
 	                'Allo Allo'
 	            ),
-	            React.createElement(FabricCanvas, { frame: this.state.frames['f_1'], width: 200, height: 200, setCurrentCanvas: this.setCurrentCanvas }),
+	            canvasButtons,
+	            React.createElement(
+	                'div',
+	                { id: 'canvases' },
+	                frameCanvases
+	            ),
 	            React.createElement(DrawingModeOptions, { canvas: this.state.currentCanvas, canvasId: 1 })
 	        );
 	    },
@@ -120,37 +233,62 @@
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	var React = __webpack_require__(3);
 	
 	var FabricCanvas = React.createClass({
-	    displayName: "FabricCanvas",
+	    displayName: 'FabricCanvas',
 	
 	
-	    componentDidMount: function componentDidMount() {
-	        var frame = this.props.frame;
-	        var id = String(frame.id);
-	
-	        var canvas = new fabric.Canvas(id, {
-	            isDrawingMode: true
-	        });
-	        // var json = {"objects":[{"type":"rect","left":50,"top":50,"width":20,"height":20,"fill":"green","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"rx":0,"ry":0},{"type":"circle","left":100,"top":100,"width":100,"height":100,"fill":"red","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"radius":50}],"background":"rgba(0, 0, 0, 0)"}
-	        // var json = JSON.parse(frame.data);
-	        // var json = JSON.stringify(json);
-	        var json = frame.data;
-	
-	        canvas.loadFromJSON(json);
-	        this.props.setCurrentCanvas(canvas);
+	    getInitialState: function getInitialState() {
+	        return { canvas: null, group: [] };
 	    },
+	
+	    // componentDidMount: function() {
+	    //     var frame = this.props.frame;
+	    //     var id = String(frame.id);
+	
+	    //     var canvas = new fabric.Canvas(id, {
+	    //       isDrawingMode: true
+	    //     });
+	
+	    //     canvas.on('path:created', function(e) {
+	    //         // var objects = canvas.getObjects();
+	    //         // var object = objects[objects.length - 1];
+	    //         // console.log('last', JSON.stringify(object));
+	
+	    //         var path = e.path;
+	    //         console.log('path', path);
+	    //         var nextGroup = this.state.group.concat([path]);
+	    //         this.setState({group: nextGroup});
+	    //     }.bind(this));
+	
+	    //     // this.setState({canvas: canvas});
+	    //     // var json = {"objects":[{"type":"rect","left":50,"top":50,"width":20,"height":20,"fill":"green","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"rx":0,"ry":0},{"type":"circle","left":100,"top":100,"width":100,"height":100,"fill":"red","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"radius":50}],"background":"rgba(0, 0, 0, 0)"}
+	
+	    //     var json = frame.data;
+	    //     canvas.loadFromJSON(json);
+	
+	    //     this.setState({canvas: canvas});
+	    //     // console.log('state canvas', canvas);
+	    //     this.props.addCanvas(canvas);
+	    //     this.props.setCurrentCanvas(canvas);
+	    // },
 	
 	    render: function render() {
 	
 	        return React.createElement(
-	            "div",
-	            { "class": "fabric-canvas" },
-	            React.createElement("canvas", { id: this.props.frame.id, width: this.props.width, height: this.props.height })
+	            'div',
+	            { className: 'fabric-canvas' },
+	            React.createElement('canvas', { id: this.props.frame.id, width: this.props.width, height: this.props.height, onMouseUp: this._onChange })
 	        );
+	    },
+	
+	    _onClick: function _onClick() {},
+	
+	    _onChange: function _onChange() {
+	        console.log('canvas', JSON.stringify(this.state.canvas));
 	    }
 	});
 	
@@ -19912,59 +20050,66 @@
 
 	'use strict';
 	
-	var AppDispatcher = __webpack_require__(162);
-	var AppConstants = __webpack_require__(166);
-	var EventEmitter = __webpack_require__(168).EventEmitter;
-	var assign = __webpack_require__(169);
+	var LayerListItem = __webpack_require__(162);
+	var React = __webpack_require__(3);
 	
-	var ActionTypes = AppConstants.ActionTypes;
-	var CHANGE_EVENT = 'change';
+	var LayerStore = __webpack_require__(171);
 	
-	var _frames = {};
-	
-	function _addFrames(rawFrames) {
-	    rawFrames.forEach(function (frame) {
-	        if (!_frames[frame.id]) {
-	            _frames[frame.id] = frame;
-	        }
-	    });
+	function getStateFromStore() {
+	    return {
+	        layers: LayerStore.getAllOrdered(),
+	        currentLayerID: LayerStore.getCurrentID()
+	    };
 	}
 	
-	var FrameStore = assign({}, EventEmitter.prototype, {
+	var LayerSection = React.createClass({
+	    displayName: 'LayerSection',
 	
-	    emitChange: function emitChange() {
-	        this.emit(CHANGE_EVENT);
+	
+	    getInitialState: function getInitialState() {
+	        return getStateFromStore();
 	    },
 	
-	    addChangeListener: function addChangeListener(callback) {
-	        this.on(CHANGE_EVENT, callback);
+	    componentDidMount: function componentDidMount() {
+	        LayerStore.addChangeListener(this._onChange);
 	    },
 	
-	    removeChangeListener: function removeChangeListener(callback) {
-	        this.removeListener(CHANGE_EVENT, callback);
+	    componentWillUnmount: function componentWillUnmount() {
+	        LayerStore.removeChangeListener(this._onChange);
 	    },
 	
-	    getAll: function getAll() {
-	        return _frames;
+	    render: function render() {
+	        var layerListItems = this.state.layers.map(function (layer) {
+	            return React.createElement(LayerListItem, {
+	                key: layer.id,
+	                layer: layer,
+	                currentLayerID: this.state.currentLayerID
+	            });
+	        }.bind(this));
+	
+	        return React.createElement(
+	            'div',
+	            null,
+	            React.createElement(
+	                'h2',
+	                null,
+	                'Layers'
+	            ),
+	            React.createElement(
+	                'ul',
+	                null,
+	                layerListItems
+	            )
+	        );
+	    },
+	
+	    _onChange: function _onChange() {
+	        this.setState(getStateFromStore());
 	    }
 	
 	});
 	
-	FrameStore.dispatchToken = AppDispatcher.register(function (action) {
-	
-	    switch (action.type) {
-	
-	        case ActionTypes.RECEIVE_RAW_FRAMES:
-	            _addFrames(action.rawFrames);
-	            FrameStore.emitChange();
-	            break;
-	
-	        default:
-	        // do nothing
-	    }
-	});
-	
-	module.exports = FrameStore;
+	module.exports = LayerSection;
 
 /***/ },
 /* 162 */
@@ -19972,12 +20117,82 @@
 
 	'use strict';
 	
-	var Dispatcher = __webpack_require__(163).Dispatcher;
+	var AppLayerActionCreators = __webpack_require__(163);
+	var React = __webpack_require__(3);
+	var classNames = __webpack_require__(170);
+	
+	var ReactPropTypes = React.PropTypes;
+	
+	var LayerListItem = React.createClass({
+	    displayName: 'LayerListItem',
+	
+	
+	    propTypes: {
+	        layer: ReactPropTypes.object,
+	        currentLayerID: ReactPropTypes.number
+	    },
+	
+	    render: function render() {
+	        var layer = this.props.layer;
+	        return React.createElement(
+	            'li',
+	            {
+	                className: classNames({
+	                    'layer-list-item': true,
+	                    'layer-active': layer.id === this.props.currentLayerID
+	                }),
+	                onClick: this._onClick, width: 200, height: 300 },
+	            React.createElement(
+	                'p',
+	                null,
+	                'Layer!!! ',
+	                layer.index
+	            )
+	        );
+	    },
+	
+	    _onClick: function _onClick() {
+	        AppLayerActionCreators.clickLayer(this.props.layer.id);
+	    }
+	
+	});
+	
+	module.exports = LayerListItem;
+
+/***/ },
+/* 163 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(164);
+	var AppConstants = __webpack_require__(168);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	
+	module.exports = {
+	
+	    clickLayer: function clickLayer(layerID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.CLICK_LAYER,
+	            layerID: layerID
+	        });
+	    }
+	
+	};
+
+/***/ },
+/* 164 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Dispatcher = __webpack_require__(165).Dispatcher;
 	
 	module.exports = new Dispatcher();
 
 /***/ },
-/* 163 */
+/* 165 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -19989,11 +20204,11 @@
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 */
 	
-	module.exports.Dispatcher = __webpack_require__(164);
+	module.exports.Dispatcher = __webpack_require__(166);
 
 
 /***/ },
-/* 164 */
+/* 166 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20015,7 +20230,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 	
-	var invariant = __webpack_require__(165);
+	var invariant = __webpack_require__(167);
 	
 	var _prefix = 'ID_';
 	
@@ -20230,7 +20445,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6)))
 
 /***/ },
-/* 165 */
+/* 167 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -20285,24 +20500,26 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6)))
 
 /***/ },
-/* 166 */
+/* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var keyMirror = __webpack_require__(167);
+	var keyMirror = __webpack_require__(169);
 	
 	module.exports = {
 	
 	    ActionTypes: keyMirror({
 	        RECEIVE_RAW_CREATED_FRAME: null,
-	        RECEIVE_RAW_FRAMES: null
+	        RECEIVE_RAW_FRAMES: null,
+	        RECEIVE_RAW_OBJECTS: null,
+	        CLICK_LAYER: null
 	    })
 	
 	};
 
 /***/ },
-/* 167 */
+/* 169 */
 /***/ function(module, exports) {
 
 	/**
@@ -20361,7 +20578,158 @@
 
 
 /***/ },
-/* 168 */
+/* 170 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+	
+	(function () {
+		'use strict';
+	
+		var hasOwn = {}.hasOwnProperty;
+	
+		function classNames () {
+			var classes = [];
+	
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+	
+				var argType = typeof arg;
+	
+				if (argType === 'string' || argType === 'number') {
+					classes.push(arg);
+				} else if (Array.isArray(arg)) {
+					classes.push(classNames.apply(null, arg));
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				}
+			}
+	
+			return classes.join(' ');
+		}
+	
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
+
+/***/ },
+/* 171 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(164);
+	var AppConstants = __webpack_require__(168);
+	var EventEmitter = __webpack_require__(172).EventEmitter;
+	var assign = __webpack_require__(173);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	var CHANGE_EVENT = 'change';
+	
+	var _currentID = null;
+	var _layers = {};
+	
+	var LayerStore = assign({}, EventEmitter.prototype, {
+	
+	    init: function init(rawObjects) {
+	        rawObjects.forEach(function (object) {
+	            var layerIndex = object.layerIndex;
+	            var layer = _layers[layerIndex];
+	            if (layer) {
+	                layer.objects.push(object);
+	                return;
+	            }
+	            _layers[layerIndex] = {
+	                id: layerIndex,
+	                index: layerIndex,
+	                objects: [object]
+	            };
+	        }, this);
+	
+	        if (!_currentID) {
+	            var allOrdered = this.getAllOrdered();
+	            _currentID = allOrdered[allOrdered.length - 1].id;
+	        }
+	    },
+	
+	    emitChange: function emitChange() {
+	        this.emit(CHANGE_EVENT);
+	    },
+	
+	    /**
+	     * @param {function} callback
+	     */
+	    addChangeListener: function addChangeListener(callback) {
+	        this.on(CHANGE_EVENT, callback);
+	    },
+	
+	    /**
+	     * @param {function} callback
+	     */
+	    removeChangeListener: function removeChangeListener(callback) {
+	        this.removeListener(CHANGE_EVENT, callback);
+	    },
+	
+	    getAllOrdered: function getAllOrdered() {
+	        var orderedLayers = [];
+	        for (var id in _layers) {
+	            var layer = _layers[id];
+	            orderedLayers.push(layer);
+	        }
+	        orderedLayers.sort(function (a, b) {
+	            return a.index + b.index;
+	        });
+	        return orderedLayers;
+	    },
+	
+	    getCurrentID: function getCurrentID() {
+	        return _currentID;
+	    }
+	
+	});
+	
+	LayerStore.dispatchToken = AppDispatcher.register(function (action) {
+	
+	    switch (action.type) {
+	
+	        case ActionTypes.CLICK_LAYER:
+	            _currentID = action.layerID;
+	            LayerStore.emitChange();
+	            break;
+	
+	        case ActionTypes.RECEIVE_RAW_OBJECTS:
+	            LayerStore.init(action.rawObjects);
+	            LayerStore.emitChange();
+	            break;
+	
+	        default:
+	        // do nothing
+	    }
+	});
+	
+	module.exports = LayerStore;
+
+/***/ },
+/* 172 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -20665,7 +21033,7 @@
 
 
 /***/ },
-/* 169 */
+/* 173 */
 /***/ function(module, exports) {
 
 	/* eslint-disable no-unused-vars */
@@ -20710,7 +21078,316 @@
 
 
 /***/ },
-/* 170 */
+/* 174 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(164);
+	var AppConstants = __webpack_require__(168);
+	var EventEmitter = __webpack_require__(172).EventEmitter;
+	var assign = __webpack_require__(173);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	var CHANGE_EVENT = 'change';
+	
+	var _frames = {};
+	
+	function _addFrames(rawFrames) {
+	    rawFrames.forEach(function (frame) {
+	        if (!_frames[frame.id]) {
+	            _frames[frame.id] = frame;
+	        }
+	    });
+	}
+	
+	var FrameStore = assign({}, EventEmitter.prototype, {
+	
+	    emitChange: function emitChange() {
+	        this.emit(CHANGE_EVENT);
+	    },
+	
+	    addChangeListener: function addChangeListener(callback) {
+	        this.on(CHANGE_EVENT, callback);
+	    },
+	
+	    removeChangeListener: function removeChangeListener(callback) {
+	        this.removeListener(CHANGE_EVENT, callback);
+	    },
+	
+	    getAll: function getAll() {
+	        return _frames;
+	    },
+	
+	    getAllOrdered: function getAllOrdered() {
+	        var orderedFrames = [];
+	        for (var id in _frames) {
+	            var frame = _frames[id];
+	            orderedFrames.push(frame);
+	        }
+	        orderedFrames.sort(function (a, b) {
+	            return a.id - b.id;
+	        });
+	        return orderedFrames;
+	    }
+	
+	});
+	
+	FrameStore.dispatchToken = AppDispatcher.register(function (action) {
+	
+	    switch (action.type) {
+	
+	        case ActionTypes.RECEIVE_RAW_FRAMES:
+	            _addFrames(action.rawFrames);
+	            FrameStore.emitChange();
+	            break;
+	
+	        default:
+	        // do nothing
+	    }
+	});
+	
+	module.exports = FrameStore;
+
+/***/ },
+/* 175 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	// var FabricCanvas = require('./FabricCanvas.jsx');
+	// var DrawingModeOptions = require('./DrawingModeOptions.jsx');
+	var LayerSection = __webpack_require__(161);
+	
+	var ObjectStore = __webpack_require__(176);
+	var React = __webpack_require__(3);
+	
+	var canvas;
+	
+	function getStateFromStore() {
+	    return {
+	        objects: ObjectStore.getAllOrdered()
+	    };
+	}
+	
+	var ObjectController = React.createClass({
+	    displayName: 'ObjectController',
+	
+	
+	    getInitialState: function getInitialState() {
+	        return getStateFromStore();
+	    },
+	
+	    componentDidMount: function componentDidMount() {
+	        ObjectStore.addChangeListener(this._onChange);
+	        this._initializeFabricCanvas();
+	    },
+	
+	    _initializeFabricCanvas: function _initializeFabricCanvas() {
+	        canvas = new fabric.Canvas("c");
+	
+	        // var json = {};
+	        // json["objects"] = this.state.objects;
+	        // json["background"] = "rgba(0, 0, 0, 0)";
+	        // var json = JSON.stringify(json);
+	
+	        // canvas.loadFromJSON(json);
+	
+	        // with objects
+	        // var object = new fabric.Rect(this.state.objects[1]);
+	        // console.log(object);
+	        // canvas.add(object);
+	        // canvas.render();
+	
+	        this.state.objects.forEach(function (object) {
+	            canvas.add(object);
+	        });
+	
+	        // console.log(json);
+	        console.log(canvas);
+	    },
+	
+	    // componentDidUpdate: function() {
+	    //     canvas.clear();
+	
+	    //     var json = {};
+	    //     json["objects"] = this.state.objects;
+	    //     json["background"] = "rgba(0, 0, 0, 0)";
+	    //     var json = JSON.stringify(json);
+	
+	    //     canvas.loadFromJSON(json);
+	    //     console.log(json);
+	    //     console.log(canvas);
+	    // },
+	
+	    componentWillUnmount: function componentWillUnmount() {
+	        ObjectStore.removeChangeListener(this._onChange);
+	    },
+	
+	    render: function render() {
+	        return React.createElement(
+	            'div',
+	            null,
+	            React.createElement(LayerSection, null),
+	            React.createElement(
+	                'h1',
+	                null,
+	                'Objects'
+	            ),
+	            React.createElement('canvas', { id: 'c', width: 300, height: 300 })
+	        );
+	    },
+	
+	    _onChange: function _onChange() {
+	        this.setState(getStateFromStore());
+	    }
+	});
+	
+	module.exports = ObjectController;
+
+/***/ },
+/* 176 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(164);
+	var AppConstants = __webpack_require__(168);
+	var AppObjectUtils = __webpack_require__(182);
+	var LayerStore = __webpack_require__(171);
+	var EventEmitter = __webpack_require__(172).EventEmitter;
+	var assign = __webpack_require__(173);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	var CHANGE_EVENT = 'change';
+	
+	var _objects = {};
+	
+	function _addObjects(rawObjects) {
+	    rawObjects.forEach(function (object) {
+	        if (!_objects[object.id]) {
+	            _objects[object.id] = AppObjectUtils.convertRawObject(object);
+	        }
+	    });
+	}
+	
+	function _markOnlyAllInLayerSelectable(layerID) {
+	    for (var id in _objects) {
+	        if (_objects[id].layerIndex === layerID) {
+	            console.log(_objects[id], 'is selectable');
+	            _objects[id].selectable = true;
+	        } else {
+	            console.log(_objects[id], 'is not selectable');
+	            _objects[id].selectable = false;
+	        }
+	    }
+	}
+	
+	var ObjectStore = assign({}, EventEmitter.prototype, {
+	
+	    emitChange: function emitChange() {
+	        this.emit(CHANGE_EVENT);
+	    },
+	
+	    addChangeListener: function addChangeListener(callback) {
+	        this.on(CHANGE_EVENT, callback);
+	    },
+	
+	    removeChangeListener: function removeChangeListener(callback) {
+	        this.removeListener(CHANGE_EVENT, callback);
+	    },
+	
+	    getAll: function getAll() {
+	        return _objects;
+	    },
+	
+	    getAllForAnimation: function getAllForAnimation(animationId) {
+	        var animationObjects = [];
+	        for (var id in _objects) {
+	            if (_objects[id].animationId === animationId) {
+	                animationObjects.push(_objects[id]);
+	            }
+	        }
+	        return animationObjects;
+	    },
+	
+	    getAllOrdered: function getAllOrdered() {
+	        var orderedObjects = [];
+	        for (var id in _objects) {
+	            var object = _objects[id];
+	            orderedObjects.push(object);
+	        }
+	        orderedObjects.sort(function (a, b) {
+	            return a.id - b.id;
+	        });
+	        return orderedObjects;
+	    }
+	
+	});
+	
+	ObjectStore.dispatchToken = AppDispatcher.register(function (action) {
+	
+	    switch (action.type) {
+	
+	        case ActionTypes.CLICK_LAYER:
+	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
+	            ObjectStore.emitChange();
+	            break;
+	
+	        case ActionTypes.RECEIVE_RAW_OBJECTS:
+	            _addObjects(action.rawObjects);
+	            ObjectStore.emitChange();
+	            break;
+	
+	        default:
+	        // do nothing
+	    }
+	});
+	
+	module.exports = ObjectStore;
+
+/***/ },
+/* 177 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	module.exports = {
+	
+	    init: function init() {
+	        localStorage.clear();
+	        localStorage.setItem('objects', JSON.stringify([{
+	            "id": "f_1",
+	            "animationId": 1,
+	            "layerIndex": 1,
+	            "frameIndex": 1,
+	            "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
+	        }, {
+	            "id": "f_2",
+	            "animationId": 1,
+	            "layerIndex": 2,
+	            "frameIndex": 1,
+	            "type": "circle", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50
+	        }, {
+	            "id": "f_3",
+	            "animationId": 2,
+	            "layerIndex": 2,
+	            "frameIndex": 1,
+	            "type": "rect", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
+	        }, {
+	            "id": "f_4",
+	            "animationId": 2,
+	            "layerIndex": 1,
+	            "frameIndex": 1,
+	            "type": "circle", "left": 100, "top": 100, "width": 50, "height": 100, "fill": "yellow", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50
+	        }]));
+	    }
+	
+	};
+
+/***/ },
+/* 178 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -20721,11 +21398,14 @@
 	        localStorage.clear();
 	        localStorage.setItem('frames', JSON.stringify([{
 	            id: 'f_1',
+	            layerIndex: 1,
 	            layerID: 'l_1',
 	            data: { "objects": [{ "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0 }, { "type": "circle", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50 }], "background": "rgba(0, 0, 0, 0)" },
 	            timestamp: Date.now()
+	        }, { "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
 	        }, {
 	            id: 'f_2',
+	            layerIndex: 2,
 	            layerID: 'l_2',
 	            data: { "objects": [{ "type": "rect", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0 }, { "type": "circle", "left": 100, "top": 100, "width": 50, "height": 100, "fill": "yellow", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50 }], "background": "rgba(0, 0, 0, 0)" },
 	            timestamp: Date.now()
@@ -20735,21 +21415,12 @@
 	};
 
 /***/ },
-/* 171 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	module.exports = __webpack_require__(5);
-
-
-/***/ },
-/* 172 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var AppServerActionCreators = __webpack_require__(173);
+	var AppServerActionCreators = __webpack_require__(180);
 	
 	// !!! Please Note !!!
 	// We are using localStorage as an example, but in a real-world scenario, this
@@ -20763,7 +21434,7 @@
 	        // simulate retrieving data from a database
 	        var rawFrames = JSON.parse(localStorage.getItem('frames'));
 	        // simulate success callback
-	        AppServerActionCreators.receiveAll(rawFrames);
+	        AppServerActionCreators.receiveAllFrames(rawFrames);
 	    },
 	
 	    createFrame: function createFrame(frame, layer) {
@@ -20785,24 +21456,31 @@
 	        setTime(function () {
 	            AppServerActionCreators.receiveCreatedFrames(createdFrames);
 	        }, 0);
+	    },
+	
+	    getAllObjects: function getAllObjects() {
+	        // simulate retrieving data from a database
+	        var rawObjects = JSON.parse(localStorage.getItem('objects'));
+	        // simulate success callback
+	        AppServerActionCreators.receiveAllObjects(rawObjects);
 	    }
 	
 	};
 
 /***/ },
-/* 173 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var AppDispatcher = __webpack_require__(162);
-	var AppConstants = __webpack_require__(166);
+	var AppDispatcher = __webpack_require__(164);
+	var AppConstants = __webpack_require__(168);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	
 	module.exports = {
 	
-	    receiveAll: function receiveAll(rawFrames) {
+	    receiveAllFrames: function receiveAllFrames(rawFrames) {
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.RECEIVE_RAW_FRAMES,
 	            rawFrames: rawFrames
@@ -20814,6 +21492,41 @@
 	            type: ActionTypes.RECEIVE_RAW_CREATED_MESSAGE,
 	            rawFrame: createdFrame
 	        });
+	    },
+	
+	    receiveAllObjects: function receiveAllObjects(rawObjects) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.RECEIVE_RAW_OBJECTS,
+	            rawObjects: rawObjects
+	        });
+	    }
+	
+	};
+
+/***/ },
+/* 181 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	module.exports = __webpack_require__(5);
+
+
+/***/ },
+/* 182 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	function capitalize(string) {
+	    return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+	
+	module.exports = {
+	
+	    convertRawObject: function convertRawObject(rawObject) {
+	        var type = capitalize(rawObject.type);
+	        return new fabric[type](rawObject);
 	    }
 	
 	};
