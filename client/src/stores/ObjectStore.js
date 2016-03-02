@@ -23,9 +23,11 @@ function _markOnlyAllInLayerSelectable(layerID) {
         if (_objects[id].layerIndex === layerID) {
             console.log(_objects[id], 'is selectable');
             _objects[id].selectable = true;
+            _objects[id].evented = true;
         } else {
             console.log(_objects[id], 'is not selectable');
             _objects[id].selectable = false;
+            _objects[id].evented = false;
         }
     }
 }

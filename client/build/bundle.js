@@ -21314,6 +21314,11 @@
 	                'Objects'
 	            ),
 	            React.createElement('canvas', { id: 'c', width: 300, height: 300 }),
+	            React.createElement(
+	                'button',
+	                { onClick: this._onDrawingModeClick },
+	                'Drawing Mode'
+	            ),
 	            React.createElement(FrameSelector, { frames: [{ id: 1 }, { id: 2 }, { id: 3 }] })
 	        );
 	    },
@@ -21324,6 +21329,10 @@
 	
 	    _onCreate: function _onCreate(object) {
 	        AppObjectActionCreators.createObject(object, LayerStore.getCurrentID());
+	    },
+	
+	    _onDrawingModeClick: function _onDrawingModeClick() {
+	        canvas.isDrawingMode = !canvas.isDrawingMode;
 	    }
 	});
 	
@@ -21360,9 +21369,11 @@
 	        if (_objects[id].layerIndex === layerID) {
 	            console.log(_objects[id], 'is selectable');
 	            _objects[id].selectable = true;
+	            _objects[id].evented = true;
 	        } else {
 	            console.log(_objects[id], 'is not selectable');
 	            _objects[id].selectable = false;
+	            _objects[id].evented = false;
 	        }
 	    }
 	}

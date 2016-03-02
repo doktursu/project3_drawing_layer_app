@@ -93,6 +93,7 @@ var ObjectController = React.createClass({
                 <LayerSection />
                 <h1>Objects</h1>
                 <canvas id="c" width={300} height={300} />
+                <button onClick={this._onDrawingModeClick}>Drawing Mode</button>
                 <FrameSelector frames={[{id:1},{id:2},{id:3}]} />
             </div>
         );
@@ -104,6 +105,10 @@ var ObjectController = React.createClass({
 
     _onCreate: function(object) {
         AppObjectActionCreators.createObject(object, LayerStore.getCurrentID());
+    },
+
+    _onDrawingModeClick: function() {
+        canvas.isDrawingMode = !canvas.isDrawingMode;
     }
 });
 
