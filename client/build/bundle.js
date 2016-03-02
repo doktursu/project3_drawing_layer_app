@@ -20672,6 +20672,7 @@
 	
 	var _currentID = null;
 	var _layers = {};
+	var _layersMap = [];
 	
 	var LayerStore = assign({}, EventEmitter.prototype, {
 	
@@ -20689,6 +20690,12 @@
 	                objects: [object]
 	            };
 	        }, this);
+	
+	        for (var index in _layers) {
+	            _layersMap[index] = _layers[index].objects.length;
+	        };
+	
+	        console.log('layersMap', _layersMap);
 	
 	        if (!_currentID) {
 	            var allOrdered = this.getAllOrdered();
@@ -20729,6 +20736,13 @@
 	LayerStore.dispatchToken = AppDispatcher.register(function (action) {
 	
 	    switch (action.type) {
+	
+	        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
+	            for (var i = action.object.layerIndex; i < _layersMap.length; i++) {
+	                _layersMap[i]++;
+	            }
+	            console.log('update layersMap', _layersMap);
+	            break;
 	
 	        case ActionTypes.CLICK_LAYER:
 	            _currentID = action.layerID;
@@ -21225,9 +21239,9 @@
 	    },
 	
 	    _initializeFabricCanvas: function _initializeFabricCanvas() {
-	        canvas = new fabric.Canvas("c", {
-	            isDrawingMode: true
-	        });
+	        canvas = new fabric.Canvas("c");
+	        canvas.isDrawingMode = true;
+	        canvas.selectable = true;
 	
 	        // var json = {};
 	        // json["objects"] = this.state.objects;
@@ -21249,6 +21263,7 @@
 	        canvas.on('object:added', function () {
 	            var objects = canvas.getObjects();
 	            var object = objects[objects.length - 1];
+	            object.moveTo(LayerStore.getCurrentID());
 	            console.log('added', object);
 	            this._onCreate(object);
 	        }.bind(this));
@@ -21258,7 +21273,7 @@
 	    },
 	
 	    componentDidUpdate: function componentDidUpdate() {
-	        console.log('rerendering canvas');
+	        console.log('rerendering canvas', canvas);
 	        canvas.renderAll();
 	    },
 	
@@ -21387,8 +21402,9 @@
 	            orderedObjects.push(object);
 	        }
 	        orderedObjects.sort(function (a, b) {
-	            return a.id - b.id;
+	            return a.layerIndex - b.layerIndex;
 	        });
+	        console.log('ordered', orderedObjects);
 	        return orderedObjects;
 	    }
 	

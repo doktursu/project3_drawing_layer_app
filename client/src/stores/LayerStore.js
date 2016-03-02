@@ -8,6 +8,7 @@ var CHANGE_EVENT = 'change';
 
 var _currentID = null;
 var _layers = {};
+var _layersMap = [];
 
 var LayerStore = assign({}, EventEmitter.prototype, {
 
@@ -25,6 +26,12 @@ var LayerStore = assign({}, EventEmitter.prototype, {
                 objects: [object]
             };
         }, this);
+
+        for (var index in _layers) {
+            _layersMap[index] = _layers[index].objects.length;
+        };
+
+        console.log('layersMap', _layersMap);
 
         if (!_currentID) {
           var allOrdered = this.getAllOrdered();
@@ -65,6 +72,13 @@ var LayerStore = assign({}, EventEmitter.prototype, {
 LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
+
+        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
+            for (var i = action.object.layerIndex; i < _layersMap.length; i++) {
+                _layersMap[i]++;
+            }
+            console.log('update layersMap', _layersMap);
+            break;
 
         case ActionTypes.CLICK_LAYER:
             _currentID = action.layerID;

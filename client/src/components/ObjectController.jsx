@@ -30,9 +30,9 @@ var ObjectController = React.createClass({
     },
 
     _initializeFabricCanvas: function() {
-        canvas = new fabric.Canvas("c", {
-            isDrawingMode: true
-        });
+        canvas = new fabric.Canvas("c");
+        canvas.isDrawingMode = true;
+        canvas.selectable = true;
 
 
         // var json = {};
@@ -56,6 +56,7 @@ var ObjectController = React.createClass({
         canvas.on('object:added', function() {
             var objects = canvas.getObjects();
             var object = objects[objects.length - 1];
+            object.moveTo(LayerStore.getCurrentID());
             console.log('added', object);
             this._onCreate(object);
         }.bind(this));
@@ -65,7 +66,7 @@ var ObjectController = React.createClass({
     },
 
     componentDidUpdate: function() {
-        console.log('rerendering canvas');
+        console.log('rerendering canvas', canvas);
         canvas.renderAll();
     },
 

@@ -74,8 +74,9 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
             orderedObjects.push(object);
         }
         orderedObjects.sort(function(a, b) {
-            return a.id - b.id;
+            return a.layerIndex - b.layerIndex;
         })
+        console.log('ordered', orderedObjects);
         return orderedObjects;
     }
 
