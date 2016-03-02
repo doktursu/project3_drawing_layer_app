@@ -6,7 +6,7 @@ var LayerStore = require('../stores/LayerStore.js');
 var LayerSection = require('./LayerSection.jsx');
 var FrameSelector = require('./FrameSelector.jsx');
 
-
+// var JsonObjectStore = require('../stores/JsonObjectStore.js');
 var ObjectStore = require('../stores/ObjectStore.js');
 var React = require('react');
 
@@ -48,6 +48,7 @@ var ObjectController = React.createClass({
         // canvas.add(object);
         // canvas.render();
 
+        console.log('ooooooo', this.state.objects);
 
         this.state.objects.forEach(function(object) {
             canvas.add(object);

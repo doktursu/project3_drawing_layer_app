@@ -12,6 +12,8 @@ module.exports = {
         CREATE_OBJECT: null,
         CREATE_LAYER: null,
         DELETE_LAYER: null,
+        MOVE_UP_LAYER: null,
+        MOVE_DOWN_LAYER: null,
         RECEIVE_CANVAS: null
     })
 

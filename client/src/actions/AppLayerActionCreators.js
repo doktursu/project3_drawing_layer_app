@@ -30,6 +30,20 @@ module.exports = {
             type: ActionTypes.DELETE_LAYER,
             layerID: layerID
         });
-    }
+    },
+
+    moveUpLayer: function(layerID) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.MOVE_UP_LAYER,
+            layerID: layerID
+        });
+    },
+
+    moveDownLayer: function(layerID) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.MOVE_DOWN_LAYER,
+            layerID: layerID
+        });
+    },
 
 };

@@ -3,6 +3,8 @@ var AppConstants = require('../constants/AppConstants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
+var AppObjectUtils = require('../utils/AppObjectUtils.js');
+
 var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
@@ -13,24 +15,58 @@ var _layersMap = [];
 
 var _layersOrder = ['l_0', 'l_1', 'l_2'];
 
+function move(old_index, new_index) {
+    console.log('from', old_index, 'to', new_index);
+    if (new_index >= _layers.length) {
+        var k = new_index - _layers.length;
+        while ((k--) + 1) {
+            _layers.push(undefined);
+        }
+    }
+    _layers.splice(new_index, 0, _layers.splice(old_index, 1)[0]);
+    console.log('moved?', _layers); // for testing purposes
+};
+
+function moveUpLayer(layerID) {
+    var index = getIndexForID(layerID);
+    if (index === _layers.length - 1) {
+        return;
+    }
+    move(index, index + 1);
+}
+
+function moveDownLayer(layerID) {
+    var index = getIndexForID(layerID);
+    if (index === 0) {
+        return;
+    }
+    move(index, index - 1);
+}
+
+function getIDforIndex(index) {
+    var layer = _layers[index];
+    if (layer) {
+        return layer.id;
+    }
+    return null;
+}
+
+function getIndexForID(layerID) {
+    var index;
+    for (index = 0; index < _layers.length; index++) {
+        if (_layers[index].id === layerID) {
+            return index;
+        }
+    }
+    return null;
+}
+
 var LayerStore = assign({}, EventEmitter.prototype, {
 
     init: function(rawObjects) {
-        // rawObjects.forEach(function(object) {
-        //     var layerID = object.layerID;
-        //     var layer = _layers[layerID];
-        //     if (layer) {
-        //         layer.objects.push(object);
-        //         return;
-        //     }
-        //     _layers[layerID] = {
-        //         id: layerID,
-        //         objects: [object]
-        //     };
-        // });
-
         var layers = rawObjects.reduce(function(layers, object) {
             var id = object.layerID;
+            var object = AppObjectUtils.convertRawObject(object);
             if (layers[id]) {
                 layers[id].objects.push(object);
             } else {
@@ -46,21 +82,10 @@ var LayerStore = assign({}, EventEmitter.prototype, {
             _layers.push(layers[id]);
         });
 
-        // for (var id in _layers) {
-        //     var index = _layersOrder.indexOf(id)
-        //     _layersMap[index] = _layers[id].objects.length;
-        // };
-
-        console.log('layers', _layers);
-        // console.log('layersMap', _layersMap);
-
         if (!_currentIndex) {
             _currentIndex = _layers.length - 1;
             _currentID = _layers[_currentIndex].id;
         }
-
-        console.log('cur index', _currentIndex);
-        console.log('cur ID', _currentID);
     },
 
     emitChange: function() {
@@ -89,6 +114,10 @@ var LayerStore = assign({}, EventEmitter.prototype, {
             return a.index + b.index;
         });
         return orderedLayers;
+    },
+
+    getAllLayers: function() {
+        return _layers;
     },
 
     getIDforIndex: function(index) {
@@ -181,6 +210,16 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.RECEIVE_RAW_OBJECTS:
             LayerStore.init(action.rawObjects);
+            LayerStore.emitChange();
+            break;
+
+        case ActionTypes.MOVE_UP_LAYER:
+            moveUpLayer(action.layerID);
+            LayerStore.emitChange();
+            break;
+
+        case ActionTypes.MOVE_DOWN_LAYER:
+            moveDownLayer(action.layerID);
             LayerStore.emitChange();
             break;
 

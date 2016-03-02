@@ -20226,6 +20226,20 @@
 	            type: ActionTypes.DELETE_LAYER,
 	            layerID: layerID
 	        });
+	    },
+	
+	    moveUpLayer: function moveUpLayer(layerID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.MOVE_UP_LAYER,
+	            layerID: layerID
+	        });
+	    },
+	
+	    moveDownLayer: function moveDownLayer(layerID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.MOVE_DOWN_LAYER,
+	            layerID: layerID
+	        });
 	    }
 	
 	};
@@ -20568,6 +20582,8 @@
 	        CREATE_OBJECT: null,
 	        CREATE_LAYER: null,
 	        DELETE_LAYER: null,
+	        MOVE_UP_LAYER: null,
+	        MOVE_DOWN_LAYER: null,
 	        RECEIVE_CANVAS: null
 	    })
 	
@@ -20697,6 +20713,8 @@
 	var EventEmitter = __webpack_require__(172).EventEmitter;
 	var assign = __webpack_require__(173);
 	
+	var AppObjectUtils = __webpack_require__(182);
+	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
 	
@@ -20707,24 +20725,58 @@
 	
 	var _layersOrder = ['l_0', 'l_1', 'l_2'];
 	
+	function move(old_index, new_index) {
+	    console.log('from', old_index, 'to', new_index);
+	    if (new_index >= _layers.length) {
+	        var k = new_index - _layers.length;
+	        while (k-- + 1) {
+	            _layers.push(undefined);
+	        }
+	    }
+	    _layers.splice(new_index, 0, _layers.splice(old_index, 1)[0]);
+	    console.log('moved?', _layers); // for testing purposes
+	};
+	
+	function moveUpLayer(layerID) {
+	    var index = getIndexForID(layerID);
+	    if (index === _layers.length - 1) {
+	        return;
+	    }
+	    move(index, index + 1);
+	}
+	
+	function moveDownLayer(layerID) {
+	    var index = getIndexForID(layerID);
+	    if (index === 0) {
+	        return;
+	    }
+	    move(index, index - 1);
+	}
+	
+	function getIDforIndex(index) {
+	    var layer = _layers[index];
+	    if (layer) {
+	        return layer.id;
+	    }
+	    return null;
+	}
+	
+	function getIndexForID(layerID) {
+	    var index;
+	    for (index = 0; index < _layers.length; index++) {
+	        if (_layers[index].id === layerID) {
+	            return index;
+	        }
+	    }
+	    return null;
+	}
+	
 	var LayerStore = assign({}, EventEmitter.prototype, {
 	
 	    init: function init(rawObjects) {
-	        // rawObjects.forEach(function(object) {
-	        //     var layerID = object.layerID;
-	        //     var layer = _layers[layerID];
-	        //     if (layer) {
-	        //         layer.objects.push(object);
-	        //         return;
-	        //     }
-	        //     _layers[layerID] = {
-	        //         id: layerID,
-	        //         objects: [object]
-	        //     };
-	        // });
-	
 	        var layers = rawObjects.reduce(function (layers, object) {
 	            var id = object.layerID;
+	            var object = AppObjectUtils.convertRawObject(object);
 	            if (layers[id]) {
 	                layers[id].objects.push(object);
 	            } else {
@@ -20740,21 +20792,10 @@
 	            _layers.push(layers[id]);
 	        });
 	
-	        // for (var id in _layers) {
-	        //     var index = _layersOrder.indexOf(id)
-	        //     _layersMap[index] = _layers[id].objects.length;
-	        // };
-	
-	        console.log('layers', _layers);
-	        // console.log('layersMap', _layersMap);
-	
 	        if (!_currentIndex) {
 	            _currentIndex = _layers.length - 1;
 	            _currentID = _layers[_currentIndex].id;
 	        }
-	
-	        console.log('cur index', _currentIndex);
-	        console.log('cur ID', _currentID);
 	    },
 	
 	    emitChange: function emitChange() {
@@ -20783,6 +20824,10 @@
 	            return a.index + b.index;
 	        });
 	        return orderedLayers;
+	    },
+	
+	    getAllLayers: function getAllLayers() {
+	        return _layers;
 	    },
 	
 	    getIDforIndex: function getIDforIndex(index) {
@@ -20875,6 +20920,16 @@
 	
 	        case ActionTypes.RECEIVE_RAW_OBJECTS:
 	            LayerStore.init(action.rawObjects);
+	            LayerStore.emitChange();
+	            break;
+	
+	        case ActionTypes.MOVE_UP_LAYER:
+	            moveUpLayer(action.layerID);
+	            LayerStore.emitChange();
+	            break;
+	
+	        case ActionTypes.MOVE_DOWN_LAYER:
+	            moveDownLayer(action.layerID);
 	            LayerStore.emitChange();
 	            break;
 	
@@ -21338,6 +21393,7 @@
 	var LayerSection = __webpack_require__(161);
 	var FrameSelector = __webpack_require__(183);
 	
+	// var JsonObjectStore = require('../stores/JsonObjectStore.js');
 	var ObjectStore = __webpack_require__(176);
 	var React = __webpack_require__(3);
 	
@@ -21379,6 +21435,8 @@
 	        // console.log(object);
 	        // canvas.add(object);
 	        // canvas.render();
+	
+	        console.log('ooooooo', this.state.objects);
 	
 	        this.state.objects.forEach(function (object) {
 	            canvas.add(object);
@@ -21487,8 +21545,20 @@
 	}
 	
 	function _markOnlyAllInLayerSelectable(layerID) {
-	    for (var id in _objects) {
-	        var object = _objects[id];
+	    // for (var id in _objects) {
+	    //     var object = _objects[id];
+	    //     if (object.layerID === layerID) {
+	    //         object.selectable = true;
+	    //         object.evented = true;
+	    //         object.opacity = 1
+	    //     } else {
+	    //         object.selectable = false;
+	    //         object.evented = false;
+	    //         object.opacity = 0.5;
+	    //     }
+	    // }
+	
+	    _canvas._objects.forEach(function (object) {
 	        if (object.layerID === layerID) {
 	            object.selectable = true;
 	            object.evented = true;
@@ -21498,16 +21568,23 @@
 	            object.evented = false;
 	            object.opacity = 0.5;
 	        }
-	    }
+	    });
 	}
 	
 	function _toggleAllInLayerVisibility(layerID) {
-	    for (var id in _objects) {
-	        if (_objects[id].layerID === layerID) {
-	            _objects[id].visible = !_objects[id].visible;
-	            console.log(_objects[id], 'set un/visible');
+	    // for (var id in _objects) {
+	    //     if (_objects[id].layerID === layerID) {
+	    //         _objects[id].visible = !_objects[id].visible
+	    //         console.log(_objects[id], 'set un/visible');
+	    //     }
+	    // }
+	
+	    _canvas._objects.forEach(function (object) {
+	        if (object.layerID === layerID) {
+	            object.visible = !object.visible;
+	            console.log(object, 'set un/visible');
 	        }
-	    }
+	    });
 	}
 	
 	function _destroyAllInLayer(layerID) {
@@ -21518,12 +21595,17 @@
 	            delete _objects[id];
 	        }
 	    }
+	    var orderedObjects = [];
+	    for (var id in _objects) {
+	        orderedObjects.push(_objects[id]);
+	    }
 	}
 	
 	var ObjectStore = assign({}, EventEmitter.prototype, {
 	
 	    emitChange: function emitChange() {
 	        console.log('----------OBJECT STORE----------');
+	        console.log('object store canvas', _canvas);
 	        console.log('objects', _objects);
 	        this.emit(CHANGE_EVENT);
 	    },
@@ -21551,13 +21633,35 @@
 	    },
 	
 	    getAllOrdered: function getAllOrdered() {
-	        var orderedObjects = [];
-	        for (var id in _objects) {
-	            orderedObjects.push(_objects[id]);
+	        // var orderedObjects = [];
+	        // for (var id in _objects) {
+	        //     orderedObjects.push(_objects[id]);
+	        // }
+	        // orderedObjects.sort(function(a, b) {
+	        //     return LayerStore.getIndexForID(a.layerID) - LayerStore.getIndexForID(b.layerID);
+	        // });
+	        // return orderedObjects;
+	
+	        var layers = LayerStore.getAllLayers();
+	        var orderedObjects = layers.reduce(function (orderedObjects, layer) {
+	            layer.objects.forEach(function (object) {
+	                orderedObjects.push(object);
+	            });
+	            return orderedObjects;
+	        }, []);
+	
+	        console.log('ordered by LAYER', orderedObjects);
+	
+	        if (_canvas !== null) {
+	            // _canvas.on('object:added', function() {});
+	            _canvas.clear();
+	            // orderedObjects.forEach(function(object) {
+	            //     _canvas.add(object);
+	            // });
+	            _canvas._objects = orderedObjects;
+	            _canvas.renderAll();
 	        }
-	        orderedObjects.sort(function (a, b) {
-	            return LayerStore.getIndexForID(a.layerID) - LayerStore.getIndexForID(b.layerID);
-	        });
+	
 	        return orderedObjects;
 	    }
 	
@@ -21598,8 +21702,21 @@
 	
 	        case ActionTypes.RECEIVE_CANVAS:
 	            _canvas = action.canvas;
-	            console.log('received canvas', _canvas);
 	            ObjectStore.emitChange();
+	            break;
+	
+	        case ActionTypes.MOVE_UP_LAYER:
+	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+	            // moveUpLayer(action.layerID);
+	            ObjectStore.getAllOrdered();
+	            // ObjectStore.emitChange();
+	            break;
+	
+	        case ActionTypes.MOVE_DOWN_LAYER:
+	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+	            // moveDownLayer(action.layerID);
+	            ObjectStore.getAllOrdered();
+	            // ObjectStore.emitChange();
 	            break;
 	
 	        default:
@@ -21934,7 +22051,17 @@
 	            'Hide',
 	            React.createElement(
 	                'button',
-	                { onClick: this._onClick },
+	                { onClick: this._onMoveUpClick },
+	                'MoveUp'
+	            ),
+	            React.createElement(
+	                'button',
+	                { onClick: this._onMoveDownClick },
+	                'MoveDown'
+	            ),
+	            React.createElement(
+	                'button',
+	                { onClick: this._onDeleteClick },
 	                'Delete'
 	            )
 	        );
@@ -21945,8 +22072,16 @@
 	        AppLayerActionCreators.checkVisible(this.props.layer.id);
 	    },
 	
-	    _onClick: function _onClick() {
+	    _onDeleteClick: function _onDeleteClick() {
 	        AppLayerActionCreators.deleteLayer(this.props.layer.id);
+	    },
+	
+	    _onMoveUpClick: function _onMoveUpClick() {
+	        AppLayerActionCreators.moveUpLayer(this.props.layer.id);
+	    },
+	
+	    _onMoveDownClick: function _onMoveDownClick() {
+	        AppLayerActionCreators.moveDownLayer(this.props.layer.id);
 	    }
 	
 	});

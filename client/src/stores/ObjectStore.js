@@ -20,8 +20,20 @@ function _addObjects(rawObjects) {
 }
 
 function _markOnlyAllInLayerSelectable(layerID) {
-    for (var id in _objects) {
-        var object = _objects[id];
+    // for (var id in _objects) {
+    //     var object = _objects[id];
+    //     if (object.layerID === layerID) {
+    //         object.selectable = true;
+    //         object.evented = true;
+    //         object.opacity = 1
+    //     } else {
+    //         object.selectable = false;
+    //         object.evented = false;
+    //         object.opacity = 0.5;
+    //     }
+    // }
+
+    _canvas._objects.forEach(function(object) {
         if (object.layerID === layerID) {
             object.selectable = true;
             object.evented = true;
@@ -31,16 +43,23 @@ function _markOnlyAllInLayerSelectable(layerID) {
             object.evented = false;
             object.opacity = 0.5;
         }
-    }
+    });
 }
 
 function _toggleAllInLayerVisibility(layerID) {
-    for (var id in _objects) {
-        if (_objects[id].layerID === layerID) {
-            _objects[id].visible = !_objects[id].visible
-            console.log(_objects[id], 'set un/visible');
+    // for (var id in _objects) {
+    //     if (_objects[id].layerID === layerID) {
+    //         _objects[id].visible = !_objects[id].visible
+    //         console.log(_objects[id], 'set un/visible');
+    //     }
+    // }
+
+    _canvas._objects.forEach(function(object) {
+        if (object.layerID === layerID) {
+            object.visible = !object.visible
+            console.log(object, 'set un/visible');
         }
-    }
+    });
 }
 
 function _destroyAllInLayer(layerID) {
@@ -51,12 +70,17 @@ function _destroyAllInLayer(layerID) {
             delete _objects[id];
         }
     }
+    var orderedObjects = [];
+    for (var id in _objects) {
+        orderedObjects.push(_objects[id]);
+    }
 }
 
 var ObjectStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
         console.log('----------OBJECT STORE----------');
+        console.log('object store canvas', _canvas);
         console.log('objects', _objects);
         this.emit(CHANGE_EVENT);
     },
@@ -84,13 +108,35 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
     },
 
     getAllOrdered: function() {
-        var orderedObjects = [];
-        for (var id in _objects) {
-            orderedObjects.push(_objects[id]);
+        // var orderedObjects = [];
+        // for (var id in _objects) {
+        //     orderedObjects.push(_objects[id]);
+        // }
+        // orderedObjects.sort(function(a, b) {
+        //     return LayerStore.getIndexForID(a.layerID) - LayerStore.getIndexForID(b.layerID);
+        // });
+        // return orderedObjects;
+
+        var layers = LayerStore.getAllLayers();
+        var orderedObjects = layers.reduce(function(orderedObjects, layer) {
+            layer.objects.forEach(function(object) {
+                orderedObjects.push(object);
+            });
+            return orderedObjects;
+        }, []);
+
+        console.log('ordered by LAYER', orderedObjects);
+
+        if (_canvas !== null) {
+            // _canvas.on('object:added', function() {});
+            _canvas.clear();
+            // orderedObjects.forEach(function(object) {
+            //     _canvas.add(object);
+            // });
+            _canvas._objects = orderedObjects;
+            _canvas.renderAll();
         }
-        orderedObjects.sort(function(a, b) {
-            return LayerStore.getIndexForID(a.layerID) - LayerStore.getIndexForID(b.layerID);
-        });
+
         return orderedObjects;
     }
 
@@ -131,8 +177,21 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.RECEIVE_CANVAS:
             _canvas = action.canvas;
-            console.log('received canvas', _canvas);
             ObjectStore.emitChange();
+            break;
+
+        case ActionTypes.MOVE_UP_LAYER:
+            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+            // moveUpLayer(action.layerID);
+            ObjectStore.getAllOrdered();
+            // ObjectStore.emitChange();
+            break;
+
+        case ActionTypes.MOVE_DOWN_LAYER:
+            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+            // moveDownLayer(action.layerID);
+            ObjectStore.getAllOrdered();
+            // ObjectStore.emitChange();
             break;
 
         default:
