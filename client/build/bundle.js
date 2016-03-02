@@ -21364,16 +21364,19 @@
 	    });
 	}
 	
-	function _markOnlyAllInLayerSelectable(layerID) {
+	function _markOnlyAllInLayerSelectable(layerIndex) {
 	    for (var id in _objects) {
-	        if (_objects[id].layerIndex === layerID) {
-	            console.log(_objects[id], 'is selectable');
-	            _objects[id].selectable = true;
-	            _objects[id].evented = true;
+	        var object = _objects[id];
+	        if (object.layerIndex === layerIndex) {
+	            console.log(object, 'is selectable');
+	            object.selectable = true;
+	            object.evented = true;
+	            object.opacity = 1;
 	        } else {
-	            console.log(_objects[id], 'is not selectable');
-	            _objects[id].selectable = false;
-	            _objects[id].evented = false;
+	            console.log(object, 'is not selectable');
+	            object.selectable = false;
+	            object.evented = false;
+	            object.opacity = 0.5;
 	        }
 	    }
 	}
