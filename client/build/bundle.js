@@ -20103,6 +20103,7 @@
 	                currentLayerIndex: this.state.currentLayerID
 	            });
 	        }.bind(this));
+	        layerListItems.reverse();
 	
 	        return React.createElement(
 	            'div',

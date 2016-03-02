@@ -37,6 +37,7 @@ var LayerSection = React.createClass({
                 />
             );
         }.bind(this));
+        layerListItems.reverse();
 
         return (
             <div>
