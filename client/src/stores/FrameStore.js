@@ -6,17 +6,32 @@ var assign = require('object-assign');
 var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
+var _currentID = null;
 var _frames = {};
 
-function _addFrames(rawFrames) {
-    rawFrames.forEach(function(frame) {
-        if (!_frames[frame.id]) {
-            _frames[frame.id] = frame;
-        }
-    });
-}
 
 var FrameStore = assign({}, EventEmitter.prototype, {
+
+    init: function(rawObjects) {
+        rawObjects.forEach(function(object) {
+            var frameIndex = object.frameIndex;
+            var frame = _frames[frameIndex];
+            if (frame) {
+                frame.objects.push(object);
+                return;
+            }
+            _frames[frameIndex] = {
+                id: frameIndex,
+                index: frameIndex,
+                objects: [object]
+            };
+        }, this);
+
+        if (!_currentID) {
+          var allOrdered = this.getAllOrdered();
+          _currentID = allOrdered[allOrdered.length - 1].id;
+        }
+    },
 
     emitChange: function() {
         this.emit(CHANGE_EVENT);
@@ -44,6 +59,10 @@ var FrameStore = assign({}, EventEmitter.prototype, {
             return a.id - b.id;
         })
         return orderedFrames;
+    },
+
+    getCurrentID: function() {
+        return _currentID;
     }
 
 });
@@ -52,8 +71,8 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
 
-        case ActionTypes.RECEIVE_RAW_FRAMES:
-            _addFrames(action.rawFrames);
+        case ActionTypes.RECEIVE_RAW_OBJECTS:
+            FrameStore.init(action.rawObjects);
             FrameStore.emitChange();
             break;
 

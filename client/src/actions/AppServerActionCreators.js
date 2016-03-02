@@ -26,4 +26,18 @@ module.exports = {
         });
     },
 
+    receiveRawAnimation: function(rawAnimation) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.RECEIVE_RAW_ANIMATION,
+            rawAnimation: rawAnimation
+        });
+    },
+
+    receiveCreatedObject: function(createdObject) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.RECEIVE_RAW_CREATED_OBJECT,
+            object: createdObject
+        })
+    }
+
 };

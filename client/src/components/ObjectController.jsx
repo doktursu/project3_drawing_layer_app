@@ -1,5 +1,8 @@
 // var FabricCanvas = require('./FabricCanvas.jsx');
 // var DrawingModeOptions = require('./DrawingModeOptions.jsx');
+var AppObjectActionCreators = require('../actions/AppObjectActionCreators.js');
+var LayerStore = require('../stores/LayerStore.js');
+
 var LayerSection = require('./LayerSection.jsx');
 var FrameSelector = require('./FrameSelector.jsx');
 
@@ -27,7 +30,9 @@ var ObjectController = React.createClass({
     },
 
     _initializeFabricCanvas: function() {
-        canvas = new fabric.Canvas("c");
+        canvas = new fabric.Canvas("c", {
+            isDrawingMode: true
+        });
 
 
         // var json = {};
@@ -47,6 +52,13 @@ var ObjectController = React.createClass({
         this.state.objects.forEach(function(object) {
             canvas.add(object);
         });
+
+        canvas.on('object:added', function() {
+            var objects = canvas.getObjects();
+            var object = objects[objects.length - 1];
+            console.log('added', object);
+            this._onCreate(object);
+        }.bind(this));
 
         // console.log(json);
         console.log(canvas);
@@ -87,6 +99,10 @@ var ObjectController = React.createClass({
 
     _onChange: function() {
         this.setState(getStateFromStore());
+    },
+
+    _onCreate: function(object) {
+        AppObjectActionCreators.createObject(object, LayerStore.getCurrentID());
     }
 });
 

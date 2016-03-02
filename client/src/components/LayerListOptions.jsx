@@ -5,7 +5,9 @@ var LayerListOptions = React.createClass({
 
     render: function() {
         return (
-            <input type="checkbox" checked="true" onChange={this._onChange} />
+            <div>
+                <input type="checkbox" onChange={this._onChange} />Hide
+            </div>
         );
     },
 

@@ -43,6 +43,31 @@ module.exports = {
         AppServerActionCreators.receiveAllObjects(rawObjects);
     },
 
+    getRawAnimation: function() {
+        var rawAnimation = JSON.parse(localStorage.getItem('animation'));
+        AppServerActionCreators.receiveRawAnimation(rawAnimation);
+    },
+
+    createObject: function(object) {
+        // simulate writing to a database
+        var rawObjects = JSON.parse(localStorage.getItem('objects'));
+
+        var createdObject = object;
+        createdObject.id = 'f_' + Date.now();
+
+        var customProperties = 'id animationId layerIndex frameIndex layerLock layerVisible'.split(' ');
+        
+
+        console.log('createdOjbect', JSON.stringify(createdObject));
+        rawObjects.push(createdObject);
+        localStorage.setItem('objects', JSON.stringify(rawObjects));
+
+        // simulate success callback
+        setTimeout(function() {
+          AppServerActionCreators.receiveCreatedObject(createdObject);
+        }, 0);
+    }
+
     // createObject: function(object, layer) {
     //     // simulate writing to a database
     //     var rawObjects = JSON.parse(localStorage.getItem('objects'));

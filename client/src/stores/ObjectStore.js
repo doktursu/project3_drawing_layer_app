@@ -85,6 +85,12 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
 
+        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
+            var object = action.object;
+            _objects[object.id] = object;
+            ObjectStore.emitChange();
+            break;
+
         case ActionTypes.CLICK_LAYER:
             AppDispatcher.waitFor([LayerStore.dispatchToken]);
             _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());

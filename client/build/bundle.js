@@ -58,6 +58,20 @@
 	
 	window.onload = function () {
 	
+	    // add custom attribute to fabric object
+	    fabric.Object.prototype.toObject = function (toObject) {
+	        return function () {
+	            return fabric.util.object.extend(toObject.call(this), {
+	                id: this.id,
+	                animationId: this.animationId,
+	                layerIndex: this.layerIndex,
+	                frameIndex: this.frameIndex,
+	                layerLock: this.layerLock,
+	                layerVisible: this.layerVisible
+	            });
+	        };
+	    }(fabric.Object.prototype.toObject);
+	
 	    AppExampleData.init();
 	    AppWebAPIUtils.getAllFrames();
 	
@@ -20521,8 +20535,10 @@
 	        RECEIVE_RAW_CREATED_FRAME: null,
 	        RECEIVE_RAW_FRAMES: null,
 	        RECEIVE_RAW_OBJECTS: null,
+	        RECEIVE_RAW_CREATED_OBJECT: null,
 	        CLICK_LAYER: null,
-	        CHECK_VISIBLE: null
+	        CHECK_VISIBLE: null,
+	        CREATE_OBJECT: null
 	    })
 	
 	};
@@ -20684,16 +20700,10 @@
 	        this.emit(CHANGE_EVENT);
 	    },
 	
-	    /**
-	     * @param {function} callback
-	     */
 	    addChangeListener: function addChangeListener(callback) {
 	        this.on(CHANGE_EVENT, callback);
 	    },
 	
-	    /**
-	     * @param {function} callback
-	     */
 	    removeChangeListener: function removeChangeListener(callback) {
 	        this.removeListener(CHANGE_EVENT, callback);
 	    },
@@ -21100,17 +21110,31 @@
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
 	
+	var _currentID = null;
 	var _frames = {};
 	
-	function _addFrames(rawFrames) {
-	    rawFrames.forEach(function (frame) {
-	        if (!_frames[frame.id]) {
-	            _frames[frame.id] = frame;
-	        }
-	    });
-	}
-	
 	var FrameStore = assign({}, EventEmitter.prototype, {
+	
+	    init: function init(rawObjects) {
+	        rawObjects.forEach(function (object) {
+	            var frameIndex = object.frameIndex;
+	            var frame = _frames[frameIndex];
+	            if (frame) {
+	                frame.objects.push(object);
+	                return;
+	            }
+	            _frames[frameIndex] = {
+	                id: frameIndex,
+	                index: frameIndex,
+	                objects: [object]
+	            };
+	        }, this);
+	
+	        if (!_currentID) {
+	            var allOrdered = this.getAllOrdered();
+	            _currentID = allOrdered[allOrdered.length - 1].id;
+	        }
+	    },
 	
 	    emitChange: function emitChange() {
 	        this.emit(CHANGE_EVENT);
@@ -21138,6 +21162,10 @@
 	            return a.id - b.id;
 	        });
 	        return orderedFrames;
+	    },
+	
+	    getCurrentID: function getCurrentID() {
+	        return _currentID;
 	    }
 	
 	});
@@ -21146,8 +21174,8 @@
 	
 	    switch (action.type) {
 	
-	        case ActionTypes.RECEIVE_RAW_FRAMES:
-	            _addFrames(action.rawFrames);
+	        case ActionTypes.RECEIVE_RAW_OBJECTS:
+	            FrameStore.init(action.rawObjects);
 	            FrameStore.emitChange();
 	            break;
 	
@@ -21166,6 +21194,9 @@
 	
 	// var FabricCanvas = require('./FabricCanvas.jsx');
 	// var DrawingModeOptions = require('./DrawingModeOptions.jsx');
+	var AppObjectActionCreators = __webpack_require__(185);
+	var LayerStore = __webpack_require__(171);
+	
 	var LayerSection = __webpack_require__(161);
 	var FrameSelector = __webpack_require__(183);
 	
@@ -21194,7 +21225,9 @@
 	    },
 	
 	    _initializeFabricCanvas: function _initializeFabricCanvas() {
-	        canvas = new fabric.Canvas("c");
+	        canvas = new fabric.Canvas("c", {
+	            isDrawingMode: true
+	        });
 	
 	        // var json = {};
 	        // json["objects"] = this.state.objects;
@@ -21212,6 +21245,13 @@
 	        this.state.objects.forEach(function (object) {
 	            canvas.add(object);
 	        });
+	
+	        canvas.on('object:added', function () {
+	            var objects = canvas.getObjects();
+	            var object = objects[objects.length - 1];
+	            console.log('added', object);
+	            this._onCreate(object);
+	        }.bind(this));
 	
 	        // console.log(json);
 	        console.log(canvas);
@@ -21256,6 +21296,10 @@
 	
 	    _onChange: function _onChange() {
 	        this.setState(getStateFromStore());
+	    },
+	
+	    _onCreate: function _onCreate(object) {
+	        AppObjectActionCreators.createObject(object, LayerStore.getCurrentID());
 	    }
 	});
 	
@@ -21354,6 +21398,12 @@
 	
 	    switch (action.type) {
 	
+	        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
+	            var object = action.object;
+	            _objects[object.id] = object;
+	            ObjectStore.emitChange();
+	            break;
+	
 	        case ActionTypes.CLICK_LAYER:
 	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
 	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
@@ -21392,24 +21442,32 @@
 	            "animationId": 1,
 	            "layerIndex": 1,
 	            "frameIndex": 1,
+	            "layerLock": false,
+	            "layerVisible": true,
 	            "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
 	        }, {
 	            "id": "f_2",
 	            "animationId": 1,
 	            "layerIndex": 2,
 	            "frameIndex": 1,
+	            "layerLock": false,
+	            "layerVisible": true,
 	            "type": "circle", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50
 	        }, {
 	            "id": "f_3",
 	            "animationId": 2,
 	            "layerIndex": 2,
 	            "frameIndex": 1,
+	            "layerLock": false,
+	            "layerVisible": true,
 	            "type": "rect", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
 	        }, {
 	            "id": "f_4",
 	            "animationId": 2,
 	            "layerIndex": 1,
 	            "frameIndex": 1,
+	            "layerLock": false,
+	            "layerVisible": true,
 	            "type": "circle", "left": 100, "top": 100, "width": 50, "height": 100, "fill": "yellow", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50
 	        }]));
 	    }
@@ -21493,7 +21551,52 @@
 	        var rawObjects = JSON.parse(localStorage.getItem('objects'));
 	        // simulate success callback
 	        AppServerActionCreators.receiveAllObjects(rawObjects);
+	    },
+	
+	    getRawAnimation: function getRawAnimation() {
+	        var rawAnimation = JSON.parse(localStorage.getItem('animation'));
+	        AppServerActionCreators.receiveRawAnimation(rawAnimation);
+	    },
+	
+	    createObject: function createObject(object) {
+	        // simulate writing to a database
+	        var rawObjects = JSON.parse(localStorage.getItem('objects'));
+	
+	        var createdObject = object;
+	        createdObject.id = 'f_' + Date.now();
+	
+	        var customProperties = 'id animationId layerIndex frameIndex layerLock layerVisible'.split(' ');
+	
+	        console.log('createdOjbect', JSON.stringify(createdObject));
+	        rawObjects.push(createdObject);
+	        localStorage.setItem('objects', JSON.stringify(rawObjects));
+	
+	        // simulate success callback
+	        setTimeout(function () {
+	            AppServerActionCreators.receiveCreatedObject(createdObject);
+	        }, 0);
 	    }
+	
+	    // createObject: function(object, layer) {
+	    //     // simulate writing to a database
+	    //     var rawObjects = JSON.parse(localStorage.getItem('objects'));
+	    //     var timestamp = Date.now();
+	    //     var id = 'f_' + timestamp;
+	    //     var layerID = frame.layerID || ('l_' + Date.now());
+	    //     var createdObject = {
+	    //         id: id,
+	    //         layerID: layerID,
+	    //         data: '',
+	    //         timestamp: timestamp
+	    //     };
+	    //     rawObjects.push(createdFrame);
+	    //     localStorage.setItem('objects', JSON.stringify(rawObjects));
+	
+	    //     //simulate success callback
+	    //     setTime(function() {
+	    //         AppServerActionCreators.receiveCreatedObjects(createdObjects);
+	    //     }, 0);
+	    // }
 	
 	};
 
@@ -21529,6 +21632,20 @@
 	            type: ActionTypes.RECEIVE_RAW_OBJECTS,
 	            rawObjects: rawObjects
 	        });
+	    },
+	
+	    receiveRawAnimation: function receiveRawAnimation(rawAnimation) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.RECEIVE_RAW_ANIMATION,
+	            rawAnimation: rawAnimation
+	        });
+	    },
+	
+	    receiveCreatedObject: function receiveCreatedObject(createdObject) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.RECEIVE_RAW_CREATED_OBJECT,
+	            object: createdObject
+	        });
 	    }
 	
 	};
@@ -21557,6 +21674,14 @@
 	    convertRawObject: function convertRawObject(rawObject) {
 	        var type = capitalize(rawObject.type);
 	        return new fabric[type](rawObject);
+	    },
+	
+	    getCreatedObjectData: function getCreatedObjectData(object, currentLayerID) {
+	        object.animationId = 2;
+	        object.layerIndex = currentLayerID;
+	        object.layerLock = false;
+	        object.layerVisible = true;
+	        return object;
 	    }
 	
 	};
@@ -21565,22 +21690,34 @@
 /* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	var React = __webpack_require__(3);
+	var FrameStore = __webpack_require__(174);
+	
+	function getStateFromStore() {
+	    return {
+	        frames: FrameStore.getAllOrdered(),
+	        currentFrameID: FrameStore.getCurrentID()
+	    };
+	}
 	
 	var FrameSelector = React.createClass({
-	    displayName: "FrameSelector",
+	    displayName: 'FrameSelector',
 	
+	
+	    getInitialState: function getInitialState() {
+	        return getStateFromStore();
+	    },
 	
 	    render: function render() {
 	
 	        var radioButtons = this.props.frames.map(function (frame) {
-	            return React.createElement("input", { type: "radio", name: "frame", value: frame.id });
+	            return React.createElement('input', { type: 'radio', name: 'frame', value: frame.id });
 	        });
 	
 	        return React.createElement(
-	            "form",
+	            'form',
 	            null,
 	            radioButtons
 	        );
@@ -21604,7 +21741,12 @@
 	
 	
 	    render: function render() {
-	        return React.createElement('input', { type: 'checkbox', checked: 'true', onChange: this._onChange });
+	        return React.createElement(
+	            'div',
+	            null,
+	            React.createElement('input', { type: 'checkbox', onChange: this._onChange }),
+	            'Hide'
+	        );
 	    },
 	
 	    _onChange: function _onChange() {
@@ -21615,6 +21757,28 @@
 	});
 	
 	module.exports = LayerListOptions;
+
+/***/ },
+/* 185 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(164);
+	var AppConstants = __webpack_require__(168);
+	var AppObjectUtils = __webpack_require__(182);
+	var AppWebAPIUtils = __webpack_require__(179);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	
+	module.exports = {
+	
+	    createObject: function createObject(object, currentLayerID, currentFrameID) {
+	        var object = AppObjectUtils.getCreatedObjectData(object, currentLayerID);
+	        AppWebAPIUtils.createObject(object);
+	    }
+	
+	};
 
 /***/ }
 /******/ ]);

@@ -5,7 +5,7 @@ var assign = require('object-assign');
 var _currentID = null;
 var _layers = {};
 
-var LayerStore = assign({}, EventEmitter.prototype, {
+var AnimationStore = assign({}, EventEmitter.prototype, {
 
     init: function(rawObjects) {
         rawObjects.forEach(function(object) {
@@ -40,4 +40,24 @@ var LayerStore = assign({}, EventEmitter.prototype, {
         return orderedLayers;
     }
 
-})
+});
+
+AnimationStore.dispatchToken = AppDispatcher.register(function(action) {
+
+    switch(action.type) {
+
+        case ActionTypes.CLICK_LAYER:
+            _currentID = action.layerID;
+            LayerStore.emitChange();
+            break;
+
+        case ActionTypes.RECEIVE_RAW_ANIMATION:
+            AnimationStore.init(action.rawAnimation);
+            AnimationStore.emitChange();
+            break;
+
+        default:
+            // do nothing
+    }
+
+});

@@ -1,6 +1,18 @@
 var React = require('react');
+var FrameStore = require('../stores/FrameStore.js');
+
+function getStateFromStore() {
+    return {
+        frames: FrameStore.getAllOrdered(),
+        currentFrameID: FrameStore.getCurrentID()
+    };
+}
 
 var FrameSelector = React.createClass({
+
+    getInitialState: function() {
+        return getStateFromStore();
+    },
 
     render: function() {
 
