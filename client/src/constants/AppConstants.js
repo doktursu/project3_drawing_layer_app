@@ -10,7 +10,8 @@ module.exports = {
         CLICK_LAYER: null,
         CHECK_VISIBLE: null,
         CREATE_OBJECT: null,
-        CREATE_LAYER: null
+        CREATE_LAYER: null,
+        DELETE_LAYER: null
     })
 
 };

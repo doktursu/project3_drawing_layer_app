@@ -7,6 +7,7 @@ var LayerListOptions = React.createClass({
         return (
             <div>
                 <input type="checkbox" onChange={this._onChange} />Hide
+                <button onClick={this._onClick}>Delete</button>
             </div>
         );
     },
@@ -14,6 +15,10 @@ var LayerListOptions = React.createClass({
     _onChange: function() {
         var checked = this.checked;
         AppLayerActionCreators.checkVisible(this.props.layer.id);
+    },
+
+    _onClick: function() {
+        AppLayerActionCreators.deleteLayer(this.props.layer.id);
     }
 
 });

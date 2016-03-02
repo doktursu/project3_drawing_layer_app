@@ -55,7 +55,7 @@ module.exports = {
         var createdObject = object;
         createdObject.id = 'f_' + Date.now();
 
-        var customProperties = 'id animationId layerIndex frameIndex layerLock layerVisible'.split(' ');
+        var customProperties = 'id animationId layerID layerIndex frameIndex layerLock layerVisible'.split(' ');
         
 
         console.log('createdOjbect', JSON.stringify(createdObject));

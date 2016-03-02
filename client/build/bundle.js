@@ -20074,7 +20074,7 @@
 	function getStateFromStore() {
 	    return {
 	        layers: LayerStore.getAllOrdered(),
-	        currentLayerIndex: LayerStore.getCurrentIndex()
+	        currentLayerID: LayerStore.getCurrentID()
 	    };
 	}
 	
@@ -20095,11 +20095,12 @@
 	    },
 	
 	    render: function render() {
-	        var layerListItems = this.state.layers.map(function (layer) {
+	        var layerListItems = this.state.layers.map(function (layer, index) {
 	            return React.createElement(LayerListItem, {
 	                key: layer.id,
+	                index: index,
 	                layer: layer,
-	                currentLayerIndex: this.state.currentLayerIndex
+	                currentLayerIndex: this.state.currentLayerID
 	            });
 	        }.bind(this));
 	
@@ -20154,7 +20155,7 @@
 	
 	    propTypes: {
 	        layer: ReactPropTypes.object,
-	        currentLayerIndex: ReactPropTypes.number
+	        currentLayerID: ReactPropTypes.string
 	    },
 	
 	    render: function render() {
@@ -20164,14 +20165,15 @@
 	            {
 	                className: classNames({
 	                    'layer-list-item': true,
-	                    'layer-active': layer.id === this.props.currentLayerIndex
+	                    'layer-active': layer.id === this.props.currentLayerID
 	                }),
-	                onClick: this._onClick, width: 200, height: 300 },
+	                width: 200,
+	                height: 300 },
 	            React.createElement(
 	                'p',
-	                null,
+	                { onClick: this._onClick },
 	                'Layer!!! ',
-	                layer.index
+	                this.props.index
 	            ),
 	            React.createElement(LayerListOptions, { layer: layer })
 	        );
@@ -20198,23 +20200,30 @@
 	
 	module.exports = {
 	
-	    clickLayer: function clickLayer(layerIndex) {
+	    clickLayer: function clickLayer(layerID) {
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.CLICK_LAYER,
-	            layerIndex: layerIndex
+	            layerID: layerID
 	        });
 	    },
 	
-	    checkVisible: function checkVisible(layerIndex) {
+	    checkVisible: function checkVisible(layerID) {
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.CHECK_VISIBLE,
-	            layerIndex: layerIndex
+	            layerID: layerID
 	        });
 	    },
 	
 	    createLayer: function createLayer() {
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.CREATE_LAYER
+	        });
+	    },
+	
+	    deleteLayer: function deleteLayer(layerID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.DELETE_LAYER,
+	            layerID: layerID
 	        });
 	    }
 	
@@ -20556,7 +20565,8 @@
 	        CLICK_LAYER: null,
 	        CHECK_VISIBLE: null,
 	        CREATE_OBJECT: null,
-	        CREATE_LAYER: null
+	        CREATE_LAYER: null,
+	        DELETE_LAYER: null
 	    })
 	
 	};
@@ -20688,40 +20698,68 @@
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
 	
+	var _currentID = null;
 	var _currentIndex = null;
-	var _layers = {};
+	var _layers = [];
 	var _layersMap = [];
+	
+	var _layersOrder = ['l_0', 'l_1', 'l_2'];
 	
 	var LayerStore = assign({}, EventEmitter.prototype, {
 	
 	    init: function init(rawObjects) {
-	        rawObjects.forEach(function (object) {
-	            var layerIndex = object.layerIndex;
-	            var layer = _layers[layerIndex];
-	            if (layer) {
-	                layer.objects.push(object);
-	                return;
+	        // rawObjects.forEach(function(object) {
+	        //     var layerID = object.layerID;
+	        //     var layer = _layers[layerID];
+	        //     if (layer) {
+	        //         layer.objects.push(object);
+	        //         return;
+	        //     }
+	        //     _layers[layerID] = {
+	        //         id: layerID,
+	        //         objects: [object]
+	        //     };
+	        // });
+	
+	        var layers = rawObjects.reduce(function (layers, object) {
+	            var id = object.layerID;
+	            if (layers[id]) {
+	                layers[id].objects.push(object);
+	            } else {
+	                layers[id] = {
+	                    id: id,
+	                    objects: [object]
+	                };
 	            }
-	            _layers[layerIndex] = {
-	                id: layerIndex,
-	                index: layerIndex,
-	                objects: [object]
-	            };
-	        }, this);
+	            return layers;
+	        }, {});
 	
-	        for (var index in _layers) {
-	            _layersMap[index] = _layers[index].objects.length;
-	        };
+	        _layersOrder.forEach(function (id) {
+	            _layers.push(layers[id]);
+	        });
 	
-	        console.log('layersMap', _layersMap);
+	        // for (var id in _layers) {
+	        //     var index = _layersOrder.indexOf(id)
+	        //     _layersMap[index] = _layers[id].objects.length;
+	        // };
+	
+	        console.log('layers', _layers);
+	        // console.log('layersMap', _layersMap);
 	
 	        if (!_currentIndex) {
-	            var allOrdered = this.getAllOrdered();
-	            _currentIndex = allOrdered[allOrdered.length - 1].id;
+	            _currentIndex = _layers.length - 1;
+	            _currentID = _layers[_currentIndex].id;
 	        }
+	
+	        console.log('cur index', _currentIndex);
+	        console.log('cur ID', _currentID);
 	    },
 	
 	    emitChange: function emitChange() {
+	        console.log('----------LAYER STORE----------');
+	        console.log('layers', _layers);
+	        console.log('currentIndex', _currentIndex);
+	        console.log('currentID', _currentID);
 	        this.emit(CHANGE_EVENT);
 	    },
 	
@@ -20745,6 +20783,28 @@
 	        return orderedLayers;
 	    },
 	
+	    getIDforIndex: function getIDforIndex(index) {
+	        var layer = _layers[index];
+	        if (layer) {
+	            return layer.id;
+	        }
+	        return null;
+	    },
+	
+	    getIndexForID: function getIndexForID(layerID) {
+	        var index;
+	        for (index = 0; index < _layers.length; index++) {
+	            if (_layers[index].id === layerID) {
+	                return index;
+	            }
+	        }
+	        return null;
+	    },
+	
+	    getCurrentID: function getCurrentID() {
+	        return _currentID;
+	    },
+	
 	    getCurrentIndex: function getCurrentIndex() {
 	        return _currentIndex;
 	    },
@@ -20752,7 +20812,7 @@
 	    getCurrentInsertionIndex: function getCurrentInsertionIndex() {
 	        var layerCount = 0;
 	        for (var i = 0; i <= _currentIndex; i++) {
-	            layerCount += _layersMap[i];
+	            layerCount += _layers[i].objects.length;
 	        }
 	        console.log('inserting at', layerCount);
 	        return layerCount;
@@ -20765,28 +20825,49 @@
 	    switch (action.type) {
 	
 	        case ActionTypes.CREATE_LAYER:
-	            var newIndex = _layersMap.length;
+	            var newIndex = _layers.length;
 	            _layers[newIndex] = {
-	                id: newIndex,
-	                index: newIndex,
+	                id: 'l_' + Date.now(),
 	                objects: []
 	            };
-	            _layersMap[newIndex] = 0;
 	            _currentIndex = newIndex;
+	            _currentID = LayerStore.getIDforIndex(_currentIndex);
+	            LayerStore.emitChange();
+	            break;
+	
+	        case ActionTypes.DELETE_LAYER:
+	            var id = action.layerID;
+	            _layers = _layers.filter(function (layer) {
+	                return layer.id !== id;
+	            });
+	
+	            if (_currentIndex > 0 && _layers[_currentIndex] !== null) {
+	                _currentIndex--;
+	            }
+	
+	            _currentID = LayerStore.getIDforIndex(_currentIndex);
+	
 	            console.log('layers', _layers);
-	            console.log('currentindex', _currentIndex);
+	            console.log('cur index', _currentIndex);
+	            console.log('cur ID', _currentID);
 	            LayerStore.emitChange();
 	            break;
 	
 	        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
-	            for (var i = action.object.layerIndex; i < _layersMap.length; i++) {
-	                _layersMap[i]++;
-	            }
-	            console.log('update layersMap', _layersMap);
+	            var object = action.object;
+	            console.log('received', object);
+	            var index = LayerStore.getIndexForID(object.layerID);
+	            _layers[index].objects.push(object);
+	            LayerStore.emitChange();
 	            break;
 	
 	        case ActionTypes.CLICK_LAYER:
-	            _currentIndex = action.layerIndex;
+	            _currentID = action.layerID;
+	            _layers.forEach(function (layer, index) {
+	                if (layer.id === _currentID) {
+	                    _currentIndex = index;
+	                }
+	            });
 	            LayerStore.emitChange();
 	            break;
 	
@@ -21314,7 +21395,7 @@
 	    },
 	
 	    componentDidUpdate: function componentDidUpdate() {
-	        console.log('rerendering canvas', canvas);
+	        console.log('rerender canvas', canvas);
 	        canvas.renderAll();
 	    },
 	
@@ -21356,11 +21437,12 @@
 	    },
 	
 	    _onChange: function _onChange() {
+	        console.log('----------CANVAS CHANGED----------');
 	        this.setState(getStateFromStore());
 	    },
 	
 	    _onCreate: function _onCreate(object) {
-	        AppObjectActionCreators.createObject(object, LayerStore.getCurrentIndex());
+	        AppObjectActionCreators.createObject(object, LayerStore.getCurrentID());
 	    },
 	
 	    _onDrawingModeClick: function _onDrawingModeClick() {
@@ -21396,16 +21478,14 @@
 	    });
 	}
 	
-	function _markOnlyAllInLayerSelectable(layerIndex) {
+	function _markOnlyAllInLayerSelectable(layerID) {
 	    for (var id in _objects) {
 	        var object = _objects[id];
-	        if (object.layerIndex === layerIndex) {
-	            console.log(object, 'is selectable');
+	        if (object.layerID === layerID) {
 	            object.selectable = true;
 	            object.evented = true;
 	            object.opacity = 1;
 	        } else {
-	            console.log(object, 'is not selectable');
 	            object.selectable = false;
 	            object.evented = false;
 	            object.opacity = 0.5;
@@ -21413,9 +21493,9 @@
 	    }
 	}
 	
-	function _toggleAllInLayerVisibility(layerIndex) {
+	function _toggleAllInLayerVisibility(layerID) {
 	    for (var id in _objects) {
-	        if (_objects[id].layerIndex === layerIndex) {
+	        if (_objects[id].layerID === layerID) {
 	            _objects[id].visible = !_objects[id].visible;
 	            console.log(_objects[id], 'set un/visible');
 	        }
@@ -21425,6 +21505,8 @@
 	var ObjectStore = assign({}, EventEmitter.prototype, {
 	
 	    emitChange: function emitChange() {
+	        console.log('----------OBJECT STORE----------');
+	        console.log('objects', _objects);
 	        this.emit(CHANGE_EVENT);
 	    },
 	
@@ -21453,13 +21535,11 @@
 	    getAllOrdered: function getAllOrdered() {
 	        var orderedObjects = [];
 	        for (var id in _objects) {
-	            var object = _objects[id];
-	            orderedObjects.push(object);
+	            orderedObjects.push(_objects[id]);
 	        }
 	        orderedObjects.sort(function (a, b) {
-	            return a.layerIndex - b.layerIndex;
+	            return LayerStore.getIndexForID(a.layerID) - LayerStore.getIndexForID(b.layerID);
 	        });
-	        console.log('ordered', orderedObjects);
 	        return orderedObjects;
 	    }
 	
@@ -21472,17 +21552,19 @@
 	        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
 	            var object = action.object;
 	            _objects[object.id] = object;
+	            console.log('----------OBJECT CREATED----------');
+	            console.log('created object', object);
 	            ObjectStore.emitChange();
 	            break;
 	
 	        case ActionTypes.CLICK_LAYER:
 	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
-	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentIndex());
+	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
 	            ObjectStore.emitChange();
 	            break;
 	
 	        case ActionTypes.CHECK_VISIBLE:
-	            _toggleAllInLayerVisibility(action.layerIndex);
+	            _toggleAllInLayerVisibility(action.layerID);
 	            ObjectStore.emitChange();
 	            break;
 	
@@ -21512,6 +21594,7 @@
 	            "id": "f_1",
 	            "animationId": 1,
 	            "layerIndex": 0,
+	            "layerID": 'l_2',
 	            "frameIndex": 1,
 	            "layerLock": false,
 	            "layerVisible": true,
@@ -21520,6 +21603,7 @@
 	            "id": "f_2",
 	            "animationId": 1,
 	            "layerIndex": 1,
+	            "layerID": 'l_1',
 	            "frameIndex": 1,
 	            "layerLock": false,
 	            "layerVisible": true,
@@ -21528,6 +21612,7 @@
 	            "id": "f_3",
 	            "animationId": 2,
 	            "layerIndex": 0,
+	            "layerID": 'l_0',
 	            "frameIndex": 1,
 	            "layerLock": false,
 	            "layerVisible": true,
@@ -21535,7 +21620,8 @@
 	        }, {
 	            "id": "f_4",
 	            "animationId": 2,
-	            "layerIndex": 1,
+	            "layerIndex": 2,
+	            "layerID": 'l_2',
 	            "frameIndex": 1,
 	            "layerLock": false,
 	            "layerVisible": true,
@@ -21636,7 +21722,7 @@
 	        var createdObject = object;
 	        createdObject.id = 'f_' + Date.now();
 	
-	        var customProperties = 'id animationId layerIndex frameIndex layerLock layerVisible'.split(' ');
+	        var customProperties = 'id animationId layerID layerIndex frameIndex layerLock layerVisible'.split(' ');
 	
 	        console.log('createdOjbect', JSON.stringify(createdObject));
 	        rawObjects.push(createdObject);
@@ -21749,7 +21835,7 @@
 	
 	    getCreatedObjectData: function getCreatedObjectData(object, currentLayerID) {
 	        object.animationId = 2;
-	        object.layerIndex = currentLayerID;
+	        object.layerID = currentLayerID;
 	        object.layerLock = false;
 	        object.layerVisible = true;
 	        return object;
@@ -21816,13 +21902,22 @@
 	            'div',
 	            null,
 	            React.createElement('input', { type: 'checkbox', onChange: this._onChange }),
-	            'Hide'
+	            'Hide',
+	            React.createElement(
+	                'button',
+	                { onClick: this._onClick },
+	                'Delete'
+	            )
 	        );
 	    },
 	
 	    _onChange: function _onChange() {
 	        var checked = this.checked;
 	        AppLayerActionCreators.checkVisible(this.props.layer.id);
+	    },
+	
+	    _onClick: function _onClick() {
+	        AppLayerActionCreators.deleteLayer(this.props.layer.id);
 	    }
 	
 	});

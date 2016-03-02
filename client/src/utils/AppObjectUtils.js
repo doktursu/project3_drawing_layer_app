@@ -11,7 +11,7 @@ module.exports = {
 
     getCreatedObjectData: function(object, currentLayerID) {
         object.animationId = 2;
-        object.layerIndex = currentLayerID;
+        object.layerID = currentLayerID;
         object.layerLock = false;
         object.layerVisible =true;
         return object;

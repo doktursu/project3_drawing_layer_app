@@ -18,16 +18,14 @@ function _addObjects(rawObjects) {
     });
 }
 
-function _markOnlyAllInLayerSelectable(layerIndex) {
+function _markOnlyAllInLayerSelectable(layerID) {
     for (var id in _objects) {
         var object = _objects[id];
-        if (object.layerIndex === layerIndex) {
-            console.log(object, 'is selectable');
+        if (object.layerID === layerID) {
             object.selectable = true;
             object.evented = true;
             object.opacity = 1
         } else {
-            console.log(object, 'is not selectable');
             object.selectable = false;
             object.evented = false;
             object.opacity = 0.5;
@@ -35,9 +33,9 @@ function _markOnlyAllInLayerSelectable(layerIndex) {
     }
 }
 
-function _toggleAllInLayerVisibility(layerIndex) {
+function _toggleAllInLayerVisibility(layerID) {
     for (var id in _objects) {
-        if (_objects[id].layerIndex === layerIndex) {
+        if (_objects[id].layerID === layerID) {
             _objects[id].visible = !_objects[id].visible
             console.log(_objects[id], 'set un/visible');
         }
@@ -47,6 +45,8 @@ function _toggleAllInLayerVisibility(layerIndex) {
 var ObjectStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
+        console.log('----------OBJECT STORE----------');
+        console.log('objects', _objects);
         this.emit(CHANGE_EVENT);
     },
 
@@ -75,13 +75,11 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
     getAllOrdered: function() {
         var orderedObjects = [];
         for (var id in _objects) {
-            var object = _objects[id];
-            orderedObjects.push(object);
+            orderedObjects.push(_objects[id]);
         }
         orderedObjects.sort(function(a, b) {
-            return a.layerIndex - b.layerIndex;
-        })
-        console.log('ordered', orderedObjects);
+            return LayerStore.getIndexForID(a.layerID) - LayerStore.getIndexForID(b.layerID);
+        });
         return orderedObjects;
     }
 
@@ -94,17 +92,19 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
         case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
             var object = action.object;
             _objects[object.id] = object;
+            console.log('----------OBJECT CREATED----------');
+            console.log('created object', object);
             ObjectStore.emitChange();
             break;
 
         case ActionTypes.CLICK_LAYER:
             AppDispatcher.waitFor([LayerStore.dispatchToken]);
-            _markOnlyAllInLayerSelectable(LayerStore.getCurrentIndex());
+            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
             ObjectStore.emitChange();
             break;
 
         case ActionTypes.CHECK_VISIBLE:
-            _toggleAllInLayerVisibility(action.layerIndex);
+            _toggleAllInLayerVisibility(action.layerID);
             ObjectStore.emitChange();
             break;
 

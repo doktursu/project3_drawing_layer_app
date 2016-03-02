@@ -66,7 +66,7 @@ var ObjectController = React.createClass({
     },
 
     componentDidUpdate: function() {
-        console.log('rerendering canvas', canvas);
+        console.log('rerender canvas', canvas);
         canvas.renderAll();
     },
 
@@ -100,11 +100,12 @@ var ObjectController = React.createClass({
     },
 
     _onChange: function() {
+        console.log('----------CANVAS CHANGED----------');
         this.setState(getStateFromStore());
     },
 
     _onCreate: function(object) {
-        AppObjectActionCreators.createObject(object, LayerStore.getCurrentIndex());
+        AppObjectActionCreators.createObject(object, LayerStore.getCurrentID());
     },
 
     _onDrawingModeClick: function() {

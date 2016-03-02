@@ -8,7 +8,7 @@ var LayerListItem = React.createClass({
 
     propTypes: {
         layer: ReactPropTypes.object,
-        currentLayerIndex: ReactPropTypes.number
+        currentLayerID: ReactPropTypes.string
     },
 
     render: function() {
@@ -17,10 +17,11 @@ var LayerListItem = React.createClass({
             <li 
                 className={classNames({
                     'layer-list-item': true,
-                    'layer-active': layer.id === this.props.currentLayerIndex
+                    'layer-active': layer.id === this.props.currentLayerID
                 })}
-                onClick={this._onClick} width={200} height={300}>
-                <p>Layer!!! {layer.index}</p>
+                width={200}
+                height={300}>
+                <p onClick={this._onClick}>Layer!!! {this.props.index}</p>
                 <LayerListOptions layer={layer} />
             </li>
         );

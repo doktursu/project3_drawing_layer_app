@@ -8,7 +8,7 @@ var LayerStore = require('../stores/LayerStore');
 function getStateFromStore() {
     return {
         layers: LayerStore.getAllOrdered(),
-        currentLayerIndex: LayerStore.getCurrentIndex()
+        currentLayerID: LayerStore.getCurrentID()
     };
 }
 
@@ -27,12 +27,13 @@ var LayerSection = React.createClass({
     },
 
     render: function() {
-        var layerListItems = this.state.layers.map(function(layer) {
+        var layerListItems = this.state.layers.map(function(layer, index) {
             return (
                 <LayerListItem
                     key={layer.id}
+                    index={index}
                     layer={layer}
-                    currentLayerIndex={this.state.currentLayerIndex}
+                    currentLayerIndex={this.state.currentLayerID}
                 />
             );
         }.bind(this));
