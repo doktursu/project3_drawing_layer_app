@@ -56,7 +56,7 @@ var ObjectController = React.createClass({
         canvas.on('object:added', function() {
             var objects = canvas.getObjects();
             var object = objects[objects.length - 1];
-            object.moveTo(LayerStore.getCurrentID());
+            object.moveTo(LayerStore.getCurrentInsertionIndex());
             console.log('added', object);
             this._onCreate(object);
         }.bind(this));

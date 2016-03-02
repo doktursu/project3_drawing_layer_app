@@ -20729,6 +20729,15 @@
 	
 	    getCurrentID: function getCurrentID() {
 	        return _currentID;
+	    },
+	
+	    getCurrentInsertionIndex: function getCurrentInsertionIndex() {
+	        var layerCount = 0;
+	        for (var i = 0; i <= _currentID; i++) {
+	            layerCount += _layersMap[i];
+	        }
+	        console.log('inserting at', layerCount);
+	        return layerCount;
 	    }
 	
 	});
@@ -21263,7 +21272,7 @@
 	        canvas.on('object:added', function () {
 	            var objects = canvas.getObjects();
 	            var object = objects[objects.length - 1];
-	            object.moveTo(LayerStore.getCurrentID());
+	            object.moveTo(LayerStore.getCurrentInsertionIndex());
 	            console.log('added', object);
 	            this._onCreate(object);
 	        }.bind(this));
@@ -21456,7 +21465,7 @@
 	        localStorage.setItem('objects', JSON.stringify([{
 	            "id": "f_1",
 	            "animationId": 1,
-	            "layerIndex": 1,
+	            "layerIndex": 0,
 	            "frameIndex": 1,
 	            "layerLock": false,
 	            "layerVisible": true,
@@ -21464,7 +21473,7 @@
 	        }, {
 	            "id": "f_2",
 	            "animationId": 1,
-	            "layerIndex": 2,
+	            "layerIndex": 1,
 	            "frameIndex": 1,
 	            "layerLock": false,
 	            "layerVisible": true,
@@ -21472,7 +21481,7 @@
 	        }, {
 	            "id": "f_3",
 	            "animationId": 2,
-	            "layerIndex": 2,
+	            "layerIndex": 0,
 	            "frameIndex": 1,
 	            "layerLock": false,
 	            "layerVisible": true,

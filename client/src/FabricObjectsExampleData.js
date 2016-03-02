@@ -6,7 +6,7 @@ module.exports = {
             {
                 "id":"f_1",
                 "animationId":1,
-                "layerIndex":1,
+                "layerIndex":0,
                 "frameIndex":1,
                 "layerLock":false,
                 "layerVisible":true,
@@ -15,7 +15,7 @@ module.exports = {
             {
                 "id":"f_2",
                 "animationId":1,
-                "layerIndex":2,
+                "layerIndex":1,
                 "frameIndex":1,
                 "layerLock":false,
                 "layerVisible":true,
@@ -24,7 +24,7 @@ module.exports = {
             {
                 "id":"f_3",
                 "animationId":2,
-                "layerIndex":2,
+                "layerIndex":0,
                 "frameIndex":1,
                 "layerLock":false,
                 "layerVisible":true,

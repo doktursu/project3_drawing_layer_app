@@ -65,6 +65,15 @@ var LayerStore = assign({}, EventEmitter.prototype, {
 
     getCurrentID: function() {
         return _currentID;
+    },
+
+    getCurrentInsertionIndex: function() {
+        var layerCount = 0;
+        for (var i = 0; i <= _currentID; i++) {
+            layerCount += _layersMap[i];
+        }
+        console.log('inserting at', layerCount);
+        return layerCount;
     }
 
 });
