@@ -104,7 +104,7 @@ var ObjectController = React.createClass({
     },
 
     _onCreate: function(object) {
-        AppObjectActionCreators.createObject(object, LayerStore.getCurrentID());
+        AppObjectActionCreators.createObject(object, LayerStore.getCurrentIndex());
     },
 
     _onDrawingModeClick: function() {

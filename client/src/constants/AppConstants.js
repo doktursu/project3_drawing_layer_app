@@ -9,7 +9,8 @@ module.exports = {
         RECEIVE_RAW_CREATED_OBJECT: null,
         CLICK_LAYER: null,
         CHECK_VISIBLE: null,
-        CREATE_OBJECT: null
+        CREATE_OBJECT: null,
+        CREATE_LAYER: null
     })
 
 };

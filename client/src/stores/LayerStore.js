@@ -6,7 +6,7 @@ var assign = require('object-assign');
 var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
-var _currentID = null;
+var _currentIndex = null;
 var _layers = {};
 var _layersMap = [];
 
@@ -33,9 +33,9 @@ var LayerStore = assign({}, EventEmitter.prototype, {
 
         console.log('layersMap', _layersMap);
 
-        if (!_currentID) {
+        if (!_currentIndex) {
           var allOrdered = this.getAllOrdered();
-          _currentID = allOrdered[allOrdered.length - 1].id;
+          _currentIndex = allOrdered[allOrdered.length - 1].id;
         }
     },
 
@@ -63,13 +63,13 @@ var LayerStore = assign({}, EventEmitter.prototype, {
         return orderedLayers;
     },
 
-    getCurrentID: function() {
-        return _currentID;
+    getCurrentIndex: function() {
+        return _currentIndex;
     },
 
     getCurrentInsertionIndex: function() {
         var layerCount = 0;
-        for (var i = 0; i <= _currentID; i++) {
+        for (var i = 0; i <= _currentIndex; i++) {
             layerCount += _layersMap[i];
         }
         console.log('inserting at', layerCount);
@@ -82,6 +82,20 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
 
+        case ActionTypes.CREATE_LAYER:
+            var newIndex = _layersMap.length;
+            _layers[newIndex] = {
+                id: newIndex,
+                index: newIndex,
+                objects: []
+            };
+            _layersMap[newIndex] = 0;
+            _currentIndex = newIndex;
+            console.log('layers', _layers);
+            console.log('currentindex', _currentIndex);
+            LayerStore.emitChange();
+            break;
+
         case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
             for (var i = action.object.layerIndex; i < _layersMap.length; i++) {
                 _layersMap[i]++;
@@ -90,7 +104,7 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
             break;
 
         case ActionTypes.CLICK_LAYER:
-            _currentID = action.layerID;
+            _currentIndex = action.layerIndex;
             LayerStore.emitChange();
             break;
 

@@ -5,17 +5,23 @@ var ActionTypes = AppConstants.ActionTypes;
 
 module.exports = {
 
-    clickLayer: function(layerID) {
+    clickLayer: function(layerIndex) {
         AppDispatcher.dispatch({
             type: ActionTypes.CLICK_LAYER,
-            layerID: layerID
+            layerIndex: layerIndex
         });
     },
 
-    checkVisible: function(layerID) {
+    checkVisible: function(layerIndex) {
         AppDispatcher.dispatch({
             type: ActionTypes.CHECK_VISIBLE,
-            layerID: layerID
+            layerIndex: layerIndex
+        });
+    },
+
+    createLayer: function() {
+        AppDispatcher.dispatch({
+            type: ActionTypes.CREATE_LAYER
         });
     }
 

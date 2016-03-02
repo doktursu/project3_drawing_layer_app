@@ -8,7 +8,7 @@ var LayerListItem = React.createClass({
 
     propTypes: {
         layer: ReactPropTypes.object,
-        currentLayerID: ReactPropTypes.number
+        currentLayerIndex: ReactPropTypes.number
     },
 
     render: function() {
@@ -17,7 +17,7 @@ var LayerListItem = React.createClass({
             <li 
                 className={classNames({
                     'layer-list-item': true,
-                    'layer-active': layer.id === this.props.currentLayerID
+                    'layer-active': layer.id === this.props.currentLayerIndex
                 })}
                 onClick={this._onClick} width={200} height={300}>
                 <p>Layer!!! {layer.index}</p>

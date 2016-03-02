@@ -1,3 +1,5 @@
+var AppLayerActionCreators = require('../actions/AppLayerActionCreators.js');
+
 var LayerListItem = require('./LayerListItem.jsx');
 var React = require('react');
 
@@ -6,7 +8,7 @@ var LayerStore = require('../stores/LayerStore');
 function getStateFromStore() {
     return {
         layers: LayerStore.getAllOrdered(),
-        currentLayerID: LayerStore.getCurrentID()
+        currentLayerIndex: LayerStore.getCurrentIndex()
     };
 }
 
@@ -30,7 +32,7 @@ var LayerSection = React.createClass({
                 <LayerListItem
                     key={layer.id}
                     layer={layer}
-                    currentLayerID={this.state.currentLayerID}
+                    currentLayerIndex={this.state.currentLayerIndex}
                 />
             );
         }.bind(this));
@@ -41,8 +43,13 @@ var LayerSection = React.createClass({
                 <ul>
                     {layerListItems}
                 </ul>
+                <button onClick={this._onAddLayerClick}>Add Layer</button>
             </div>
         );
+    },
+
+    _onAddLayerClick: function() {
+        AppLayerActionCreators.createLayer();
     },
 
     _onChange: function() {
