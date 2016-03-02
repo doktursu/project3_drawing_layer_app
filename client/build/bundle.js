@@ -20567,7 +20567,8 @@
 	        CHECK_VISIBLE: null,
 	        CREATE_OBJECT: null,
 	        CREATE_LAYER: null,
-	        DELETE_LAYER: null
+	        DELETE_LAYER: null,
+	        RECEIVE_CANVAS: null
 	    })
 	
 	};
@@ -21393,6 +21394,7 @@
 	
 	        // console.log(json);
 	        console.log(canvas);
+	        this._sendCanvas(canvas);
 	    },
 	
 	    componentDidUpdate: function componentDidUpdate() {
@@ -21448,6 +21450,10 @@
 	
 	    _onDrawingModeClick: function _onDrawingModeClick() {
 	        canvas.isDrawingMode = !canvas.isDrawingMode;
+	    },
+	
+	    _sendCanvas: function _sendCanvas(canvas) {
+	        AppObjectActionCreators.sendCanvas(canvas);
 	    }
 	});
 	
@@ -21470,6 +21476,7 @@
 	var CHANGE_EVENT = 'change';
 	
 	var _objects = {};
+	var _canvas = null;
 	
 	function _addObjects(rawObjects) {
 	    rawObjects.forEach(function (object) {
@@ -21499,6 +21506,16 @@
 	        if (_objects[id].layerID === layerID) {
 	            _objects[id].visible = !_objects[id].visible;
 	            console.log(_objects[id], 'set un/visible');
+	        }
+	    }
+	}
+	
+	function _destroyAllInLayer(layerID) {
+	    console.log('called destroy');
+	    for (var id in _objects) {
+	        if (_objects[id].layerID === layerID) {
+	            _canvas.remove(_objects[id]);
+	            delete _objects[id];
 	        }
 	    }
 	}
@@ -21558,6 +21575,11 @@
 	            ObjectStore.emitChange();
 	            break;
 	
+	        case ActionTypes.DELETE_LAYER:
+	            _destroyAllInLayer(action.layerID);
+	            ObjectStore.emitChange();
+	            break;
+	
 	        case ActionTypes.CLICK_LAYER:
 	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
 	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
@@ -21571,6 +21593,12 @@
 	
 	        case ActionTypes.RECEIVE_RAW_OBJECTS:
 	            _addObjects(action.rawObjects);
+	            ObjectStore.emitChange();
+	            break;
+	
+	        case ActionTypes.RECEIVE_CANVAS:
+	            _canvas = action.canvas;
+	            console.log('received canvas', _canvas);
 	            ObjectStore.emitChange();
 	            break;
 	
@@ -21943,6 +21971,13 @@
 	    createObject: function createObject(object, currentLayerID, currentFrameID) {
 	        var object = AppObjectUtils.getCreatedObjectData(object, currentLayerID);
 	        AppWebAPIUtils.createObject(object);
+	    },
+	
+	    sendCanvas: function sendCanvas(canvas) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.RECEIVE_CANVAS,
+	            canvas: canvas
+	        });
 	    }
 	
 	};

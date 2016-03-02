@@ -63,6 +63,7 @@ var ObjectController = React.createClass({
 
         // console.log(json);
         console.log(canvas);
+        this._sendCanvas(canvas);
     },
 
     componentDidUpdate: function() {
@@ -110,6 +111,10 @@ var ObjectController = React.createClass({
 
     _onDrawingModeClick: function() {
         canvas.isDrawingMode = !canvas.isDrawingMode;
+    },
+
+    _sendCanvas: function(canvas) {
+        AppObjectActionCreators.sendCanvas(canvas);
     }
 });
 

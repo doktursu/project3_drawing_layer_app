@@ -11,7 +11,8 @@ module.exports = {
         CHECK_VISIBLE: null,
         CREATE_OBJECT: null,
         CREATE_LAYER: null,
-        DELETE_LAYER: null
+        DELETE_LAYER: null,
+        RECEIVE_CANVAS: null
     })
 
 };

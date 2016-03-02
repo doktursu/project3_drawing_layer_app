@@ -9,6 +9,7 @@ var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
 var _objects = {};
+var _canvas = null;
 
 function _addObjects(rawObjects) {
     rawObjects.forEach(function(object) {
@@ -38,6 +39,16 @@ function _toggleAllInLayerVisibility(layerID) {
         if (_objects[id].layerID === layerID) {
             _objects[id].visible = !_objects[id].visible
             console.log(_objects[id], 'set un/visible');
+        }
+    }
+}
+
+function _destroyAllInLayer(layerID) {
+    console.log('called destroy');
+    for (var id in _objects) {
+        if (_objects[id].layerID === layerID) {
+            _canvas.remove(_objects[id]);
+            delete _objects[id];
         }
     }
 }
@@ -97,6 +108,11 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             ObjectStore.emitChange();
             break;
 
+        case ActionTypes.DELETE_LAYER:
+            _destroyAllInLayer(action.layerID);
+            ObjectStore.emitChange();
+            break;
+
         case ActionTypes.CLICK_LAYER:
             AppDispatcher.waitFor([LayerStore.dispatchToken]);
             _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
@@ -110,6 +126,12 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.RECEIVE_RAW_OBJECTS:
             _addObjects(action.rawObjects);
+            ObjectStore.emitChange();
+            break;
+
+        case ActionTypes.RECEIVE_CANVAS:
+            _canvas = action.canvas;
+            console.log('received canvas', _canvas);
             ObjectStore.emitChange();
             break;
 

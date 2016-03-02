@@ -10,6 +10,13 @@ module.exports = {
     createObject: function(object, currentLayerID, currentFrameID) {
         var object = AppObjectUtils.getCreatedObjectData(object, currentLayerID);
         AppWebAPIUtils.createObject(object);
+    },
+
+    sendCanvas: function(canvas) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.RECEIVE_CANVAS,
+            canvas: canvas
+        })
     }
 
 };
