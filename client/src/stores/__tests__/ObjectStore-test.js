@@ -39,7 +39,6 @@ describe('Object Store', function() {
     var circle1 = new fabric.Circle(objects[1]);
     var rect2 = new fabric.Rect(objects[2]);
     var circle2 = new fabric.Circle(objects[3]);
-    var canvasObjects = [rect1, circle1, rect1, circle2];
     var canvasObjects = [circle2, rect2, circle1, rect1];
 
     var canvas = {
@@ -76,21 +75,36 @@ describe('Object Store', function() {
         expect(all).toEqual({});
     });
 
-    it('initialises with no canvas', function() {
-        var canvas = ObjectStore.getCanvas();
-        expect(canvas).toBeNull();
-    });
-
-    it('receives objects from canvas', function() {
+    it('receives objects from canvas and sets selectable layer', function() {
+        var LayerStore = require('../LayerStore');
+        LayerStore.getCurrentID.mockReturnValue('l_1');
         callback(actionReceiveCanvasObjects);
         var objects = ObjectStore.getAll();
-        expect(objects['f_3']).toEqual(rect1);
+        var objects = ObjectStore.getAll();
+
+        expect(objects['f_2'].type).toEqual(circle2.type);
+        expect(objects['f_2'].selectable).toBeTruthy();
+        expect(objects['f_2'].evented).toBeTruthy();
+        expect(objects['f_2'].opacity).toBe(1);
+
+        expect(objects['f_4'].type).toEqual(circle1.type);
+        expect(objects['f_4'].selectable).toBeTruthy();
+        expect(objects['f_4'].evented).toBeTruthy();
+        expect(objects['f_4'].opacity).toBe(1);
+
+        expect(objects['f_1'].type).toEqual(rect1.type);
+        expect(objects['f_1'].selectable).toBeFalsy();
+        expect(objects['f_1'].evented).toBeFalsy();
+
+        expect(objects['f_3'].type).toEqual(rect2.type);
+        expect(objects['f_3'].selectable).toBeFalsy();
+        expect(objects['f_3'].evented).toBeFalsy();
     });
 
     it('gets all objects for frame, ordered by layer order', function() {
         callback(actionReceiveCanvasObjects);
         var LayerStore = require('../LayerStore');
-        LayerStore.getOrder.mockReturnValueOnce(['l_0', 'l_1', 'l_2']);
+        LayerStore.getOrder.mockReturnValue(['l_0', 'l_1', 'l_2']);
         var orderedObjects = ObjectStore.getAllForFrame('f_1');
         expect(orderedObjects).toEqual([rect1, circle1]);
     });
@@ -98,9 +112,9 @@ describe('Object Store', function() {
     it('gets all objects for current frame, ordered by layer order', function() {
         callback(actionReceiveCanvasObjects);
         var FrameStore = require('../FrameStore');
-        FrameStore.getCurrentID.mockReturnValueOnce('f_2');
+        FrameStore.getCurrentID.mockReturnValue('f_2');
         var LayerStore = require('../LayerStore');
-        LayerStore.getOrder.mockReturnValueOnce(['l_0', 'l_1', 'l_2']);
+        LayerStore.getOrder.mockReturnValue(['l_0', 'l_1', 'l_2']);
         var orderedObjects = ObjectStore.getAllForCurrentFrame('f_1');
         expect(orderedObjects).toEqual([rect2, circle2]);
     });
@@ -108,7 +122,7 @@ describe('Object Store', function() {
     it('marks only all in current layer as selectable on click', function() {
         callback(actionReceiveCanvasObjects);
         var LayerStore = require('../LayerStore');
-        LayerStore.getCurrentID.mockReturnValueOnce('l_1');
+        LayerStore.getCurrentID.mockReturnValue('l_1');
         callback(actionClickLayer);
         var objects = ObjectStore.getAll();
 
@@ -125,7 +139,6 @@ describe('Object Store', function() {
 
         expect(objects['f_3'].selectable).toBeFalsy();
         expect(objects['f_3'].evented).toBeFalsy();
-
     });
 
 

@@ -7,28 +7,28 @@ var ReactPropTypes = React.PropTypes;
 var LayerListItem = React.createClass({
 
     propTypes: {
-        layer: ReactPropTypes.object,
+        layerID: ReactPropTypes.string,
         currentLayerID: ReactPropTypes.string
     },
 
     render: function() {
-        var layer = this.props.layer;
+        var layerID = this.props.layerID;
         return (
             <li 
                 className={classNames({
                     'layer-list-item': true,
-                    'layer-active': layer.id === this.props.currentLayerID
+                    'layer-active': layerID === this.props.currentLayerID
                 })}
                 width={200}
                 height={300}>
-                <p onClick={this._onClick}>Layer!!! {this.props.index}</p>
-                <LayerListOptions layer={layer} />
+                <p onClick={this._onClick}>Layer!!! {layerID}</p>
+                <LayerListOptions layer={layerID} />
             </li>
         );
     },
 
     _onClick: function() {
-        AppLayerActionCreators.clickLayer(this.props.layer.id);
+        AppLayerActionCreators.clickLayer(this.props.layerID);
     }
 
 });

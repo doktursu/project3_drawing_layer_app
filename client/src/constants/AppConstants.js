@@ -15,7 +15,6 @@ module.exports = {
         ClICK_FRAME: null,
         CLICK_LAYER: null,
 
-
         CHECK_VISIBLE: null,
         CREATE_OBJECT: null,
         CREATE_LAYER: null,

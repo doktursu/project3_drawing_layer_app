@@ -103,8 +103,7 @@ var LayerStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
         console.log('----------LAYER STORE----------')
-        console.log('layers', _layers);
-        console.log('currentIndex', _currentIndex);
+        console.log('layers', _layerOrder);
         console.log('currentID', _currentID);
         this.emit(CHANGE_EVENT);
     },
@@ -192,6 +191,7 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
         case ActionTypes.RECEIVE_RAW_ANIMATION:
             _layerOrder = action.rawAnimation.layerOrder;
             _currentID = _layerOrder[_layerOrder.length - 1];
+            LayerStore.emitChange();
             break;
 
         case ActionTypes.CLICK_LAYER:
@@ -209,7 +209,7 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
 
 
-            
+
 
         case ActionTypes.CREATE_LAYER:
             var newIndex = _layers.length;

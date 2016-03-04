@@ -13,7 +13,6 @@ var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
 var _objects = {};
-var _canvas = null;
 
 function _addObjects(rawObjects) {
     rawObjects.forEach(function(object) {
@@ -26,7 +25,7 @@ function _addObjects(rawObjects) {
 function _markOnlyAllInLayerSelectable(layerID) {
     for (var id in _objects) {
         var object = _objects[id];
-        console.log(object.layerID, 'equals?',  layerID);
+        console.log(object.layerID, 'equals?',  layerID, object.layerID === layerID);
         if (object.layerID === layerID) {
             object.selectable = true;
             object.evented = true;
@@ -69,9 +68,8 @@ function _destroyAllInLayer(layerID) {
 var ObjectStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
-        // console.log('----------OBJECT STORE----------');
-        // console.log('object store canvas', _canvas);
-        // console.log('objects', _objects);
+        console.log('----------OBJECT STORE----------');
+        console.log('objects', _objects);
         this.emit(CHANGE_EVENT);
     },
 
@@ -87,9 +85,6 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
         return _objects;
     },
 
-    getCanvas: function() {
-        return _canvas;
-    },
 
     getAllForAnimation: function(animationId) {
         var animationObjects = [];
@@ -146,6 +141,7 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
     },
 
     getAllForCurrentFrame: function() {
+        console.log('frame current id', FrameStore.getCurrentID());
         return this.getAllForFrame(FrameStore.getCurrentID());
     }
 
@@ -159,6 +155,7 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             var canvas = action.canvas;
             var objects = canvas._objects;
             _addObjects(objects);
+            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
             ObjectStore.emitChange();
             break;
 
@@ -167,6 +164,13 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
             ObjectStore.emitChange();
             break;
+
+        case ActionTypes.CLICK_FRAME:
+            AppDispatcher.waitFor([FrameStore.dispatchToken]);
+            ObjectStore.emitChange();
+            break;
+
+
 
         case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
             var object = action.object;

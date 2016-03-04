@@ -58,7 +58,7 @@ describe('Frame Store', function() {
 
     var actionClickFrame = {
         type: ActionTypes.CLICK_FRAME,
-        frameID: 'f_1'
+        frameID: 'f_2'
     };
 
     beforeEach(function() {
@@ -78,7 +78,12 @@ describe('Frame Store', function() {
 
     it('gets frame order from Animation', function() {
         callback(actionReceiveRawAnimation);
-        expect(FrameStore.getFrameOrder()).toEqual(['f_1', 'f_2']);
+        expect(FrameStore.getOrder()).toEqual(['f_1', 'f_2']);
+    });
+
+    it('sets currentID to first in frame order', function() {
+        callback(actionReceiveRawAnimation);
+        expect(FrameStore.getCurrentID()).toEqual('f_1');
     });
 
     it('adds objects from canvas', function() {
@@ -91,7 +96,7 @@ describe('Frame Store', function() {
     it('sets current frame ID on frame click', function() {
         callback(actionReceiveCanvas);
         callback(actionClickFrame);
-        expect(FrameStore.getCurrentID()).toEqual('f_1');
+        expect(FrameStore.getCurrentID()).toEqual('f_2');
     });
 
     it('gets frame by frameID', function() {

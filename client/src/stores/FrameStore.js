@@ -13,10 +13,6 @@ var _frames = {};
 
 var FrameStore = assign({}, EventEmitter.prototype, {
 
-    init: function(frameOrder) {
-        _frameOrder = frameOrder;
-    },
-
     addObjects: function(objects) {
         objects.forEach(function(object) {
             var frameID = object.frameID;
@@ -37,6 +33,9 @@ var FrameStore = assign({}, EventEmitter.prototype, {
     },
 
     emitChange: function() {
+        console.log('----------FRAME STORE----------')
+        console.log('frames', _frameOrder);
+        console.log('currentID', _currentID);
         this.emit(CHANGE_EVENT);
     },
 
@@ -52,7 +51,7 @@ var FrameStore = assign({}, EventEmitter.prototype, {
         return _frames;
     },
 
-    getFrameOrder: function() {
+    getOrder: function() {
         return _frameOrder;
     },
 
@@ -84,14 +83,15 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
 
-        case ActionTypes.RECEIVE_RAW_OBJECTS:
-            FrameStore.init(action.rawObjects);
-            FrameStore.emitChange();
-            break;
+        // case ActionTypes.RECEIVE_RAW_OBJECTS:
+        //     FrameStore.addObjects(action.rawObjects);
+        //     FrameStore.emitChange();
+        //     break;
 
         case ActionTypes.RECEIVE_RAW_ANIMATION:
-            var frameOrder = action.rawAnimation.frameOrder;
-            FrameStore.init(frameOrder);
+            _frameOrder = action.rawAnimation.frameOrder;
+            _currentID = _frameOrder[0];
+            FrameStore.emitChange();
             break;
 
         case ActionTypes.RECEIVE_CANVAS:
@@ -101,6 +101,7 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.CLICK_FRAME:
             _currentID = action.frameID;
+            FrameStore.emitChange();
             break;
 
         default:

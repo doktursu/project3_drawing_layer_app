@@ -14,13 +14,16 @@ var React = require('react');
 var canvas;
 
 function getStateFromStore() {
+    console.log('from store', ObjectStore.getAllForCurrentFrame());
     return {
-        objects: ObjectStore.getAllOrdered()
+        objects: ObjectStore.getAllForCurrentFrame()
     }
 }
 
 function getInitialCanvasJSONFromStore() {
-    return {canvasJSON: AnimationStore.getCanvasJSON()};
+    return {
+        canvasJSON: AnimationStore.getCanvasJSON()
+    };
 }
 
 var ObjectController = React.createClass({
@@ -32,14 +35,13 @@ var ObjectController = React.createClass({
 
     componentDidMount: function() {
         this._initializeFabricCanvas();
-        AnimationStore.addChangeListener(this._onChange);
+        ObjectStore.addChangeListener(this._onChange);
     },
 
     _initializeFabricCanvas: function() {
         canvas = new fabric.Canvas("c");
         canvas.isDrawingMode = true;
         canvas.selectable = true;
-
 
         // var json = {};
         // json["objects"] = this.state.objects;
@@ -67,8 +69,8 @@ var ObjectController = React.createClass({
     },
 
     componentDidUpdate: function() {
-        console.log('rerender canvas', canvas);
-        // canvas._objects = this.state.objects;
+        console.log('rerender canvas', this.state.objects);
+        canvas._objects = this.state.objects;
         canvas.renderAll();
     },
 
@@ -86,7 +88,7 @@ var ObjectController = React.createClass({
     // },
 
     componentWillUnmount: function() {
-        AnimationStore.removeChangeListener(this._onChange);
+        ObjectStore.removeChangeListener(this._onChange);
     },
 
     render: function() {
@@ -96,14 +98,14 @@ var ObjectController = React.createClass({
                 <h1>Objects</h1>
                 <canvas id="c" width={300} height={300} />
                 <button onClick={this._onDrawingModeClick}>Drawing Mode</button>
-                <FrameSelector frames={[{id:1},{id:2},{id:3}]} />
+                <FrameSelector />
             </div>
         );
     },
 
     _onChange: function() {
-        console.log('----------CANVAS CHANGED----------');
-        // this.setState(getStateFromStore());
+        console.log('----------CANVAS CHANGED----------', getStateFromStore());
+        this.setState(getStateFromStore());
     },
 
     _onCreate: function(object) {
