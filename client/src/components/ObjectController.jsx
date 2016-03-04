@@ -20,12 +20,13 @@ function getStateFromStore() {
 }
 
 function getInitialCanvasJSONFromStore() {
-    return {cavnasJSON: AnimationStore.getCanvasJSON()};
+    return {canvasJSON: AnimationStore.getCanvasJSON()};
 }
 
 var ObjectController = React.createClass({
 
     getInitialState: function() {
+        console.log('get', getInitialCanvasJSONFromStore());
         return getInitialCanvasJSONFromStore();
     },
 

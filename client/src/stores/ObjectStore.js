@@ -1,7 +1,11 @@
-var AppDispatcher = require('../dispatcher/AppDispatcher.js');
-var AppConstants = require('../constants/AppConstants.js');
-var AppObjectUtils = require('../utils/AppObjectUtils.js');
-var LayerStore = require('./LayerStore.js');
+var AppDispatcher = require('../dispatcher/AppDispatcher');
+var AppConstants = require('../constants/AppConstants');
+var AppObjectUtils = require('../utils/AppObjectUtils');
+
+var FrameStore = require('./FrameStore');
+var LayerStore = require('./LayerStore');
+
+
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
@@ -14,7 +18,7 @@ var _canvas = null;
 function _addObjects(rawObjects) {
     rawObjects.forEach(function(object) {
         if (!_objects[object.id]) {
-            _objects[object.id] = AppObjectUtils.convertRawObject(object);
+            _objects[object.id] = object;
         }
     });
 }
@@ -22,28 +26,17 @@ function _addObjects(rawObjects) {
 function _markOnlyAllInLayerSelectable(layerID) {
     for (var id in _objects) {
         var object = _objects[id];
+        console.log(object.layerID, 'equals?',  layerID);
         if (object.layerID === layerID) {
             object.selectable = true;
             object.evented = true;
-            object.opacity = 1
+            object.opacity = 1;
         } else {
             object.selectable = false;
             object.evented = false;
             object.opacity = 0.5;
         }
     }
-
-    // _canvas._objects.forEach(function(object) {
-    //     if (object.layerID === layerID) {
-    //         object.selectable = true;
-    //         object.evented = true;
-    //         object.opacity = 1
-    //     } else {
-    //         object.selectable = false;
-    //         object.evented = false;
-    //         object.opacity = 0.8;
-    //     }
-    // });
 }
 
 function _toggleAllInLayerVisibility(layerID) {
@@ -76,9 +69,9 @@ function _destroyAllInLayer(layerID) {
 var ObjectStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
-        console.log('----------OBJECT STORE----------');
-        console.log('object store canvas', _canvas);
-        console.log('objects', _objects);
+        // console.log('----------OBJECT STORE----------');
+        // console.log('object store canvas', _canvas);
+        // console.log('objects', _objects);
         this.emit(CHANGE_EVENT);
     },
 
@@ -92,6 +85,10 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
 
     getAll: function() {
         return _objects;
+    },
+
+    getCanvas: function() {
+        return _canvas;
     },
 
     getAllForAnimation: function(animationId) {
@@ -123,6 +120,33 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
         }, []);
 
         return orderedObjects;
+    },
+
+    getAllForFrame: function(frameID) {
+        var frameObjects = [];
+        for (var id in _objects) {
+            var object = _objects[id];
+            if (object.frameID === frameID) {
+                frameObjects.push(object);
+            }
+        }
+
+        var orderedObjects = [];
+        var order = LayerStore.getOrder();
+
+        order.forEach(function(layerID) {
+            frameObjects.forEach(function(object) {
+                if (object.layerID === layerID) {
+                    orderedObjects.push(object);
+                }
+            });
+        });
+
+        return orderedObjects;
+    },
+
+    getAllForCurrentFrame: function() {
+        return this.getAllForFrame(FrameStore.getCurrentID());
     }
 
 });
@@ -130,6 +154,19 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
 ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
+
+        case ActionTypes.RECEIVE_CANVAS:
+            var canvas = action.canvas;
+            var objects = canvas._objects;
+            _addObjects(objects);
+            ObjectStore.emitChange();
+            break;
+
+        case ActionTypes.CLICK_LAYER:
+            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
+            ObjectStore.emitChange();
+            break;
 
         case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
             var object = action.object;
@@ -144,11 +181,6 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             ObjectStore.emitChange();
             break;
 
-        case ActionTypes.CLICK_LAYER:
-            AppDispatcher.waitFor([LayerStore.dispatchToken]);
-            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
-            ObjectStore.emitChange();
-            break;
 
         case ActionTypes.CHECK_VISIBLE:
             _toggleAllInLayerVisibility(action.layerID);
@@ -157,11 +189,6 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.RECEIVE_RAW_OBJECTS:
             _addObjects(action.rawObjects);
-            ObjectStore.emitChange();
-            break;
-
-        case ActionTypes.RECEIVE_CANVAS:
-            _canvas = action.canvas;
             ObjectStore.emitChange();
             break;
 

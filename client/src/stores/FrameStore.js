@@ -7,29 +7,33 @@ var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
 var _currentID = null;
+var _frameOrder = [];
 var _frames = {};
 
 
 var FrameStore = assign({}, EventEmitter.prototype, {
 
-    init: function(rawObjects) {
-        // rawObjects.forEach(function(object) {
-        //     var frameIndex = object.frameIndex;
-        //     var frame = _frames[frameIndex];
-        //     if (frame) {
-        //         frame.objects.push(object);
-        //         return;
-        //     }
-        //     _frames[frameIndex] = {
-        //         id: frameIndex,
-        //         // layers: [layers]
-        //     };
-        // }, this);
+    init: function(frameOrder) {
+        _frameOrder = frameOrder;
+    },
 
-        // if (!_currentID) {
-        //   var allOrdered = this.getAllOrdered();
-        //   _currentID = allOrdered[allOrdered.length - 1].id;
-        // }
+    addObjects: function(objects) {
+        objects.forEach(function(object) {
+            var frameID = object.frameID;
+            var frame = _frames[frameID];
+            if (frame) {
+                frame.objects.push(object);
+                return;
+            }
+            _frames[frameID] = {
+                objects: [object]
+            };
+        }, this);
+
+        if (!_currentID) {
+          var allOrdered = this.getAllOrdered();
+          _currentID = allOrdered[allOrdered.length - 1].id;
+        }
     },
 
     emitChange: function() {
@@ -46,6 +50,14 @@ var FrameStore = assign({}, EventEmitter.prototype, {
 
     getAll: function() {
         return _frames;
+    },
+
+    getFrameOrder: function() {
+        return _frameOrder;
+    },
+
+    getAllByFrame: function(frameID) {
+        return _frames[frameID];
     },
 
     getAllOrdered: function() {
@@ -75,6 +87,20 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
         case ActionTypes.RECEIVE_RAW_OBJECTS:
             FrameStore.init(action.rawObjects);
             FrameStore.emitChange();
+            break;
+
+        case ActionTypes.RECEIVE_RAW_ANIMATION:
+            var frameOrder = action.rawAnimation.frameOrder;
+            FrameStore.init(frameOrder);
+            break;
+
+        case ActionTypes.RECEIVE_CANVAS:
+            var objects = action.canvas._objects;
+            FrameStore.addObjects(objects);
+            break;
+
+        case ActionTypes.CLICK_FRAME:
+            _currentID = action.frameID;
             break;
 
         default:

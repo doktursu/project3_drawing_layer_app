@@ -48,15 +48,15 @@
 	
 	var App = __webpack_require__(1);
 	
-	var ObjectController = __webpack_require__(177);
-	var FabricObjectsExampleData = __webpack_require__(183);
+	var ObjectController = __webpack_require__(176);
+	var FabricObjectsExampleData = __webpack_require__(184);
 	
-	var RawAnimationData = __webpack_require__(187);
+	var RawAnimationData = __webpack_require__(185);
 	
-	var AppExampleData = __webpack_require__(184);
+	var AppExampleData = __webpack_require__(186);
 	var AppWebAPIUtils = __webpack_require__(179);
 	var React = __webpack_require__(3);
-	var ReactDOM = __webpack_require__(185);
+	var ReactDOM = __webpack_require__(187);
 	
 	window.onload = function () {
 	
@@ -96,7 +96,7 @@
 	
 	var LayerSection = __webpack_require__(161);
 	
-	var FrameStore = __webpack_require__(176);
+	var FrameStore = __webpack_require__(173);
 	var React = __webpack_require__(3);
 	
 	function getStateFromStore() {
@@ -20531,8 +20531,13 @@
 	        RECEIVE_RAW_FRAMES: null,
 	        RECEIVE_RAW_OBJECTS: null,
 	        RECEIVE_RAW_CREATED_OBJECT: null,
+	
 	        RECEIVE_RAW_ANIMATION: null,
+	        RECEIVE_CANVAS: null,
+	
+	        ClICK_FRAME: null,
 	        CLICK_LAYER: null,
+	
 	        CHECK_VISIBLE: null,
 	        CREATE_OBJECT: null,
 	        CREATE_LAYER: null,
@@ -20541,10 +20546,6 @@
 	        MOVE_DOWN_LAYER: null,
 	        RECEIVE_CANVAS: null
 	    })
-	
-	    // ActionTypes: {
-	    //     RECEIVE_RAW_ANIMATION: 'RECEIVE_RAW_ANIMATION'
-	    // }
 	
 	};
 
@@ -20777,10 +20778,10 @@
 	
 	var AppDispatcher = __webpack_require__(163);
 	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(173).EventEmitter;
-	var assign = __webpack_require__(174);
+	var EventEmitter = __webpack_require__(174).EventEmitter;
+	var assign = __webpack_require__(175);
 	
-	var AppObjectUtils = __webpack_require__(175);
+	var AppObjectUtils = __webpack_require__(178);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -20790,7 +20791,18 @@
 	var _layers = [];
 	var _layersMap = [];
 	
-	var _layersOrder = ['l_0', 'l_1', 'l_2'];
+	var _layerOrder = [];
+	
+	var _layersOptions = {
+	    'l_0': {
+	        visible: true,
+	        selectable: true
+	    },
+	    'l_1': {
+	        visible: true,
+	        selectable: true
+	    }
+	};
 	
 	function move(old_index, new_index) {
 	    console.log('from', old_index, 'to', new_index);
@@ -20855,7 +20867,7 @@
 	            return layers;
 	        }, {});
 	
-	        _layersOrder.forEach(function (id) {
+	        _layerOrder.forEach(function (id) {
 	            _layers.push(layers[id]);
 	        });
 	
@@ -20879,6 +20891,14 @@
 	
 	    removeChangeListener: function removeChangeListener(callback) {
 	        this.removeListener(CHANGE_EVENT, callback);
+	    },
+	
+	    getOrder: function getOrder() {
+	        return _layerOrder;
+	    },
+	
+	    getCurrentID: function getCurrentID() {
+	        return _currentID;
 	    },
 	
 	    getAllOrdered: function getAllOrdered() {
@@ -20915,10 +20935,6 @@
 	        return null;
 	    },
 	
-	    getCurrentID: function getCurrentID() {
-	        return _currentID;
-	    },
-	
 	    getCurrentIndex: function getCurrentIndex() {
 	        return _currentIndex;
 	    },
@@ -20937,6 +20953,21 @@
 	LayerStore.dispatchToken = AppDispatcher.register(function (action) {
 	
 	    switch (action.type) {
+	
+	        case ActionTypes.RECEIVE_RAW_ANIMATION:
+	            _layerOrder = action.rawAnimation.layerOrder;
+	            _currentID = _layerOrder[_layerOrder.length - 1];
+	            break;
+	
+	        case ActionTypes.CLICK_LAYER:
+	            _currentID = action.layerID;
+	            // _layers.forEach(function(layer, index) {
+	            //     if (layer.id === _currentID) {
+	            //         _currentIndex = index;
+	            //     }
+	            // });
+	            LayerStore.emitChange();
+	            break;
 	
 	        case ActionTypes.CREATE_LAYER:
 	            var newIndex = _layers.length;
@@ -20972,16 +21003,6 @@
 	            LayerStore.emitChange();
 	            break;
 	
-	        case ActionTypes.CLICK_LAYER:
-	            _currentID = action.layerID;
-	            _layers.forEach(function (layer, index) {
-	                if (layer.id === _currentID) {
-	                    _currentIndex = index;
-	                }
-	            });
-	            LayerStore.emitChange();
-	            break;
-	
 	        case ActionTypes.RECEIVE_RAW_OBJECTS:
 	            LayerStore.init(action.rawObjects);
 	            LayerStore.emitChange();
@@ -21006,6 +21027,123 @@
 
 /***/ },
 /* 173 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(163);
+	var AppConstants = __webpack_require__(167);
+	var EventEmitter = __webpack_require__(174).EventEmitter;
+	var assign = __webpack_require__(175);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	var CHANGE_EVENT = 'change';
+	
+	var _currentID = null;
+	var _frameOrder = [];
+	var _frames = {};
+	
+	var FrameStore = assign({}, EventEmitter.prototype, {
+	
+	    init: function init(frameOrder) {
+	        _frameOrder = frameOrder;
+	    },
+	
+	    addObjects: function addObjects(objects) {
+	        objects.forEach(function (object) {
+	            var frameID = object.frameID;
+	            var frame = _frames[frameID];
+	            if (frame) {
+	                frame.objects.push(object);
+	                return;
+	            }
+	            _frames[frameID] = {
+	                objects: [object]
+	            };
+	        }, this);
+	
+	        if (!_currentID) {
+	            var allOrdered = this.getAllOrdered();
+	            _currentID = allOrdered[allOrdered.length - 1].id;
+	        }
+	    },
+	
+	    emitChange: function emitChange() {
+	        this.emit(CHANGE_EVENT);
+	    },
+	
+	    addChangeListener: function addChangeListener(callback) {
+	        this.on(CHANGE_EVENT, callback);
+	    },
+	
+	    removeChangeListener: function removeChangeListener(callback) {
+	        this.removeListener(CHANGE_EVENT, callback);
+	    },
+	
+	    getAll: function getAll() {
+	        return _frames;
+	    },
+	
+	    getFrameOrder: function getFrameOrder() {
+	        return _frameOrder;
+	    },
+	
+	    getAllByFrame: function getAllByFrame(frameID) {
+	        return _frames[frameID];
+	    },
+	
+	    getAllOrdered: function getAllOrdered() {
+	        // var orderedFrames = [];
+	        // for (var id in _frames) {
+	        //     var frame = _frames[id];
+	        //     orderedFrames.push(frame);
+	        // }
+	        // orderedFrames.sort(function(a, b) {
+	        //     return a.id - b.id;
+	        // })
+	        // return orderedFrames;
+	
+	        return [1, 2, 3, 4, 5];
+	    },
+	
+	    getCurrentID: function getCurrentID() {
+	        return _currentID;
+	    }
+	
+	});
+	
+	FrameStore.dispatchToken = AppDispatcher.register(function (action) {
+	
+	    switch (action.type) {
+	
+	        case ActionTypes.RECEIVE_RAW_OBJECTS:
+	            FrameStore.init(action.rawObjects);
+	            FrameStore.emitChange();
+	            break;
+	
+	        case ActionTypes.RECEIVE_RAW_ANIMATION:
+	            var frameOrder = action.rawAnimation.frameOrder;
+	            FrameStore.init(frameOrder);
+	            break;
+	
+	        case ActionTypes.RECEIVE_CANVAS:
+	            var objects = action.canvas._objects;
+	            FrameStore.addObjects(objects);
+	            break;
+	
+	        case ActionTypes.CLICK_FRAME:
+	            _currentID = action.frameID;
+	            break;
+	
+	        default:
+	        // do nothing
+	    }
+	});
+	
+	module.exports = FrameStore;
+
+/***/ },
+/* 174 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -21309,7 +21447,7 @@
 
 
 /***/ },
-/* 174 */
+/* 175 */
 /***/ function(module, exports) {
 
 	/* eslint-disable no-unused-vars */
@@ -21354,140 +21492,22 @@
 
 
 /***/ },
-/* 175 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	function capitalize(string) {
-	    return string.charAt(0).toUpperCase() + string.slice(1);
-	}
-	
-	module.exports = {
-	
-	    convertRawObject: function convertRawObject(rawObject) {
-	        var type = capitalize(rawObject.type);
-	        return new fabric[type](rawObject);
-	    },
-	
-	    getCreatedObjectData: function getCreatedObjectData(object, currentLayerID) {
-	        object.animationId = 2;
-	        object.layerID = currentLayerID;
-	        object.layerLock = false;
-	        object.layerVisible = true;
-	        return object;
-	    }
-	
-	};
-
-/***/ },
 /* 176 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(173).EventEmitter;
-	var assign = __webpack_require__(174);
-	
-	var ActionTypes = AppConstants.ActionTypes;
-	var CHANGE_EVENT = 'change';
-	
-	var _currentID = null;
-	var _frames = {};
-	
-	var FrameStore = assign({}, EventEmitter.prototype, {
-	
-	    init: function init(rawObjects) {
-	        // rawObjects.forEach(function(object) {
-	        //     var frameIndex = object.frameIndex;
-	        //     var frame = _frames[frameIndex];
-	        //     if (frame) {
-	        //         frame.objects.push(object);
-	        //         return;
-	        //     }
-	        //     _frames[frameIndex] = {
-	        //         id: frameIndex,
-	        //         // layers: [layers]
-	        //     };
-	        // }, this);
-	
-	        // if (!_currentID) {
-	        //   var allOrdered = this.getAllOrdered();
-	        //   _currentID = allOrdered[allOrdered.length - 1].id;
-	        // }
-	    },
-	
-	    emitChange: function emitChange() {
-	        this.emit(CHANGE_EVENT);
-	    },
-	
-	    addChangeListener: function addChangeListener(callback) {
-	        this.on(CHANGE_EVENT, callback);
-	    },
-	
-	    removeChangeListener: function removeChangeListener(callback) {
-	        this.removeListener(CHANGE_EVENT, callback);
-	    },
-	
-	    getAll: function getAll() {
-	        return _frames;
-	    },
-	
-	    getAllOrdered: function getAllOrdered() {
-	        // var orderedFrames = [];
-	        // for (var id in _frames) {
-	        //     var frame = _frames[id];
-	        //     orderedFrames.push(frame);
-	        // }
-	        // orderedFrames.sort(function(a, b) {
-	        //     return a.id - b.id;
-	        // })
-	        // return orderedFrames;
-	
-	        return [1, 2, 3, 4, 5];
-	    },
-	
-	    getCurrentID: function getCurrentID() {
-	        return _currentID;
-	    }
-	
-	});
-	
-	FrameStore.dispatchToken = AppDispatcher.register(function (action) {
-	
-	    switch (action.type) {
-	
-	        case ActionTypes.RECEIVE_RAW_OBJECTS:
-	            FrameStore.init(action.rawObjects);
-	            FrameStore.emitChange();
-	            break;
-	
-	        default:
-	        // do nothing
-	    }
-	});
-	
-	module.exports = FrameStore;
-
-/***/ },
-/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	// var FabricCanvas = require('./FabricCanvas.jsx');
 	// var DrawingModeOptions = require('./DrawingModeOptions.jsx');
-	var AppObjectActionCreators = __webpack_require__(178);
+	var AppObjectActionCreators = __webpack_require__(177);
 	var LayerStore = __webpack_require__(172);
 	
 	var LayerSection = __webpack_require__(161);
 	var FrameSelector = __webpack_require__(181);
 	
-	var AnimationStore = __webpack_require__(186);
+	var AnimationStore = __webpack_require__(182);
 	// var JsonObjectStore = require('../stores/JsonObjectStore.js');
-	var ObjectStore = __webpack_require__(182);
+	var ObjectStore = __webpack_require__(183);
 	var React = __webpack_require__(3);
 	
 	var canvas;
@@ -21499,7 +21519,7 @@
 	}
 	
 	function getInitialCanvasJSONFromStore() {
-	    return { cavnasJSON: AnimationStore.getCanvasJSON() };
+	    return { canvasJSON: AnimationStore.getCanvasJSON() };
 	}
 	
 	var ObjectController = React.createClass({
@@ -21507,6 +21527,7 @@
 	
 	
 	    getInitialState: function getInitialState() {
+	        console.log('get', getInitialCanvasJSONFromStore());
 	        return getInitialCanvasJSONFromStore();
 	    },
 	
@@ -21609,14 +21630,14 @@
 	module.exports = ObjectController;
 
 /***/ },
-/* 178 */
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
 	var AppConstants = __webpack_require__(167);
-	var AppObjectUtils = __webpack_require__(175);
+	var AppObjectUtils = __webpack_require__(178);
 	var AppWebAPIUtils = __webpack_require__(179);
 	
 	var ActionTypes = AppConstants.ActionTypes;
@@ -21633,6 +21654,33 @@
 	            type: ActionTypes.RECEIVE_CANVAS,
 	            canvas: canvas
 	        });
+	    }
+	
+	};
+
+/***/ },
+/* 178 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	function capitalize(string) {
+	    return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+	
+	module.exports = {
+	
+	    convertRawObject: function convertRawObject(rawObject) {
+	        var type = capitalize(rawObject.type);
+	        return new fabric[type](rawObject);
+	    },
+	
+	    getCreatedObjectData: function getCreatedObjectData(object, currentLayerID) {
+	        object.animationId = 2;
+	        object.layerID = currentLayerID;
+	        object.layerLock = false;
+	        object.layerVisible = true;
+	        return object;
 	    }
 	
 	};
@@ -21792,7 +21840,7 @@
 	'use strict';
 	
 	var React = __webpack_require__(3);
-	var FrameStore = __webpack_require__(176);
+	var FrameStore = __webpack_require__(173);
 	
 	function getStateFromStore() {
 	    return {
@@ -21834,10 +21882,71 @@
 	
 	var AppDispatcher = __webpack_require__(163);
 	var AppConstants = __webpack_require__(167);
-	var AppObjectUtils = __webpack_require__(175);
+	var EventEmitter = __webpack_require__(174).EventEmitter;
+	var assign = __webpack_require__(175);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	var CHANGE_EVENT = 'change';
+	
+	var _currentID = null;
+	var _layers = {};
+	var _canvasJSON = null;
+	
+	var AnimationStore = assign({}, EventEmitter.prototype, {
+	
+	    init: function init(rawAnimation) {
+	        _canvasJSON = rawAnimation.canvasJSON;
+	    },
+	
+	    emitChange: function emitChange() {
+	        this.emit(CHANGE_EVENT);
+	    },
+	
+	    addChangeListener: function addChangeListener(callback) {
+	        this.on(CHANGE_EVENT, callback);
+	    },
+	
+	    removeChangeListener: function removeChangeListener(callback) {
+	        this.removeListener(CHANGE_EVENT, callback);
+	    },
+	
+	    getCanvasJSON: function getCanvasJSON() {
+	        return _canvasJSON;
+	    }
+	
+	});
+	
+	AnimationStore.dispatchToken = AppDispatcher.register(function (action) {
+	
+	    switch (action.type) {
+	
+	        case ActionTypes.RECEIVE_RAW_ANIMATION:
+	            AnimationStore.init(action.rawAnimation);
+	            AnimationStore.emitChange();
+	            break;
+	
+	        default:
+	        // do nothing
+	    }
+	});
+	
+	module.exports = AnimationStore;
+
+/***/ },
+/* 183 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(163);
+	var AppConstants = __webpack_require__(167);
+	var AppObjectUtils = __webpack_require__(178);
+	
+	var FrameStore = __webpack_require__(173);
 	var LayerStore = __webpack_require__(172);
-	var EventEmitter = __webpack_require__(173).EventEmitter;
-	var assign = __webpack_require__(174);
+	
+	var EventEmitter = __webpack_require__(174).EventEmitter;
+	var assign = __webpack_require__(175);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -21848,7 +21957,7 @@
 	function _addObjects(rawObjects) {
 	    rawObjects.forEach(function (object) {
 	        if (!_objects[object.id]) {
-	            _objects[object.id] = AppObjectUtils.convertRawObject(object);
+	            _objects[object.id] = object;
 	        }
 	    });
 	}
@@ -21856,6 +21965,7 @@
 	function _markOnlyAllInLayerSelectable(layerID) {
 	    for (var id in _objects) {
 	        var object = _objects[id];
+	        console.log(object.layerID, 'equals?', layerID);
 	        if (object.layerID === layerID) {
 	            object.selectable = true;
 	            object.evented = true;
@@ -21866,18 +21976,6 @@
 	            object.opacity = 0.5;
 	        }
 	    }
-	
-	    // _canvas._objects.forEach(function(object) {
-	    //     if (object.layerID === layerID) {
-	    //         object.selectable = true;
-	    //         object.evented = true;
-	    //         object.opacity = 1
-	    //     } else {
-	    //         object.selectable = false;
-	    //         object.evented = false;
-	    //         object.opacity = 0.8;
-	    //     }
-	    // });
 	}
 	
 	function _toggleAllInLayerVisibility(layerID) {
@@ -21910,9 +22008,9 @@
 	var ObjectStore = assign({}, EventEmitter.prototype, {
 	
 	    emitChange: function emitChange() {
-	        console.log('----------OBJECT STORE----------');
-	        console.log('object store canvas', _canvas);
-	        console.log('objects', _objects);
+	        // console.log('----------OBJECT STORE----------');
+	        // console.log('object store canvas', _canvas);
+	        // console.log('objects', _objects);
 	        this.emit(CHANGE_EVENT);
 	    },
 	
@@ -21926,6 +22024,10 @@
 	
 	    getAll: function getAll() {
 	        return _objects;
+	    },
+	
+	    getCanvas: function getCanvas() {
+	        return _canvas;
 	    },
 	
 	    getAllForAnimation: function getAllForAnimation(animationId) {
@@ -21957,6 +22059,33 @@
 	        }, []);
 	
 	        return orderedObjects;
+	    },
+	
+	    getAllForFrame: function getAllForFrame(frameID) {
+	        var frameObjects = [];
+	        for (var id in _objects) {
+	            var object = _objects[id];
+	            if (object.frameID === frameID) {
+	                frameObjects.push(object);
+	            }
+	        }
+	
+	        var orderedObjects = [];
+	        var order = LayerStore.getOrder();
+	
+	        order.forEach(function (layerID) {
+	            frameObjects.forEach(function (object) {
+	                if (object.layerID === layerID) {
+	                    orderedObjects.push(object);
+	                }
+	            });
+	        });
+	
+	        return orderedObjects;
+	    },
+	
+	    getAllForCurrentFrame: function getAllForCurrentFrame() {
+	        return this.getAllForFrame(FrameStore.getCurrentID());
 	    }
 	
 	});
@@ -21964,6 +22093,19 @@
 	ObjectStore.dispatchToken = AppDispatcher.register(function (action) {
 	
 	    switch (action.type) {
+	
+	        case ActionTypes.RECEIVE_CANVAS:
+	            var canvas = action.canvas;
+	            var objects = canvas._objects;
+	            _addObjects(objects);
+	            ObjectStore.emitChange();
+	            break;
+	
+	        case ActionTypes.CLICK_LAYER:
+	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
+	            ObjectStore.emitChange();
+	            break;
 	
 	        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
 	            var object = action.object;
@@ -21978,12 +22120,6 @@
 	            ObjectStore.emitChange();
 	            break;
 	
-	        case ActionTypes.CLICK_LAYER:
-	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
-	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
-	            ObjectStore.emitChange();
-	            break;
-	
 	        case ActionTypes.CHECK_VISIBLE:
 	            _toggleAllInLayerVisibility(action.layerID);
 	            ObjectStore.emitChange();
@@ -21991,11 +22127,6 @@
 	
 	        case ActionTypes.RECEIVE_RAW_OBJECTS:
 	            _addObjects(action.rawObjects);
-	            ObjectStore.emitChange();
-	            break;
-	
-	        case ActionTypes.RECEIVE_CANVAS:
-	            _canvas = action.canvas;
 	            ObjectStore.emitChange();
 	            break;
 	
@@ -22017,7 +22148,7 @@
 	module.exports = ObjectStore;
 
 /***/ },
-/* 183 */
+/* 184 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22068,7 +22199,29 @@
 	};
 
 /***/ },
-/* 184 */
+/* 185 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = {
+	
+	    init: function init() {
+	        localStorage.clear();
+	        localStorage.setItem('animation', JSON.stringify({
+	            animationID: 1,
+	            frameOrder: ['f_1', 'f_2'],
+	            timerInterval: 500,
+	            canvasJSON: this.json
+	        }));
+	    },
+	
+	    json: { "objects": [{ "type": "rect", "originX": "left", "originY": "top", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_3", "animationID": 1, "layerID": 0, "frameID": "f_1", "layerLock": false, "layerVisible": true, "rx": 0, "ry": 0 }, { "type": "circle", "originX": "left", "originY": "top", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_2", "animationID": 1, "layerID": 1, "frameID": "f_1", "layerLock": false, "layerVisible": true, "radius": 50, "startAngle": 0, "endAngle": 6.283185307179586 }, { "type": "rect", "originX": "left", "originY": "top", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_1", "animationID": 1, "layerID": 0, "frameID": "f_2", "layerLock": false, "layerVisible": true, "rx": 0, "ry": 0 }, { "type": "circle", "originX": "left", "originY": "top", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "yellow", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_4", "animationID": 1, "layerID": 2, "frameID": "f_2", "layerLock": false, "layerVisible": true, "radius": 50, "startAngle": 0, "endAngle": 6.283185307179586 }], "background": "" }
+	
+	};
+
+/***/ },
+/* 186 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22096,90 +22249,13 @@
 	};
 
 /***/ },
-/* 185 */
+/* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	module.exports = __webpack_require__(5);
 
-
-/***/ },
-/* 186 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(173).EventEmitter;
-	var assign = __webpack_require__(174);
-	
-	var ActionTypes = AppConstants.ActionTypes;
-	var CHANGE_EVENT = 'change';
-	
-	var _currentID = null;
-	var _layers = {};
-	var _canvasJSON = null;
-	
-	var AnimationStore = assign({}, EventEmitter.prototype, {
-	
-	    init: function init(rawAnimation) {
-	        _canvasJSON = rawAnimation.canvasJSON;
-	    },
-	
-	    emitChange: function emitChange() {
-	        this.emit(CHANGE_EVENT);
-	    },
-	
-	    addChangeListener: function addChangeListener(callback) {
-	        this.on(CHANGE_EVENT, callback);
-	    },
-	
-	    removeChangeListener: function removeChangeListener(callback) {
-	        this.removeListener(CHANGE_EVENT, callback);
-	    },
-	
-	    getCanvasJSON: function getCanvasJSON() {
-	        return _canvasJSON;
-	    }
-	
-	});
-	
-	AnimationStore.dispatchToken = AppDispatcher.register(function (action) {
-	
-	    switch (action.type) {
-	
-	        case ActionTypes.RECEIVE_RAW_ANIMATION:
-	            AnimationStore.init(action.rawAnimation);
-	            AnimationStore.emitChange();
-	            break;
-	
-	        default:
-	        // do nothing
-	    }
-	});
-	
-	module.exports = AnimationStore;
-
-/***/ },
-/* 187 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	module.exports = {
-	
-	    init: function init() {
-	        localStorage.clear();
-	        localStorage.setItem('animation', JSON.stringify({
-	            animationID: 1,
-	            timerInterval: 500,
-	            canvasJSON: { "objects": [{ "type": "rect", "originX": "left", "originY": "top", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_3", "animationID": 1, "layerID": 0, "frameIndex": 1, "layerLock": false, "layerVisible": true, "rx": 0, "ry": 0 }, { "type": "circle", "originX": "left", "originY": "top", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_2", "animationID": 1, "layerID": 1, "frameIndex": 1, "layerLock": false, "layerVisible": true, "radius": 50, "startAngle": 0, "endAngle": 6.283185307179586 }, { "type": "rect", "originX": "left", "originY": "top", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_1", "animationID": 1, "layerID": 0, "frameIndex": 2, "layerLock": false, "layerVisible": true, "rx": 0, "ry": 0 }, { "type": "circle", "originX": "left", "originY": "top", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "yellow", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_4", "animationID": 1, "layerID": 2, "frameIndex": 2, "layerLock": false, "layerVisible": true, "radius": 50, "startAngle": 0, "endAngle": 6.283185307179586 }], "background": "" }
-	        }));
-	    }
-	
-	};
 
 /***/ }
 /******/ ]);

@@ -13,7 +13,20 @@ var _currentIndex = null;
 var _layers = [];
 var _layersMap = [];
 
-var _layersOrder = ['l_0', 'l_1', 'l_2'];
+var _layerOrder = [];
+
+var _layersOptions = {
+    'l_0': 
+    {
+        visible: true,
+        selectable: true
+    },
+    'l_1':
+    {
+        visible: true,
+        selectable: true
+    }
+};
 
 function move(old_index, new_index) {
     console.log('from', old_index, 'to', new_index);
@@ -78,7 +91,7 @@ var LayerStore = assign({}, EventEmitter.prototype, {
             return layers;
         }, {});
 
-        _layersOrder.forEach(function(id) {
+        _layerOrder.forEach(function(id) {
             _layers.push(layers[id]);
         });
 
@@ -103,6 +116,25 @@ var LayerStore = assign({}, EventEmitter.prototype, {
     removeChangeListener: function(callback) {
         this.removeListener(CHANGE_EVENT, callback);
     },
+
+
+
+
+
+    getOrder: function() {
+        return _layerOrder;
+    },
+
+    getCurrentID: function() {
+        return _currentID;
+    },
+
+
+
+
+
+
+
 
     getAllOrdered: function() {
         var orderedLayers = [];
@@ -138,10 +170,6 @@ var LayerStore = assign({}, EventEmitter.prototype, {
         return null;
     },
 
-    getCurrentID: function() {
-        return _currentID;
-    },
-
     getCurrentIndex: function() {
         return _currentIndex;
     },
@@ -160,6 +188,28 @@ var LayerStore = assign({}, EventEmitter.prototype, {
 LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
+
+        case ActionTypes.RECEIVE_RAW_ANIMATION:
+            _layerOrder = action.rawAnimation.layerOrder;
+            _currentID = _layerOrder[_layerOrder.length - 1];
+            break;
+
+        case ActionTypes.CLICK_LAYER:
+            _currentID = action.layerID;
+            // _layers.forEach(function(layer, index) {
+            //     if (layer.id === _currentID) {
+            //         _currentIndex = index;
+            //     }
+            // });
+            LayerStore.emitChange();
+            break;
+
+
+
+
+
+
+            
 
         case ActionTypes.CREATE_LAYER:
             var newIndex = _layers.length;
@@ -195,15 +245,7 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
             LayerStore.emitChange();
             break;
 
-        case ActionTypes.CLICK_LAYER:
-            _currentID = action.layerID;
-            _layers.forEach(function(layer, index) {
-                if (layer.id === _currentID) {
-                    _currentIndex = index;
-                }
-            });
-            LayerStore.emitChange();
-            break;
+        
 
         case ActionTypes.RECEIVE_RAW_OBJECTS:
             LayerStore.init(action.rawObjects);

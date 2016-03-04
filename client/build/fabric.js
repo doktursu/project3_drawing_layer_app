@@ -1,3 +1,4 @@
+
 /* build: `node build.js modules=ALL exclude=gestures,json minifier=uglifyjs` */
 /*! Fabric.js Copyright 2008-2015, Printio (Juriy Zaytsev, Maxim Chernyak) */
 
