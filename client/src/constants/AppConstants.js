@@ -14,8 +14,9 @@ module.exports = {
 
         ClICK_FRAME: null,
         CLICK_LAYER: null,
+        
+        TOGGLE_VISIBILITY: null,
 
-        CHECK_VISIBLE: null,
         CREATE_OBJECT: null,
         CREATE_LAYER: null,
         DELETE_LAYER: null,

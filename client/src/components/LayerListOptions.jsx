@@ -16,19 +16,19 @@ var LayerListOptions = React.createClass({
 
     _onChange: function() {
         var checked = this.checked;
-        AppLayerActionCreators.checkVisible(this.props.layer.id);
+        AppLayerActionCreators.toggleVisibility(this.props.layerID);
     },
 
     _onDeleteClick: function() {
-        AppLayerActionCreators.deleteLayer(this.props.layer.id);
+        AppLayerActionCreators.deleteLayer(this.props.layerID);
     },
 
     _onMoveUpClick: function() {
-        AppLayerActionCreators.moveUpLayer(this.props.layer.id);
+        AppLayerActionCreators.moveUpLayer(this.props.layerID);
     },
 
     _onMoveDownClick: function() {
-        AppLayerActionCreators.moveDownLayer(this.props.layer.id);
+        AppLayerActionCreators.moveDownLayer(this.props.layerID);
     }
 
 });

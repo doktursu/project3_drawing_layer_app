@@ -60,6 +60,11 @@ describe('Object Store', function() {
         layerID: 'l_1'
     };
 
+    var actionToggleVisibility = {
+        type: ActionTypes.TOGGLE_VISIBILITY,
+        layerID: 'l_1'
+    };
+
     beforeEach(function() {
         AppDispatcher = require('../../dispatcher/AppDispatcher');
         ObjectStore = require('../ObjectStore');
@@ -139,6 +144,16 @@ describe('Object Store', function() {
 
         expect(objects['f_3'].selectable).toBeFalsy();
         expect(objects['f_3'].evented).toBeFalsy();
+    });
+
+    it('toggles visibility on all objects in layer', function() {
+        callback(actionReceiveCanvasObjects);
+        callback(actionToggleVisibility);
+        var objects = ObjectStore.getAll();
+        expect(objects['f_2'].visible).toBeFalsy();
+        expect(objects['f_4'].visible).toBeFalsy();
+        expect(objects['f_3'].visible).toBeTruthy();
+        expect(objects['f_1'].visible).toBeTruthy();
     });
 
 

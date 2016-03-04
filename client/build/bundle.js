@@ -20161,9 +20161,9 @@
 	        });
 	    },
 	
-	    checkVisible: function checkVisible(layerID) {
+	    toggleVisibility: function toggleVisibility(layerID) {
 	        AppDispatcher.dispatch({
-	            type: ActionTypes.CHECK_VISIBLE,
+	            type: ActionTypes.TOGGLE_VISIBILITY,
 	            layerID: layerID
 	        });
 	    },
@@ -20537,7 +20537,8 @@
 	        ClICK_FRAME: null,
 	        CLICK_LAYER: null,
 	
-	        CHECK_VISIBLE: null,
+	        TOGGLE_VISIBILITY: null,
+	
 	        CREATE_OBJECT: null,
 	        CREATE_LAYER: null,
 	        DELETE_LAYER: null,
@@ -20645,7 +20646,7 @@
 	                'Layer!!! ',
 	                layerID
 	            ),
-	            React.createElement(LayerListOptions, { layer: layerID })
+	            React.createElement(LayerListOptions, { layerID: layerID })
 	        );
 	    },
 	
@@ -20750,19 +20751,19 @@
 	
 	    _onChange: function _onChange() {
 	        var checked = this.checked;
-	        AppLayerActionCreators.checkVisible(this.props.layer.id);
+	        AppLayerActionCreators.toggleVisibility(this.props.layerID);
 	    },
 	
 	    _onDeleteClick: function _onDeleteClick() {
-	        AppLayerActionCreators.deleteLayer(this.props.layer.id);
+	        AppLayerActionCreators.deleteLayer(this.props.layerID);
 	    },
 	
 	    _onMoveUpClick: function _onMoveUpClick() {
-	        AppLayerActionCreators.moveUpLayer(this.props.layer.id);
+	        AppLayerActionCreators.moveUpLayer(this.props.layerID);
 	    },
 	
 	    _onMoveDownClick: function _onMoveDownClick() {
-	        AppLayerActionCreators.moveDownLayer(this.props.layer.id);
+	        AppLayerActionCreators.moveDownLayer(this.props.layerID);
 	    }
 	
 	});
@@ -21995,16 +21996,11 @@
 	
 	function _toggleAllInLayerVisibility(layerID) {
 	    for (var id in _objects) {
-	        if (_objects[id].layerID === layerID) {
-	            _objects[id].visible = !_objects[id].visible;
+	        var object = _objects[id];
+	        if (object.layerID === layerID) {
+	            object.visible = !object.visible;
 	        }
 	    }
-	
-	    // _canvas._objects.forEach(function(object) {
-	    //     if (object.layerID === layerID) {
-	    //         object.visible = !object.visible
-	    //     }
-	    // });
 	}
 	
 	function _destroyAllInLayer(layerID) {
@@ -22124,6 +22120,11 @@
 	            ObjectStore.emitChange();
 	            break;
 	
+	        case ActionTypes.TOGGLE_VISIBILITY:
+	            _toggleAllInLayerVisibility(action.layerID);
+	            ObjectStore.emitChange();
+	            break;
+	
 	        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
 	            var object = action.object;
 	            _objects[object.id] = object;
@@ -22134,11 +22135,6 @@
 	
 	        case ActionTypes.DELETE_LAYER:
 	            // _destroyAllInLayer(action.layerID);
-	            ObjectStore.emitChange();
-	            break;
-	
-	        case ActionTypes.CHECK_VISIBLE:
-	            _toggleAllInLayerVisibility(action.layerID);
 	            ObjectStore.emitChange();
 	            break;
 	

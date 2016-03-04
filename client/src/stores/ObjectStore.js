@@ -40,16 +40,11 @@ function _markOnlyAllInLayerSelectable(layerID) {
 
 function _toggleAllInLayerVisibility(layerID) {
     for (var id in _objects) {
-        if (_objects[id].layerID === layerID) {
-            _objects[id].visible = !_objects[id].visible;
+        var object = _objects[id];
+        if (object.layerID === layerID) {
+            object.visible = !object.visible;
         }
     }
-
-    // _canvas._objects.forEach(function(object) {
-    //     if (object.layerID === layerID) {
-    //         object.visible = !object.visible
-    //     }
-    // });
 }
 
 function _destroyAllInLayer(layerID) {
@@ -170,6 +165,11 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             ObjectStore.emitChange();
             break;
 
+        case ActionTypes.TOGGLE_VISIBILITY:
+            _toggleAllInLayerVisibility(action.layerID);
+            ObjectStore.emitChange();
+            break;
+
 
 
         case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
@@ -185,11 +185,6 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             ObjectStore.emitChange();
             break;
 
-
-        case ActionTypes.CHECK_VISIBLE:
-            _toggleAllInLayerVisibility(action.layerID);
-            ObjectStore.emitChange();
-            break;
 
         case ActionTypes.RECEIVE_RAW_OBJECTS:
             _addObjects(action.rawObjects);

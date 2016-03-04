@@ -22,7 +22,7 @@ var LayerListItem = React.createClass({
                 width={200}
                 height={300}>
                 <p onClick={this._onClick}>Layer!!! {layerID}</p>
-                <LayerListOptions layer={layerID} />
+                <LayerListOptions layerID={layerID} />
             </li>
         );
     },

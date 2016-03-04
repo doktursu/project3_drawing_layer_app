@@ -12,9 +12,9 @@ module.exports = {
         });
     },
 
-    checkVisible: function(layerID) {
+    toggleVisibility: function(layerID) {
         AppDispatcher.dispatch({
-            type: ActionTypes.CHECK_VISIBLE,
+            type: ActionTypes.TOGGLE_VISIBILITY,
             layerID: layerID
         });
     },
