@@ -20,20 +20,8 @@ function _addObjects(rawObjects) {
 }
 
 function _markOnlyAllInLayerSelectable(layerID) {
-    // for (var id in _objects) {
-    //     var object = _objects[id];
-    //     if (object.layerID === layerID) {
-    //         object.selectable = true;
-    //         object.evented = true;
-    //         object.opacity = 1
-    //     } else {
-    //         object.selectable = false;
-    //         object.evented = false;
-    //         object.opacity = 0.5;
-    //     }
-    // }
-
-    _canvas._objects.forEach(function(object) {
+    for (var id in _objects) {
+        var object = _objects[id];
         if (object.layerID === layerID) {
             object.selectable = true;
             object.evented = true;
@@ -43,27 +31,36 @@ function _markOnlyAllInLayerSelectable(layerID) {
             object.evented = false;
             object.opacity = 0.5;
         }
-    });
+    }
+
+    // _canvas._objects.forEach(function(object) {
+    //     if (object.layerID === layerID) {
+    //         object.selectable = true;
+    //         object.evented = true;
+    //         object.opacity = 1
+    //     } else {
+    //         object.selectable = false;
+    //         object.evented = false;
+    //         object.opacity = 0.8;
+    //     }
+    // });
 }
 
 function _toggleAllInLayerVisibility(layerID) {
-    // for (var id in _objects) {
-    //     if (_objects[id].layerID === layerID) {
-    //         _objects[id].visible = !_objects[id].visible
-    //         console.log(_objects[id], 'set un/visible');
-    //     }
-    // }
-
-    _canvas._objects.forEach(function(object) {
-        if (object.layerID === layerID) {
-            object.visible = !object.visible
-            console.log(object, 'set un/visible');
+    for (var id in _objects) {
+        if (_objects[id].layerID === layerID) {
+            _objects[id].visible = !_objects[id].visible;
         }
-    });
+    }
+
+    // _canvas._objects.forEach(function(object) {
+    //     if (object.layerID === layerID) {
+    //         object.visible = !object.visible
+    //     }
+    // });
 }
 
 function _destroyAllInLayer(layerID) {
-    console.log('called destroy');
     for (var id in _objects) {
         if (_objects[id].layerID === layerID) {
             _canvas.remove(_objects[id]);
@@ -125,18 +122,6 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
             return orderedObjects;
         }, []);
 
-        console.log('ordered by LAYER', orderedObjects);
-
-        if (_canvas !== null) {
-            // _canvas.on('object:added', function() {});
-            _canvas.clear();
-            // orderedObjects.forEach(function(object) {
-            //     _canvas.add(object);
-            // });
-            _canvas._objects = orderedObjects;
-            _canvas.renderAll();
-        }
-
         return orderedObjects;
     }
 
@@ -155,7 +140,7 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             break;
 
         case ActionTypes.DELETE_LAYER:
-            _destroyAllInLayer(action.layerID);
+            // _destroyAllInLayer(action.layerID);
             ObjectStore.emitChange();
             break;
 
@@ -182,16 +167,12 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.MOVE_UP_LAYER:
             AppDispatcher.waitFor([LayerStore.dispatchToken]);
-            // moveUpLayer(action.layerID);
-            ObjectStore.getAllOrdered();
-            // ObjectStore.emitChange();
+            ObjectStore.emitChange();
             break;
 
         case ActionTypes.MOVE_DOWN_LAYER:
             AppDispatcher.waitFor([LayerStore.dispatchToken]);
-            // moveDownLayer(action.layerID);
-            ObjectStore.getAllOrdered();
-            // ObjectStore.emitChange();
+            ObjectStore.emitChange();
             break;
 
         default:

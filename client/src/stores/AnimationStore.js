@@ -1,43 +1,35 @@
-var AppDispatcher = require('../dispatcher/AppDispatcher.js');
+var AppDispatcher = require('../dispatcher/AppDispatcher');
+var AppConstants = require('../constants/AppConstants');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
+var ActionTypes = AppConstants.ActionTypes;
+var CHANGE_EVENT = 'change';
+
 var _currentID = null;
 var _layers = {};
+var _canvasJSON = null;
 
 var AnimationStore = assign({}, EventEmitter.prototype, {
 
-    init: function(rawObjects) {
-        rawObjects.forEach(function(object) {
-            var layerIndex = object.layerIndex;
-            var layer = _layers[layerIndex];
-            if (layer) {
-                layer[objects].push(object);
-                return;
-            }
-            _layers[layerIndex] = {
-                id: layerIndex,
-                index: layerIndex,
-                objects: [objects]
-            };
-        }, this);
-
-        if (!_currentID) {
-          var allOrdered = this.getAllOrdered();
-          _currentID = allOrdered[allOrdered.length - 1].id;
-        }
+    init: function(rawAnimation) {
+        _canvasJSON = rawAnimation.canvasJSON;
     },
 
-    getAllOrdered: function() {
-        var orderedLayers = [];
-        for (var id in _layers) {
-            var layer = _layers[id];
-            orderedLayers.push(layer);
-        }
-        orderLayers.sort(function(a, b) {
-            return a.index - b.index;
-        });
-        return orderedLayers;
+    emitChange: function() {
+        this.emit(CHANGE_EVENT);
+    },
+
+    addChangeListener: function(callback) {
+        this.on(CHANGE_EVENT, callback);
+    },
+
+    removeChangeListener: function(callback) {
+        this.removeListener(CHANGE_EVENT, callback);
+    },
+
+    getCanvasJSON: function() {
+        return _canvasJSON;
     }
 
 });
@@ -45,11 +37,6 @@ var AnimationStore = assign({}, EventEmitter.prototype, {
 AnimationStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
-
-        case ActionTypes.CLICK_LAYER:
-            _currentID = action.layerID;
-            LayerStore.emitChange();
-            break;
 
         case ActionTypes.RECEIVE_RAW_ANIMATION:
             AnimationStore.init(action.rawAnimation);
@@ -61,3 +48,5 @@ AnimationStore.dispatchToken = AppDispatcher.register(function(action) {
     }
 
 });
+
+module.exports = AnimationStore;

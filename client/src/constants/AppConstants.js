@@ -7,6 +7,7 @@ module.exports = {
         RECEIVE_RAW_FRAMES: null,
         RECEIVE_RAW_OBJECTS: null,
         RECEIVE_RAW_CREATED_OBJECT: null,
+        RECEIVE_RAW_ANIMATION: null,
         CLICK_LAYER: null,
         CHECK_VISIBLE: null,
         CREATE_OBJECT: null,
@@ -16,5 +17,9 @@ module.exports = {
         MOVE_DOWN_LAYER: null,
         RECEIVE_CANVAS: null
     })
+
+    // ActionTypes: {
+    //     RECEIVE_RAW_ANIMATION: 'RECEIVE_RAW_ANIMATION'
+    // }
 
 };

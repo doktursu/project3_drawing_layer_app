@@ -3,6 +3,8 @@ var App = require('./components/App.jsx');
 var ObjectController = require('./components/ObjectController.jsx');
 var FabricObjectsExampleData = require('./FabricObjectsExampleData.js');
 
+var RawAnimationData = require('./RawAnimationData');
+
 var AppExampleData = require('./AppExampleData.js');
 var AppWebAPIUtils = require('./utils/AppWebAPIUtils.js');
 var React = require('react');
@@ -16,7 +18,7 @@ window.onload = function() {
             return fabric.util.object.extend(toObject.call(this), {
                 id: this.id,
                 animationId: this.animationId,
-                layerIndex: this.layerIndex,
+                layerID: this.layerIndex,
                 frameIndex: this.frameIndex,
                 layerLock: this.layerLock,
                 layerVisible: this.layerVisible
@@ -24,11 +26,13 @@ window.onload = function() {
         };
     })(fabric.Object.prototype.toObject);
 
-    AppExampleData.init();
-    AppWebAPIUtils.getAllFrames();
+    // AppExampleData.init();
+    RawAnimationData.init();
+    AppWebAPIUtils.getRawAnimation();
+    // AppWebAPIUtils.getAllFrames();
 
-    FabricObjectsExampleData.init();
-    AppWebAPIUtils.getAllObjects();
+    // FabricObjectsExampleData.init();
+    // AppWebAPIUtils.getAllObjects();
 
     ReactDOM.render(
         <ObjectController />,

@@ -184,9 +184,6 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
             _currentID = LayerStore.getIDforIndex(_currentIndex);
 
-            console.log('layers', _layers);
-            console.log('cur index', _currentIndex);
-            console.log('cur ID', _currentID);
             LayerStore.emitChange();
             break;
 

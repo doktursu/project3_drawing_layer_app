@@ -4,7 +4,7 @@
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "Sky Su",
   "license": "ISC",
@@ -13,6 +13,7 @@
     "chai": "^3.5.0",
     "classnames": "^2.2.3",
     "flux": "^2.1.1",
+    "jest-cli": "^0.8.2",
     "keymirror": "^0.1.1",
     "object-assign": "^4.0.1",
     "react": "^0.14.7",

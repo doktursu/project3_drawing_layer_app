@@ -13,24 +13,23 @@ var _frames = {};
 var FrameStore = assign({}, EventEmitter.prototype, {
 
     init: function(rawObjects) {
-        rawObjects.forEach(function(object) {
-            var frameIndex = object.frameIndex;
-            var frame = _frames[frameIndex];
-            if (frame) {
-                frame.objects.push(object);
-                return;
-            }
-            _frames[frameIndex] = {
-                id: frameIndex,
-                index: frameIndex,
-                objects: [object]
-            };
-        }, this);
+        // rawObjects.forEach(function(object) {
+        //     var frameIndex = object.frameIndex;
+        //     var frame = _frames[frameIndex];
+        //     if (frame) {
+        //         frame.objects.push(object);
+        //         return;
+        //     }
+        //     _frames[frameIndex] = {
+        //         id: frameIndex,
+        //         // layers: [layers]
+        //     };
+        // }, this);
 
-        if (!_currentID) {
-          var allOrdered = this.getAllOrdered();
-          _currentID = allOrdered[allOrdered.length - 1].id;
-        }
+        // if (!_currentID) {
+        //   var allOrdered = this.getAllOrdered();
+        //   _currentID = allOrdered[allOrdered.length - 1].id;
+        // }
     },
 
     emitChange: function() {
@@ -50,15 +49,17 @@ var FrameStore = assign({}, EventEmitter.prototype, {
     },
 
     getAllOrdered: function() {
-        var orderedFrames = [];
-        for (var id in _frames) {
-            var frame = _frames[id];
-            orderedFrames.push(frame);
-        }
-        orderedFrames.sort(function(a, b) {
-            return a.id - b.id;
-        })
-        return orderedFrames;
+        // var orderedFrames = [];
+        // for (var id in _frames) {
+        //     var frame = _frames[id];
+        //     orderedFrames.push(frame);
+        // }
+        // orderedFrames.sort(function(a, b) {
+        //     return a.id - b.id;
+        // })
+        // return orderedFrames;
+
+        return [1,2,3,4,5];
     },
 
     getCurrentID: function() {

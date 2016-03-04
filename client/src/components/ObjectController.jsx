@@ -1,13 +1,14 @@
 // var FabricCanvas = require('./FabricCanvas.jsx');
 // var DrawingModeOptions = require('./DrawingModeOptions.jsx');
-var AppObjectActionCreators = require('../actions/AppObjectActionCreators.js');
-var LayerStore = require('../stores/LayerStore.js');
+var AppObjectActionCreators = require('../actions/AppObjectActionCreators');
+var LayerStore = require('../stores/LayerStore');
 
 var LayerSection = require('./LayerSection.jsx');
 var FrameSelector = require('./FrameSelector.jsx');
 
+var AnimationStore = require('../stores/AnimationStore');
 // var JsonObjectStore = require('../stores/JsonObjectStore.js');
-var ObjectStore = require('../stores/ObjectStore.js');
+var ObjectStore = require('../stores/ObjectStore');
 var React = require('react');
 
 var canvas;
@@ -18,15 +19,19 @@ function getStateFromStore() {
     }
 }
 
+function getInitialCanvasJSONFromStore() {
+    return {cavnasJSON: AnimationStore.getCanvasJSON()};
+}
+
 var ObjectController = React.createClass({
 
     getInitialState: function() {
-        return getStateFromStore();
+        return getInitialCanvasJSONFromStore();
     },
 
     componentDidMount: function() {
-        ObjectStore.addChangeListener(this._onChange);
         this._initializeFabricCanvas();
+        AnimationStore.addChangeListener(this._onChange);
     },
 
     _initializeFabricCanvas: function() {
@@ -40,35 +45,29 @@ var ObjectController = React.createClass({
         // json["background"] = "rgba(0, 0, 0, 0)";
         // var json = JSON.stringify(json);
 
-        // canvas.loadFromJSON(json);
+        console.log('json', this.state.canvasJSON);
 
-        // with objects
-        // var object = new fabric.Rect(this.state.objects[1]);
-        // console.log(object);
-        // canvas.add(object);
-        // canvas.render();
+        canvas.loadFromJSON(this.state.canvasJSON);
 
-        console.log('ooooooo', this.state.objects);
-
-        this.state.objects.forEach(function(object) {
-            canvas.add(object);
-        });
+        // this.state.objects.forEach(function(object) {
+        //     canvas.add(object);
+        // });
 
         canvas.on('object:added', function() {
             var objects = canvas.getObjects();
             var object = objects[objects.length - 1];
             object.moveTo(LayerStore.getCurrentInsertionIndex());
-            console.log('added', object);
             this._onCreate(object);
         }.bind(this));
 
         // console.log(json);
-        console.log(canvas);
+        console.log('canvas', JSON.stringify(canvas));
         this._sendCanvas(canvas);
     },
 
     componentDidUpdate: function() {
         console.log('rerender canvas', canvas);
+        // canvas._objects = this.state.objects;
         canvas.renderAll();
     },
 
@@ -86,7 +85,7 @@ var ObjectController = React.createClass({
     // },
 
     componentWillUnmount: function() {
-        ObjectStore.removeChangeListener(this._onChange);
+        AnimationStore.removeChangeListener(this._onChange);
     },
 
     render: function() {
@@ -103,7 +102,7 @@ var ObjectController = React.createClass({
 
     _onChange: function() {
         console.log('----------CANVAS CHANGED----------');
-        this.setState(getStateFromStore());
+        // this.setState(getStateFromStore());
     },
 
     _onCreate: function(object) {
