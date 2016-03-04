@@ -31,6 +31,13 @@ describe('Animation Store', function() {
         var json = AnimationStore.getCanvasJSON();
         expect(json).toBeNull();
     });
+
+    it('adds canvasJSON data on receiving animation', function() {
+        callback(actionReceiveRawAnimation);
+        var json = AnimationStore.getCanvasJSON();
+        expect(json).toEqual(RawAnimationData.canvasJSON);
+    });
+
 });
 
 
