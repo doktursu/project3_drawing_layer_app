@@ -21865,7 +21865,12 @@
 	    render: function render() {
 	
 	        var radioButtons = this.state.frames.map(function (frameID) {
-	            return React.createElement('input', { type: 'radio', name: 'frame', value: frameID, onChange: this._onChange });
+	            return React.createElement('input', {
+	                type: 'radio',
+	                key: frameID,
+	                name: 'frame',
+	                value: frameID,
+	                onChange: this._onChange });
 	        }, this);
 	
 	        return React.createElement(

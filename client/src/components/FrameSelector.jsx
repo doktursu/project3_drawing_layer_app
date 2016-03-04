@@ -19,7 +19,12 @@ var FrameSelector = React.createClass({
     render: function() {
 
         var radioButtons = this.state.frames.map(function(frameID) {
-            return <input type="radio" name="frame" value={frameID} onChange={this._onChange} />
+            return <input
+                type="radio"
+                key={frameID}
+                name="frame"
+                value={frameID}
+                onChange={this._onChange} />
         }, this);
 
         return (
