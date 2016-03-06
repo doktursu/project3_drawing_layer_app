@@ -16,6 +16,17 @@ describe('Layer Store', function() {
         animationID: 1,
         frameOrder: ['f_1', 'f_2'],
         layerOrder: ['l_0', 'l_1', 'l_2'],
+        layerInfo: {
+            'l_0':{
+                name:'Rectangles'
+            },
+            'l_1':{
+                name:'Circles'
+            },
+            'l_2':{
+                name:'Empty'
+            }
+        },
         timerInterval: 500,
         canvasJSON: {"objects": [
             {
@@ -80,6 +91,16 @@ describe('Layer Store', function() {
         layerID: 'l_1'
     };
 
+    var actionCreateLayer = {
+        type: ActionTypes.CREATE_LAYER
+    };
+
+    var actionRenameLayer = {
+        type: ActionTypes.RENAME_LAYER,
+        layerID: 'l_1',
+        layerName: 'New Layer Name!'
+    }
+
     beforeEach(function() {
         AppDispatcher = require('../../dispatcher/AppDispatcher');
         LayerStore = require('../LayerStore');
@@ -98,6 +119,13 @@ describe('Layer Store', function() {
     it('gets layer order from Animation', function() {
         callback(actionReceiveRawAnimation);
         expect(LayerStore.getOrder()).toEqual(['l_0', 'l_1', 'l_2']);
+    });
+
+    it('sets layer info and gets layername from Animation', function() {
+        callback(actionReceiveRawAnimation);
+        expect(LayerStore.getNameForLayer('l_0')).toEqual('Rectangles');
+        expect(LayerStore.getNameForLayer('l_1')).toEqual('Circles');
+        expect(LayerStore.getNameForLayer('l_2')).toEqual('Empty');
     });
 
     it('sets currentID as topmost', function() {
@@ -128,6 +156,26 @@ describe('Layer Store', function() {
         callback(actionDestroyLayer);
         expect(LayerStore.getOrder()).toEqual(['l_0', 'l_2']);
     });
+
+    it('creates a new layerID and adds it above current layer', function() {
+        callback(actionReceiveRawAnimation);
+        callback(actionClickLayer);
+        expect(LayerStore.getCurrentID()).toEqual('l_1');
+        var AppObjectUtils = require('../../utils/AppObjectUtils');
+        AppObjectUtils.newID.mockReturnValueOnce(4);
+        callback(actionCreateLayer);
+        var layerOrder = LayerStore.getOrder();
+        expect(layerOrder.length).toBe(4);
+        expect(layerOrder[1]).toEqual('l_1');
+        expect(layerOrder[2]).toEqual('l_4');
+        expect(layerOrder[3]).toEqual('l_2');
+    });
+
+    it('renames layer', function() {
+        callback(actionReceiveRawAnimation);
+        callback(actionRenameLayer);
+        expect(LayerStore.getNameForLayer('l_1')).toEqual('New Layer Name!');
+    })
 
     // it('adds objects from canvas', function() {
     //     callback(actionReceiveCanvas);

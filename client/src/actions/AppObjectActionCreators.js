@@ -7,8 +7,8 @@ var ActionTypes = AppConstants.ActionTypes;
 
 module.exports = {
 
-    createObject: function(object, currentLayerID, currentFrameID) {
-        var object = AppObjectUtils.getCreatedObjectData(object, currentLayerID);
+    createObject: function(object, currentAnimationID, currentLayerID, currentFrameID) {
+        var object = AppObjectUtils.getCreatedObjectData(object, currentAnimationID, currentLayerID, currentFrameID);
         AppWebAPIUtils.createObject(object);
     },
 

@@ -20,7 +20,7 @@ var LayerListOptions = React.createClass({
     },
 
     _onDeleteClick: function() {
-        AppLayerActionCreators.deleteLayer(this.props.layerID);
+        AppLayerActionCreators.destroyLayer(this.props.layerID);
     },
 
     _onMoveUpClick: function() {

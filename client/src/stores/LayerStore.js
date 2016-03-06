@@ -14,6 +14,8 @@ var _layers = [];
 var _layersMap = [];
 
 var _layerOrder = [];
+var _layerInfo = {};
+var _layerNameCount = 0;
 
 var _layersOptions = {
     'l_0': 
@@ -54,6 +56,11 @@ function moveDownLayer(layerID) {
         return;
     }
     move(index, index - 1);
+}
+
+function _createLayerName() {
+    _layerNameCount++;
+    return 'Layer ' + _layerNameCount;
 }
 
 function getIDforIndex(index) {
@@ -117,9 +124,6 @@ var LayerStore = assign({}, EventEmitter.prototype, {
     },
 
 
-
-
-
     getOrder: function() {
         return _layerOrder;
     },
@@ -128,6 +132,9 @@ var LayerStore = assign({}, EventEmitter.prototype, {
         return _currentID;
     },
 
+    getNameForLayer: function(layerID) {
+        return _layerInfo[layerID].name;
+    },
 
 
 
@@ -199,7 +206,9 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
                 copy[i] = obj[i];
             }
             _layerOrder = copy;
-            
+
+            _layerInfo = action.rawAnimation.layerInfo;
+
             _currentID = _layerOrder[_layerOrder.length - 1];
             LayerStore.emitChange();
             break;
@@ -230,39 +239,56 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
 
         case ActionTypes.CREATE_LAYER:
-            var newIndex = _layers.length;
-            _layers[newIndex] = {
-                id: 'l_' + Date.now(),
-                objects: []
+            // var newIndex = _layers.length;
+            // _layers[newIndex] = {
+            //     id: 'l_' + AppObjectUtils.newID(),
+            //     objects: []
+            // };
+
+            var newID = 'l_' + AppObjectUtils.newID();
+            var currentIndex = _layerOrder.indexOf(_currentID);
+            var newIndex = currentIndex + 1;
+
+            _layerOrder.splice(newIndex, 0, newID);
+
+            _layerInfo[newID] = {
+                name: _createLayerName()
             };
-            _currentIndex = newIndex;
-            _currentID = LayerStore.getIDforIndex(_currentIndex);
+
+            _currentID = newID;
             LayerStore.emitChange();
             break;
 
 
         case ActionTypes.DESTROY_LAYER:
             var id = action.layerID;
+            var currentIndex = _layerOrder.indexOf(_currentID);
+
             _layerOrder = _layerOrder.filter(function(layerID) {
                 return layerID !== id;
             });
 
-            if (_currentIndex > 0 && _layerOrder.indexOf(_currentIndex) !== null) {
-                _currentIndex--;
+            if (currentIndex > 0 && !_layerOrder[currentIndex]) {
+                currentIndex--;
             }
-
-            // _currentID = LayerStore.getIDforIndex(_currentIndex);
+            _currentID = _layerOrder[currentIndex];
 
             LayerStore.emitChange();
             break;
 
-        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
-            var object = action.object;
-            console.log('received', object);
-            var index = LayerStore.getIndexForID(object.layerID);
-            _layers[index].objects.push(object);
-            LayerStore.emitChange();
+        case ActionTypes.RENAME_LAYER:
+            var id = action.layerID;
+            var name = action.layerName;
+
+            _layerInfo[id].name = name;
             break;
+        // case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
+        //     var object = action.object;
+        //     console.log('received', object);
+        //     var index = LayerStore.getIndexForID(object.layerID);
+        //     _layers[index].objects.push(object);
+        //     LayerStore.emitChange();
+        //     break;
 
         
 

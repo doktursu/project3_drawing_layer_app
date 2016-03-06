@@ -69,6 +69,18 @@ describe('Object Store', function() {
         layerID: 'l_1'
     };
 
+    var actionDestroyLayer = {
+        type: ActionTypes.DESTROY_LAYER,
+        layerID: 'l_1'
+    };
+
+    var actionReceiveCreatedObject = {
+        type: ActionTypes.RECEIVE_CREATED_OBJECT,
+        object: {
+            "type":"rect","originX":"left","originY":"top","left":70,"top":50,"width":20,"height":20,"fill":"blue","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeLineJoin":"miter","strokeMiterLimit":10,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"clipTo":null,"backgroundColor":"","fillRule":"nonzero","globalCompositeOperation":"source-over","id":"f_5","animationID":1,"layerID":"l_1","frameID":"f_1","layerLock":false,"layerVisible":true,"rx":0,"ry":0
+        }
+    };
+
     beforeEach(function() {
         AppDispatcher = require('../../dispatcher/AppDispatcher');
         ObjectStore = require('../ObjectStore');
@@ -164,14 +176,30 @@ describe('Object Store', function() {
         expect(objects['f_1'].visible).toBeTruthy();
     });
 
-    it('toggles visibility on all objects in layer', function() {
+    it('destroys all objects in layer', function() {
         callback(actionReceiveCanvasObjects);
-        callback(actionToggleVisibility);
+        callback(actionDestroyLayer);
         var objects = ObjectStore.getAll();
-        expect(objects['f_2'].visible).toBeFalsy();
-        expect(objects['f_4'].visible).toBeFalsy();
-        expect(objects['f_3'].visible).toBeTruthy();
-        expect(objects['f_1'].visible).toBeTruthy();
+        expect(objects['f_2']).toBeUndefined();
+        expect(objects['f_4']).toBeUndefined();
+        expect(objects['f_3']).toBeDefined();
+        expect(objects['f_1']).toBeDefined();
+    });
+
+    it('on drawing, adds new object with current animationID, frameID and layerID', function() {
+        callback(actionReceiveCanvasObjects);
+
+        // var AppObjectUtils = require('../../utils/AppObjectUtils');
+        // AppObjectUtils.newID.mockReturnValueOnce(5);
+        // var LayerStore = require('../../stores/LayerStore');
+        // LayerStore.getCurrentID.mockReturnValue('l_1');
+        // var FrameStore = require('../../stores/FrameStore');
+        // FrameStore.getCurrentID.mockReturnValue('f_1');
+
+        callback(actionReceiveCreatedObject);
+
+        var objects = ObjectStore.getAll();
+        expect(objects['f_5']).toBeDefined();
     });
 
 

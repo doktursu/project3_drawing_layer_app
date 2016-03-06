@@ -1,17 +1,25 @@
+var AppUtils = require('./AppUtils');
+
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 module.exports = {
 
+    newID: function() {
+        return Date.now();
+    },
+
     convertRawObject: function(rawObject) {
         var type = capitalize(rawObject.type);
         return (new fabric[type](rawObject));
     },
 
-    getCreatedObjectData: function(object, currentLayerID) {
-        object.animationId = 2;
+    getCreatedObjectData: function(object, currentAnimationID, currentLayerID, currentFrameID) {
+        object.id = this.newID();
+        object.animationId = currentAnimationID;
         object.layerID = currentLayerID;
+        object.frameID = currentFrameID;
         object.layerLock = false;
         object.layerVisible =true;
         return object;

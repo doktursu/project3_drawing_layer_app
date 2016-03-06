@@ -35,7 +35,7 @@ module.exports = {
 
     receiveCreatedObject: function(createdObject) {
         AppDispatcher.dispatch({
-            type: ActionTypes.RECEIVE_RAW_CREATED_OBJECT,
+            type: ActionTypes.RECEIVE_CREATED_OBJECT,
             object: createdObject
         })
     }

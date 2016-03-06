@@ -46,4 +46,12 @@ module.exports = {
         });
     },
 
+    renameLayer: function(layerID, layerName) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.RENAME_LAYER,
+            layerID: layerID,
+            layerName: layerName
+        });
+    }
+
 };

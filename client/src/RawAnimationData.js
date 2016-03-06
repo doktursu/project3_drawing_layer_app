@@ -7,6 +7,17 @@ module.exports = {
         animationID: 1,
         frameOrder: ['f_1', 'f_2'],
         layerOrder: ['l_0', 'l_1'],
+        layerInfo: {
+            'l_0':{
+                name:'Rectangles'
+            },
+            'l_1':{
+                name:'Circles'
+            },
+            'l_2':{
+                name:'Empty'
+            }
+        },
         timerInterval: 500,
         canvasJSON: {
             "objects": [

@@ -147,19 +147,19 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.RECEIVE_CANVAS:
             var canvas = action.canvas;
-            // var objects = canvas._objects;
+            var objects = canvas._objects;
 
-            var objs = canvas._objects;
-            var copy = [];
-            for (var i = 0, len = objs.length; i < len; i++) {
-                var obj = objs[i];
-                var objcopy = {};
-                for (var attr in obj) {
-                    if (obj.hasOwnProperty(attr)) objcopy[attr] = obj[attr];
-                }
-                copy[i] = objcopy;
-            }
-            var objects = copy;
+            // var objs = canvas._objects;
+            // var copy = [];
+            // for (var i = 0, len = objs.length; i < len; i++) {
+            //     var obj = objs[i];
+            //     var objcopy = {};
+            //     for (var attr in obj) {
+            //         if (obj.hasOwnProperty(attr)) objcopy[attr] = obj[attr];
+            //     }
+            //     copy[i] = objcopy;
+            // }
+            // var objects = copy;
 
             _addObjects(objects);
             _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
@@ -190,7 +190,7 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
 
 
-        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
+        case ActionTypes.RECEIVE_CREATED_OBJECT:
             var object = action.object;
             _objects[object.id] = object;
             console.log('----------OBJECT CREATED----------');

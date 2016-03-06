@@ -48,15 +48,15 @@
 	
 	var App = __webpack_require__(1);
 	
-	var ObjectController = __webpack_require__(177);
-	var FabricObjectsExampleData = __webpack_require__(185);
+	var ObjectController = __webpack_require__(176);
+	var FabricObjectsExampleData = __webpack_require__(184);
 	
-	var RawAnimationData = __webpack_require__(186);
+	var RawAnimationData = __webpack_require__(185);
 	
-	var AppExampleData = __webpack_require__(187);
-	var AppWebAPIUtils = __webpack_require__(179);
+	var AppExampleData = __webpack_require__(186);
+	var AppWebAPIUtils = __webpack_require__(178);
 	var React = __webpack_require__(3);
-	var ReactDOM = __webpack_require__(188);
+	var ReactDOM = __webpack_require__(187);
 	
 	window.onload = function () {
 	
@@ -96,7 +96,7 @@
 	
 	var LayerSection = __webpack_require__(161);
 	
-	var FrameStore = __webpack_require__(176);
+	var FrameStore = __webpack_require__(175);
 	var React = __webpack_require__(3);
 	
 	function getStateFromStore() {
@@ -20073,7 +20073,7 @@
 	var LayerListItem = __webpack_require__(169);
 	var React = __webpack_require__(3);
 	
-	var LayerStore = __webpack_require__(172);
+	var LayerStore = __webpack_require__(170);
 	
 	function getStateFromStore() {
 	    return {
@@ -20192,6 +20192,14 @@
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.MOVE_DOWN_LAYER,
 	            layerID: layerID
+	        });
+	    },
+	
+	    renameLayer: function renameLayer(layerID, layerName) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.RENAME_LAYER,
+	            layerID: layerID,
+	            layerName: layerName
 	        });
 	    }
 	
@@ -20529,7 +20537,6 @@
 	        RECEIVE_RAW_CREATED_FRAME: null,
 	        RECEIVE_RAW_FRAMES: null,
 	        RECEIVE_RAW_OBJECTS: null,
-	        RECEIVE_RAW_CREATED_OBJECT: null,
 	
 	        RECEIVE_RAW_ANIMATION: null,
 	        RECEIVE_CANVAS: null,
@@ -20542,9 +20549,13 @@
 	        MOVE_UP_LAYER: null,
 	        MOVE_DOWN_LAYER: null,
 	        DESTROY_LAYER: null,
+	        CREATE_LAYER: null,
+	        RENAME_LAYER: null,
+	
+	        RECEIVE_CREATED_OBJECT: null,
 	
 	        CREATE_OBJECT: null,
-	        CREATE_LAYER: null,
+	
 	        RECEIVE_CANVAS: null
 	    })
 	
@@ -20617,13 +20628,23 @@
 	
 	var AppLayerActionCreators = __webpack_require__(162);
 	var React = __webpack_require__(3);
-	var classNames = __webpack_require__(170);
-	var LayerListOptions = __webpack_require__(171);
+	var classNames = __webpack_require__(188);
+	var LayerStore = __webpack_require__(170);
+	
+	var LayerNameEditInput = __webpack_require__(190);
+	var LayerListOptions = __webpack_require__(189);
 	var ReactPropTypes = React.PropTypes;
 	
 	var LayerListItem = React.createClass({
 	    displayName: 'LayerListItem',
 	
+	
+	    getInitialState: function getInitialState() {
+	        return {
+	            isEditingName: false,
+	            layerName: LayerStore.getNameForLayer(this.props.layerID)
+	        };
+	    },
 	
 	    propTypes: {
 	        layerID: ReactPropTypes.string,
@@ -20632,6 +20653,26 @@
 	
 	    render: function render() {
 	        var layerID = this.props.layerID;
+	
+	        var input;
+	        if (this.state.isEditingName) {
+	            input = React.createElement(LayerNameEditInput, {
+	                className: 'edit',
+	                onSave: this._onSave,
+	                name: this.state.layerName
+	            });
+	        } else {
+	            input = React.createElement(
+	                'p',
+	                {
+	                    onClick: this._onClick,
+	                    onDoubleClick: this._onDoubleClick
+	                },
+	                'Layer!!! ',
+	                this.state.layerName
+	            );
+	        }
+	
 	        return React.createElement(
 	            'li',
 	            {
@@ -20641,20 +20682,26 @@
 	                }),
 	                width: 200,
 	                height: 300 },
-	            React.createElement(
-	                'p',
-	                { onClick: this._onClick },
-	                'Layer!!! ',
-	                layerID
-	            ),
+	            input,
 	            React.createElement(LayerListOptions, { layerID: layerID })
 	        );
 	    },
 	
 	    _onClick: function _onClick() {
 	        AppLayerActionCreators.clickLayer(this.props.layerID);
-	    }
+	    },
 	
+	    _onDoubleClick: function _onDoubleClick() {
+	        this.setState({ isEditingName: true });
+	    },
+	
+	    _onSave: function _onSave(name) {
+	        this.setState({
+	            isEditingName: false,
+	            layerName: name
+	        });
+	        AppLayerActionCreators.renameLayer(this.props.layerID, this.state.layerName);
+	    }
 	});
 	
 	module.exports = LayerListItem;
@@ -20663,126 +20710,14 @@
 /* 170 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-	  Copyright (c) 2016 Jed Watson.
-	  Licensed under the MIT License (MIT), see
-	  http://jedwatson.github.io/classnames
-	*/
-	/* global define */
-	
-	(function () {
-		'use strict';
-	
-		var hasOwn = {}.hasOwnProperty;
-	
-		function classNames () {
-			var classes = [];
-	
-			for (var i = 0; i < arguments.length; i++) {
-				var arg = arguments[i];
-				if (!arg) continue;
-	
-				var argType = typeof arg;
-	
-				if (argType === 'string' || argType === 'number') {
-					classes.push(arg);
-				} else if (Array.isArray(arg)) {
-					classes.push(classNames.apply(null, arg));
-				} else if (argType === 'object') {
-					for (var key in arg) {
-						if (hasOwn.call(arg, key) && arg[key]) {
-							classes.push(key);
-						}
-					}
-				}
-			}
-	
-			return classes.join(' ');
-		}
-	
-		if (typeof module !== 'undefined' && module.exports) {
-			module.exports = classNames;
-		} else if (true) {
-			// register as 'classnames', consistent with npm package name
-			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
-				return classNames;
-			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-		} else {
-			window.classNames = classNames;
-		}
-	}());
-
-
-/***/ },
-/* 171 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var AppLayerActionCreators = __webpack_require__(162);
-	var React = __webpack_require__(3);
-	
-	var LayerListOptions = React.createClass({
-	    displayName: 'LayerListOptions',
-	
-	
-	    render: function render() {
-	        return React.createElement(
-	            'div',
-	            null,
-	            React.createElement('input', { type: 'checkbox', onChange: this._onChange }),
-	            'Hide',
-	            React.createElement(
-	                'button',
-	                { onClick: this._onMoveUpClick },
-	                'MoveUp'
-	            ),
-	            React.createElement(
-	                'button',
-	                { onClick: this._onMoveDownClick },
-	                'MoveDown'
-	            ),
-	            React.createElement(
-	                'button',
-	                { onClick: this._onDeleteClick },
-	                'Delete'
-	            )
-	        );
-	    },
-	
-	    _onChange: function _onChange() {
-	        var checked = this.checked;
-	        AppLayerActionCreators.toggleVisibility(this.props.layerID);
-	    },
-	
-	    _onDeleteClick: function _onDeleteClick() {
-	        AppLayerActionCreators.deleteLayer(this.props.layerID);
-	    },
-	
-	    _onMoveUpClick: function _onMoveUpClick() {
-	        AppLayerActionCreators.moveUpLayer(this.props.layerID);
-	    },
-	
-	    _onMoveDownClick: function _onMoveDownClick() {
-	        AppLayerActionCreators.moveDownLayer(this.props.layerID);
-	    }
-	
-	});
-	
-	module.exports = LayerListOptions;
-
-/***/ },
-/* 172 */
-/***/ function(module, exports, __webpack_require__) {
-
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
 	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(173).EventEmitter;
-	var assign = __webpack_require__(174);
+	var EventEmitter = __webpack_require__(171).EventEmitter;
+	var assign = __webpack_require__(172);
 	
-	var AppObjectUtils = __webpack_require__(175);
+	var AppObjectUtils = __webpack_require__(173);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -20793,6 +20728,8 @@
 	var _layersMap = [];
 	
 	var _layerOrder = [];
+	var _layerInfo = {};
+	var _layerNameCount = 0;
 	
 	var _layersOptions = {
 	    'l_0': {
@@ -20831,6 +20768,11 @@
 	        return;
 	    }
 	    move(index, index - 1);
+	}
+	
+	function _createLayerName() {
+	    _layerNameCount++;
+	    return 'Layer ' + _layerNameCount;
 	}
 	
 	function getIDforIndex(index) {
@@ -20901,6 +20843,10 @@
 	        return _currentID;
 	    },
 	
+	    getNameForLayer: function getNameForLayer(layerID) {
+	        return _layerInfo[layerID].name;
+	    },
+	
 	    getAllOrdered: function getAllOrdered() {
 	        var orderedLayers = [];
 	        for (var id in _layers) {
@@ -20966,6 +20912,8 @@
 	            }
 	            _layerOrder = copy;
 	
+	            _layerInfo = action.rawAnimation.layerInfo;
+	
 	            _currentID = _layerOrder[_layerOrder.length - 1];
 	            LayerStore.emitChange();
 	            break;
@@ -20991,38 +20939,55 @@
 	            break;
 	
 	        case ActionTypes.CREATE_LAYER:
-	            var newIndex = _layers.length;
-	            _layers[newIndex] = {
-	                id: 'l_' + Date.now(),
-	                objects: []
+	            // var newIndex = _layers.length;
+	            // _layers[newIndex] = {
+	            //     id: 'l_' + AppObjectUtils.newID(),
+	            //     objects: []
+	            // };
+	
+	            var newID = 'l_' + AppObjectUtils.newID();
+	            var currentIndex = _layerOrder.indexOf(_currentID);
+	            var newIndex = currentIndex + 1;
+	
+	            _layerOrder.splice(newIndex, 0, newID);
+	
+	            _layerInfo[newID] = {
+	                name: _createLayerName()
 	            };
-	            _currentIndex = newIndex;
-	            _currentID = LayerStore.getIDforIndex(_currentIndex);
+	
+	            _currentID = newID;
 	            LayerStore.emitChange();
 	            break;
 	
 	        case ActionTypes.DESTROY_LAYER:
 	            var id = action.layerID;
+	            var currentIndex = _layerOrder.indexOf(_currentID);
+	
 	            _layerOrder = _layerOrder.filter(function (layerID) {
 	                return layerID !== id;
 	            });
 	
-	            if (_currentIndex > 0 && _layerOrder.indexOf(_currentIndex) !== null) {
-	                _currentIndex--;
+	            if (currentIndex > 0 && !_layerOrder[currentIndex]) {
+	                currentIndex--;
 	            }
-	
-	            // _currentID = LayerStore.getIDforIndex(_currentIndex);
+	            _currentID = _layerOrder[currentIndex];
 	
 	            LayerStore.emitChange();
 	            break;
 	
-	        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
-	            var object = action.object;
-	            console.log('received', object);
-	            var index = LayerStore.getIndexForID(object.layerID);
-	            _layers[index].objects.push(object);
-	            LayerStore.emitChange();
+	        case ActionTypes.RENAME_LAYER:
+	            var id = action.layerID;
+	            var name = action.layerName;
+	
+	            _layerInfo[id].name = name;
 	            break;
+	        // case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
+	        //     var object = action.object;
+	        //     console.log('received', object);
+	        //     var index = LayerStore.getIndexForID(object.layerID);
+	        //     _layers[index].objects.push(object);
+	        //     LayerStore.emitChange();
+	        //     break;
 	
 	        case ActionTypes.RECEIVE_RAW_OBJECTS:
 	            LayerStore.init(action.rawObjects);
@@ -21037,7 +21002,7 @@
 	module.exports = LayerStore;
 
 /***/ },
-/* 173 */
+/* 171 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -21341,7 +21306,7 @@
 
 
 /***/ },
-/* 174 */
+/* 172 */
 /***/ function(module, exports) {
 
 	/* eslint-disable no-unused-vars */
@@ -21386,12 +21351,14 @@
 
 
 /***/ },
-/* 175 */
-/***/ function(module, exports) {
+/* 173 */
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 	
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	
+	var AppUtils = __webpack_require__(174);
 	
 	function capitalize(string) {
 	    return string.charAt(0).toUpperCase() + string.slice(1);
@@ -21399,14 +21366,20 @@
 	
 	module.exports = {
 	
+	    newID: function newID() {
+	        return Date.now();
+	    },
+	
 	    convertRawObject: function convertRawObject(rawObject) {
 	        var type = capitalize(rawObject.type);
 	        return new fabric[type](rawObject);
 	    },
 	
-	    getCreatedObjectData: function getCreatedObjectData(object, currentLayerID) {
-	        object.animationId = 2;
+	    getCreatedObjectData: function getCreatedObjectData(object, currentAnimationID, currentLayerID, currentFrameID) {
+	        object.id = this.newID();
+	        object.animationId = currentAnimationID;
 	        object.layerID = currentLayerID;
+	        object.frameID = currentFrameID;
 	        object.layerLock = false;
 	        object.layerVisible = true;
 	        return object;
@@ -21417,7 +21390,7 @@
 	
 	        console.log('object to copy', obj);
 	        // Handle the 3 simple types, and null or undefined
-	        if (null == obj || "object" != (typeof obj === "undefined" ? "undefined" : _typeof(obj))) return obj;
+	        if (null == obj || "object" != (typeof obj === 'undefined' ? 'undefined' : _typeof(obj))) return obj;
 	
 	        // Handle Date
 	        if (obj instanceof Date) {
@@ -21450,17 +21423,31 @@
 	};
 
 /***/ },
-/* 176 */
+/* 174 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	module.exports = {
+	
+	    newID: function newID() {
+	        return Date.now();
+	    }
+	
+	};
+
+/***/ },
+/* 175 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
 	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(173).EventEmitter;
-	var assign = __webpack_require__(174);
+	var EventEmitter = __webpack_require__(171).EventEmitter;
+	var assign = __webpack_require__(172);
 	
-	var AppObjectUtils = __webpack_require__(175);
+	var AppObjectUtils = __webpack_require__(173);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -21580,22 +21567,23 @@
 	module.exports = FrameStore;
 
 /***/ },
-/* 177 */
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	// var FabricCanvas = require('./FabricCanvas.jsx');
 	// var DrawingModeOptions = require('./DrawingModeOptions.jsx');
-	var AppObjectActionCreators = __webpack_require__(178);
-	var LayerStore = __webpack_require__(172);
+	var AppObjectActionCreators = __webpack_require__(177);
 	
 	var LayerSection = __webpack_require__(161);
-	var FrameSelector = __webpack_require__(181);
+	var FrameSelector = __webpack_require__(180);
 	
-	var AnimationStore = __webpack_require__(183);
+	var AnimationStore = __webpack_require__(182);
+	var LayerStore = __webpack_require__(170);
+	var FrameStore = __webpack_require__(175);
 	// var JsonObjectStore = require('../stores/JsonObjectStore.js');
-	var ObjectStore = __webpack_require__(184);
+	var ObjectStore = __webpack_require__(183);
 	var React = __webpack_require__(3);
 	
 	var canvas;
@@ -21623,8 +21611,8 @@
 	    },
 	
 	    componentDidMount: function componentDidMount() {
-	        this._initializeFabricCanvas();
 	        ObjectStore.addChangeListener(this._onChange);
+	        this._initializeFabricCanvas();
 	    },
 	
 	    _initializeFabricCanvas: function _initializeFabricCanvas() {
@@ -21648,11 +21636,10 @@
 	        canvas.on('object:added', function () {
 	            var objects = canvas.getObjects();
 	            var object = objects[objects.length - 1];
-	            object.moveTo(LayerStore.getCurrentInsertionIndex());
+	            // object.moveTo(LayerStore.getCurrentInsertionIndex());
 	            this._onCreate(object);
 	        }.bind(this));
 	
-	        // console.log(json);
 	        console.log('canvas', JSON.stringify(canvas));
 	        this._sendCanvas(canvas);
 	    },
@@ -21694,7 +21681,7 @@
 	            React.createElement(
 	                'button',
 	                { onClick: this._onDrawingModeClick },
-	                'Drawing Mode'
+	                'Cancel Drawing Mode'
 	            ),
 	            React.createElement(FrameSelector, null)
 	        );
@@ -21706,11 +21693,12 @@
 	    },
 	
 	    _onCreate: function _onCreate(object) {
-	        AppObjectActionCreators.createObject(object, LayerStore.getCurrentID());
+	        AppObjectActionCreators.createObject(object, AnimationStore.getCurrentID(), LayerStore.getCurrentID(), FrameStore.getCurrentID());
 	    },
 	
-	    _onDrawingModeClick: function _onDrawingModeClick() {
+	    _onDrawingModeClick: function _onDrawingModeClick(e) {
 	        canvas.isDrawingMode = !canvas.isDrawingMode;
+	        e.target.innerHTML = canvas.isDrawingMode ? 'Cancel Drawing Mode' : 'Drawing Mode';
 	    },
 	
 	    _sendCanvas: function _sendCanvas(canvas) {
@@ -21721,22 +21709,22 @@
 	module.exports = ObjectController;
 
 /***/ },
-/* 178 */
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
 	var AppConstants = __webpack_require__(167);
-	var AppObjectUtils = __webpack_require__(175);
-	var AppWebAPIUtils = __webpack_require__(179);
+	var AppObjectUtils = __webpack_require__(173);
+	var AppWebAPIUtils = __webpack_require__(178);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	
 	module.exports = {
 	
-	    createObject: function createObject(object, currentLayerID, currentFrameID) {
-	        var object = AppObjectUtils.getCreatedObjectData(object, currentLayerID);
+	    createObject: function createObject(object, currentAnimationID, currentLayerID, currentFrameID) {
+	        var object = AppObjectUtils.getCreatedObjectData(object, currentAnimationID, currentLayerID, currentFrameID);
 	        AppWebAPIUtils.createObject(object);
 	    },
 	
@@ -21750,12 +21738,12 @@
 	};
 
 /***/ },
-/* 179 */
+/* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var AppServerActionCreators = __webpack_require__(180);
+	var AppServerActionCreators = __webpack_require__(179);
 	
 	// !!! Please Note !!!
 	// We are using localStorage as an example, but in a real-world scenario, this
@@ -21807,16 +21795,15 @@
 	
 	    createObject: function createObject(object) {
 	        // simulate writing to a database
-	        var rawObjects = JSON.parse(localStorage.getItem('objects'));
+	        // var rawObjects = JSON.parse(localStorage.getItem('animation'));
 	
 	        var createdObject = object;
-	        createdObject.id = 'f_' + Date.now();
 	
-	        var customProperties = 'id animationId layerID layerIndex frameIndex layerLock layerVisible'.split(' ');
+	        // var customProperties = 'id animationId layerID layerIndex frameIndex layerLock layerVisible'.split(' ');
 	
-	        console.log('createdOjbect', JSON.stringify(createdObject));
-	        rawObjects.push(createdObject);
-	        localStorage.setItem('objects', JSON.stringify(rawObjects));
+	        // console.log('createdOjbect', JSON.stringify(createdObject));
+	        // rawObjects.push(createdObject);
+	        // localStorage.setItem('objects', JSON.stringify(rawObjects));
 	
 	        // simulate success callback
 	        setTimeout(function () {
@@ -21848,7 +21835,7 @@
 	};
 
 /***/ },
-/* 180 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21890,7 +21877,7 @@
 	
 	    receiveCreatedObject: function receiveCreatedObject(createdObject) {
 	        AppDispatcher.dispatch({
-	            type: ActionTypes.RECEIVE_RAW_CREATED_OBJECT,
+	            type: ActionTypes.RECEIVE_CREATED_OBJECT,
 	            object: createdObject
 	        });
 	    }
@@ -21898,15 +21885,15 @@
 	};
 
 /***/ },
-/* 181 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var AppFrameActionCreators = __webpack_require__(182);
+	var AppFrameActionCreators = __webpack_require__(181);
 	
 	var React = __webpack_require__(3);
-	var FrameStore = __webpack_require__(176);
+	var FrameStore = __webpack_require__(175);
 	
 	function getStateFromStore() {
 	    return {
@@ -21952,7 +21939,7 @@
 	module.exports = FrameSelector;
 
 /***/ },
-/* 182 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21974,15 +21961,15 @@
 	};
 
 /***/ },
-/* 183 */
+/* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
 	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(173).EventEmitter;
-	var assign = __webpack_require__(174);
+	var EventEmitter = __webpack_require__(171).EventEmitter;
+	var assign = __webpack_require__(172);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -21995,6 +21982,7 @@
 	
 	    init: function init(rawAnimation) {
 	        _canvasJSON = rawAnimation.canvasJSON;
+	        _currentID = rawAnimation.animationID;
 	    },
 	
 	    emitChange: function emitChange() {
@@ -22011,6 +21999,10 @@
 	
 	    getCanvasJSON: function getCanvasJSON() {
 	        return _canvasJSON;
+	    },
+	
+	    getCurrentID: function getCurrentID() {
+	        return _currentID;
 	    }
 	
 	});
@@ -22032,20 +22024,20 @@
 	module.exports = AnimationStore;
 
 /***/ },
-/* 184 */
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
 	var AppConstants = __webpack_require__(167);
-	var AppObjectUtils = __webpack_require__(175);
+	var AppObjectUtils = __webpack_require__(173);
 	
-	var FrameStore = __webpack_require__(176);
-	var LayerStore = __webpack_require__(172);
+	var FrameStore = __webpack_require__(175);
+	var LayerStore = __webpack_require__(170);
 	
-	var EventEmitter = __webpack_require__(173).EventEmitter;
-	var assign = __webpack_require__(174);
+	var EventEmitter = __webpack_require__(171).EventEmitter;
+	var assign = __webpack_require__(172);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -22184,19 +22176,19 @@
 	
 	        case ActionTypes.RECEIVE_CANVAS:
 	            var canvas = action.canvas;
-	            // var objects = canvas._objects;
+	            var objects = canvas._objects;
 	
-	            var objs = canvas._objects;
-	            var copy = [];
-	            for (var i = 0, len = objs.length; i < len; i++) {
-	                var obj = objs[i];
-	                var objcopy = {};
-	                for (var attr in obj) {
-	                    if (obj.hasOwnProperty(attr)) objcopy[attr] = obj[attr];
-	                }
-	                copy[i] = objcopy;
-	            }
-	            var objects = copy;
+	            // var objs = canvas._objects;
+	            // var copy = [];
+	            // for (var i = 0, len = objs.length; i < len; i++) {
+	            //     var obj = objs[i];
+	            //     var objcopy = {};
+	            //     for (var attr in obj) {
+	            //         if (obj.hasOwnProperty(attr)) objcopy[attr] = obj[attr];
+	            //     }
+	            //     copy[i] = objcopy;
+	            // }
+	            // var objects = copy;
 	
 	            _addObjects(objects);
 	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
@@ -22225,7 +22217,7 @@
 	            ObjectStore.emitChange();
 	            break;
 	
-	        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
+	        case ActionTypes.RECEIVE_CREATED_OBJECT:
 	            var object = action.object;
 	            _objects[object.id] = object;
 	            console.log('----------OBJECT CREATED----------');
@@ -22252,7 +22244,7 @@
 	module.exports = ObjectStore;
 
 /***/ },
-/* 185 */
+/* 184 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22303,7 +22295,7 @@
 	};
 
 /***/ },
-/* 186 */
+/* 185 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22317,6 +22309,17 @@
 	            animationID: 1,
 	            frameOrder: ['f_1', 'f_2'],
 	            layerOrder: ['l_0', 'l_1'],
+	            layerInfo: {
+	                'l_0': {
+	                    name: 'Rectangles'
+	                },
+	                'l_1': {
+	                    name: 'Circles'
+	                },
+	                'l_2': {
+	                    name: 'Empty'
+	                }
+	            },
 	            timerInterval: 500,
 	            canvasJSON: {
 	                "objects": [{
@@ -22335,7 +22338,7 @@
 	};
 
 /***/ },
-/* 187 */
+/* 186 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22363,13 +22366,181 @@
 	};
 
 /***/ },
-/* 188 */
+/* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	module.exports = __webpack_require__(5);
 
+
+/***/ },
+/* 188 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+	
+	(function () {
+		'use strict';
+	
+		var hasOwn = {}.hasOwnProperty;
+	
+		function classNames () {
+			var classes = [];
+	
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+	
+				var argType = typeof arg;
+	
+				if (argType === 'string' || argType === 'number') {
+					classes.push(arg);
+				} else if (Array.isArray(arg)) {
+					classes.push(classNames.apply(null, arg));
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				}
+			}
+	
+			return classes.join(' ');
+		}
+	
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
+
+/***/ },
+/* 189 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppLayerActionCreators = __webpack_require__(162);
+	var React = __webpack_require__(3);
+	
+	var LayerListOptions = React.createClass({
+	    displayName: 'LayerListOptions',
+	
+	
+	    render: function render() {
+	        return React.createElement(
+	            'div',
+	            null,
+	            React.createElement('input', { type: 'checkbox', onChange: this._onChange }),
+	            'Hide',
+	            React.createElement(
+	                'button',
+	                { onClick: this._onMoveUpClick },
+	                'MoveUp'
+	            ),
+	            React.createElement(
+	                'button',
+	                { onClick: this._onMoveDownClick },
+	                'MoveDown'
+	            ),
+	            React.createElement(
+	                'button',
+	                { onClick: this._onDeleteClick },
+	                'Delete'
+	            )
+	        );
+	    },
+	
+	    _onChange: function _onChange() {
+	        var checked = this.checked;
+	        AppLayerActionCreators.toggleVisibility(this.props.layerID);
+	    },
+	
+	    _onDeleteClick: function _onDeleteClick() {
+	        AppLayerActionCreators.destroyLayer(this.props.layerID);
+	    },
+	
+	    _onMoveUpClick: function _onMoveUpClick() {
+	        AppLayerActionCreators.moveUpLayer(this.props.layerID);
+	    },
+	
+	    _onMoveDownClick: function _onMoveDownClick() {
+	        AppLayerActionCreators.moveDownLayer(this.props.layerID);
+	    }
+	
+	});
+	
+	module.exports = LayerListOptions;
+
+/***/ },
+/* 190 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(3);
+	
+	var ENTER_KEY_CODE = 13;
+	
+	var LayerNameEditInput = React.createClass({
+	    displayName: 'LayerNameEditInput',
+	
+	
+	    getInitialState: function getInitialState() {
+	        return {
+	            name: this.props.name || ''
+	        };
+	    },
+	
+	    render: function render() {
+	        return React.createElement('input', {
+	            id: this.props.id,
+	            placeholder: this.state.name,
+	            value: this.state.name,
+	            onBlur: this._save,
+	            onChange: this._onChange,
+	            onKeyDown: this._onKeyDown,
+	            autoFocus: true
+	        });
+	    },
+	
+	    _save: function _save() {
+	        var name = this.state.name.trim();
+	        this.props.onSave(name);
+	        this.setState({
+	            name: ''
+	        });
+	    },
+	
+	    _onChange: function _onChange(event) {
+	        this.setState({
+	            name: event.target.value
+	        });
+	    },
+	
+	    _onKeyDown: function _onKeyDown(event) {
+	        if (event.keyCode === ENTER_KEY_CODE) {
+	            this._save();
+	        }
+	    }
+	
+	});
+	
+	module.exports = LayerNameEditInput;
 
 /***/ }
 /******/ ]);

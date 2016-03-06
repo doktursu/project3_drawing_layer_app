@@ -1,12 +1,13 @@
 // var FabricCanvas = require('./FabricCanvas.jsx');
 // var DrawingModeOptions = require('./DrawingModeOptions.jsx');
 var AppObjectActionCreators = require('../actions/AppObjectActionCreators');
-var LayerStore = require('../stores/LayerStore');
 
 var LayerSection = require('./LayerSection.jsx');
 var FrameSelector = require('./FrameSelector.jsx');
 
 var AnimationStore = require('../stores/AnimationStore');
+var LayerStore = require('../stores/LayerStore');
+var FrameStore = require('../stores/FrameStore');
 // var JsonObjectStore = require('../stores/JsonObjectStore.js');
 var ObjectStore = require('../stores/ObjectStore');
 var React = require('react');
@@ -34,8 +35,8 @@ var ObjectController = React.createClass({
     },
 
     componentDidMount: function() {
-        this._initializeFabricCanvas();
         ObjectStore.addChangeListener(this._onChange);
+        this._initializeFabricCanvas();
     },
 
     _initializeFabricCanvas: function() {
@@ -59,11 +60,10 @@ var ObjectController = React.createClass({
         canvas.on('object:added', function() {
             var objects = canvas.getObjects();
             var object = objects[objects.length - 1];
-            object.moveTo(LayerStore.getCurrentInsertionIndex());
+            // object.moveTo(LayerStore.getCurrentInsertionIndex());
             this._onCreate(object);
         }.bind(this));
 
-        // console.log(json);
         console.log('canvas', JSON.stringify(canvas));
         this._sendCanvas(canvas);
     },
@@ -97,7 +97,7 @@ var ObjectController = React.createClass({
                 <LayerSection />
                 <h1>Objects</h1>
                 <canvas id="c" width={300} height={300} />
-                <button onClick={this._onDrawingModeClick}>Drawing Mode</button>
+                <button onClick={this._onDrawingModeClick}>Cancel Drawing Mode</button>
                 <FrameSelector />
             </div>
         );
@@ -109,11 +109,12 @@ var ObjectController = React.createClass({
     },
 
     _onCreate: function(object) {
-        AppObjectActionCreators.createObject(object, LayerStore.getCurrentID());
+        AppObjectActionCreators.createObject(object, AnimationStore.getCurrentID(), LayerStore.getCurrentID(), FrameStore.getCurrentID());
     },
 
-    _onDrawingModeClick: function() {
+    _onDrawingModeClick: function(e) {
         canvas.isDrawingMode = !canvas.isDrawingMode;
+        e.target.innerHTML = canvas.isDrawingMode ? 'Cancel Drawing Mode' : 'Drawing Mode';
     },
 
     _sendCanvas: function(canvas) {

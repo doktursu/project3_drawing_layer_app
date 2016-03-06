@@ -6,7 +6,6 @@ module.exports = {
         RECEIVE_RAW_CREATED_FRAME: null,
         RECEIVE_RAW_FRAMES: null,
         RECEIVE_RAW_OBJECTS: null,
-        RECEIVE_RAW_CREATED_OBJECT: null,
 
 
         RECEIVE_RAW_ANIMATION: null,
@@ -20,9 +19,13 @@ module.exports = {
         MOVE_UP_LAYER: null,
         MOVE_DOWN_LAYER: null,
         DESTROY_LAYER: null,
+        CREATE_LAYER: null,
+        RENAME_LAYER: null,
+
+        RECEIVE_CREATED_OBJECT: null,
 
         CREATE_OBJECT: null,
-        CREATE_LAYER: null,
+
         RECEIVE_CANVAS: null
     })
 

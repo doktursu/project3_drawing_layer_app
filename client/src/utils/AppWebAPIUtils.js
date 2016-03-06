@@ -50,17 +50,16 @@ module.exports = {
 
     createObject: function(object) {
         // simulate writing to a database
-        var rawObjects = JSON.parse(localStorage.getItem('objects'));
+        // var rawObjects = JSON.parse(localStorage.getItem('animation'));
 
         var createdObject = object;
-        createdObject.id = 'f_' + Date.now();
 
-        var customProperties = 'id animationId layerID layerIndex frameIndex layerLock layerVisible'.split(' ');
+        // var customProperties = 'id animationId layerID layerIndex frameIndex layerLock layerVisible'.split(' ');
         
 
-        console.log('createdOjbect', JSON.stringify(createdObject));
-        rawObjects.push(createdObject);
-        localStorage.setItem('objects', JSON.stringify(rawObjects));
+        // console.log('createdOjbect', JSON.stringify(createdObject));
+        // rawObjects.push(createdObject);
+        // localStorage.setItem('objects', JSON.stringify(rawObjects));
 
         // simulate success callback
         setTimeout(function() {
