@@ -25,9 +25,9 @@ module.exports = {
         });
     },
 
-    deleteLayer: function(layerID) {
+    destroyLayer: function(layerID) {
         AppDispatcher.dispatch({
-            type: ActionTypes.DELETE_LAYER,
+            type: ActionTypes.DESTROY_LAYER,
             layerID: layerID
         });
     },

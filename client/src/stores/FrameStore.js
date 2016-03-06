@@ -3,6 +3,8 @@ var AppConstants = require('../constants/AppConstants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
+var AppObjectUtils = require('../utils/AppObjectUtils.js');
+
 var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
@@ -89,7 +91,18 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
         //     break;
 
         case ActionTypes.RECEIVE_RAW_ANIMATION:
-            _frameOrder = action.rawAnimation.frameOrder;
+            // _frameOrder = action.rawAnimation.frameOrder;
+            // to prevent tests from mutating rawAnimation data
+            // _frameOrder = AppObjectUtils.clone(action.rawAnimation.frameOrder);
+
+            var obj = action.rawAnimation.frameOrder;
+            var copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                copy[i] = obj[i];
+            }
+            _frameOrder = copy;
+            
+
             _currentID = _frameOrder[0];
             FrameStore.emitChange();
             break;

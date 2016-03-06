@@ -36,10 +36,14 @@ describe('Layer Store', function() {
     };
 
     var objects = TestAnimationData.canvasJSON.objects;
-    var rect1 = new fabric.Rect(objects[0]);
-    var circle1 = new fabric.Circle(objects[1]);
-    var rect2 = new fabric.Rect(objects[2]);
-    var circle2 = new fabric.Circle(objects[3]);
+    // var rect1 = new fabric.Rect(objects[0]);
+    // var circle1 = new fabric.Circle(objects[1]);
+    // var rect2 = new fabric.Rect(objects[2]);
+    // var circle2 = new fabric.Circle(objects[3]);
+    var rect1 = objects[0];
+    var circle1 = objects[1];
+    var rect2 = objects[2];
+    var circle2 = objects[3];
     var canvasObjects = [rect1, circle1, rect2, circle2];
 
     var canvas = {
@@ -71,8 +75,8 @@ describe('Layer Store', function() {
         layerID: 'l_1'
     };
 
-    var actionDeleteLayer = {
-        type: ActionTypes.DELETE_LAYER,
+    var actionDestroyLayer = {
+        type: ActionTypes.DESTROY_LAYER,
         layerID: 'l_1'
     };
 
@@ -121,7 +125,7 @@ describe('Layer Store', function() {
 
     it('deletes layerID from layer order', function() {
         callback(actionReceiveRawAnimation);
-        callback(actionDeleteLayer);
+        callback(actionDestroyLayer);
         expect(LayerStore.getOrder()).toEqual(['l_0', 'l_2']);
     });
 

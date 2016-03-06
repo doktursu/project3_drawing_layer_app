@@ -49,14 +49,14 @@
 	var App = __webpack_require__(1);
 	
 	var ObjectController = __webpack_require__(177);
-	var FabricObjectsExampleData = __webpack_require__(184);
+	var FabricObjectsExampleData = __webpack_require__(185);
 	
-	var RawAnimationData = __webpack_require__(185);
+	var RawAnimationData = __webpack_require__(186);
 	
-	var AppExampleData = __webpack_require__(186);
+	var AppExampleData = __webpack_require__(187);
 	var AppWebAPIUtils = __webpack_require__(179);
 	var React = __webpack_require__(3);
-	var ReactDOM = __webpack_require__(187);
+	var ReactDOM = __webpack_require__(188);
 	
 	window.onload = function () {
 	
@@ -20174,9 +20174,9 @@
 	        });
 	    },
 	
-	    deleteLayer: function deleteLayer(layerID) {
+	    destroyLayer: function destroyLayer(layerID) {
 	        AppDispatcher.dispatch({
-	            type: ActionTypes.DELETE_LAYER,
+	            type: ActionTypes.DESTROY_LAYER,
 	            layerID: layerID
 	        });
 	    },
@@ -20541,7 +20541,7 @@
 	
 	        MOVE_UP_LAYER: null,
 	        MOVE_DOWN_LAYER: null,
-	        DELETE_LAYER: null,
+	        DESTROY_LAYER: null,
 	
 	        CREATE_OBJECT: null,
 	        CREATE_LAYER: null,
@@ -20957,9 +20957,15 @@
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
 	            // _layerOrder = action.rawAnimation.layerOrder
 	            // to prevent tests from altering rawAnimation data
-	            _layerOrder = action.rawAnimation.layerOrder.map(function (layerID) {
-	                return layerID;
-	            });
+	            // _layerOrder = AppObjectUtils.clone(action.rawAnimation.layerOrder);
+	
+	            var obj = action.rawAnimation.layerOrder;
+	            var copy = [];
+	            for (var i = 0, len = obj.length; i < len; i++) {
+	                copy[i] = obj[i];
+	            }
+	            _layerOrder = copy;
+	
 	            _currentID = _layerOrder[_layerOrder.length - 1];
 	            LayerStore.emitChange();
 	            break;
@@ -20995,15 +21001,12 @@
 	            LayerStore.emitChange();
 	            break;
 	
-	        case ActionTypes.DELETE_LAYER:
+	        case ActionTypes.DESTROY_LAYER:
 	            var id = action.layerID;
-	            console.log('LAYER ID', id);
-	            console.log('LAYER ORDER BEFORE', _layerOrder);
 	            _layerOrder = _layerOrder.filter(function (layerID) {
 	                return layerID !== id;
 	            });
 	
-	            console.log('LAYER ORDER AFTER', _layerOrder);
 	            if (_currentIndex > 0 && _layerOrder.indexOf(_currentIndex) !== null) {
 	                _currentIndex--;
 	            }
@@ -21388,6 +21391,8 @@
 
 	"use strict";
 	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	
 	function capitalize(string) {
 	    return string.charAt(0).toUpperCase() + string.slice(1);
 	}
@@ -21405,6 +21410,41 @@
 	        object.layerLock = false;
 	        object.layerVisible = true;
 	        return object;
+	    },
+	
+	    clone: function clone(obj) {
+	        var copy;
+	
+	        console.log('object to copy', obj);
+	        // Handle the 3 simple types, and null or undefined
+	        if (null == obj || "object" != (typeof obj === "undefined" ? "undefined" : _typeof(obj))) return obj;
+	
+	        // Handle Date
+	        if (obj instanceof Date) {
+	            copy = new Date();
+	            copy.setTime(obj.getTime());
+	            return copy;
+	        }
+	
+	        // Handle Array
+	        if (obj instanceof Array) {
+	            copy = [];
+	            for (var i = 0, len = obj.length; i < len; i++) {
+	                copy[i] = this.clone(obj[i]);
+	            }
+	            return copy;
+	        }
+	
+	        // Handle Object
+	        if (obj instanceof Object) {
+	            copy = {};
+	            for (var attr in obj) {
+	                if (obj.hasOwnProperty(attr)) copy[attr] = this.clone(obj[attr]);
+	            }
+	            return copy;
+	        }
+	
+	        throw new Error("Unable to copy obj! Its type isn't supported.");
 	    }
 	
 	};
@@ -21419,6 +21459,8 @@
 	var AppConstants = __webpack_require__(167);
 	var EventEmitter = __webpack_require__(173).EventEmitter;
 	var assign = __webpack_require__(174);
+	
+	var AppObjectUtils = __webpack_require__(175);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -21505,7 +21547,17 @@
 	        //     break;
 	
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
-	            _frameOrder = action.rawAnimation.frameOrder;
+	            // _frameOrder = action.rawAnimation.frameOrder;
+	            // to prevent tests from mutating rawAnimation data
+	            // _frameOrder = AppObjectUtils.clone(action.rawAnimation.frameOrder);
+	
+	            var obj = action.rawAnimation.frameOrder;
+	            var copy = [];
+	            for (var i = 0, len = obj.length; i < len; i++) {
+	                copy[i] = obj[i];
+	            }
+	            _frameOrder = copy;
+	
 	            _currentID = _frameOrder[0];
 	            FrameStore.emitChange();
 	            break;
@@ -21541,9 +21593,9 @@
 	var LayerSection = __webpack_require__(161);
 	var FrameSelector = __webpack_require__(181);
 	
-	var AnimationStore = __webpack_require__(182);
+	var AnimationStore = __webpack_require__(183);
 	// var JsonObjectStore = require('../stores/JsonObjectStore.js');
-	var ObjectStore = __webpack_require__(183);
+	var ObjectStore = __webpack_require__(184);
 	var React = __webpack_require__(3);
 	
 	var canvas;
@@ -21851,7 +21903,7 @@
 
 	'use strict';
 	
-	var AppFrameActionCreators = __webpack_require__(188);
+	var AppFrameActionCreators = __webpack_require__(182);
 	
 	var React = __webpack_require__(3);
 	var FrameStore = __webpack_require__(176);
@@ -21901,6 +21953,28 @@
 
 /***/ },
 /* 182 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(163);
+	var AppConstants = __webpack_require__(167);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	
+	module.exports = {
+	
+	    clickFrame: function clickFrame(frameID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.CLICK_FRAME,
+	            frameID: frameID
+	        });
+	    }
+	
+	};
+
+/***/ },
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21958,7 +22032,7 @@
 	module.exports = AnimationStore;
 
 /***/ },
-/* 183 */
+/* 184 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22014,14 +22088,13 @@
 	function _destroyAllInLayer(layerID) {
 	    for (var id in _objects) {
 	        if (_objects[id].layerID === layerID) {
-	            _canvas.remove(_objects[id]);
 	            delete _objects[id];
 	        }
 	    }
-	    var orderedObjects = [];
-	    for (var id in _objects) {
-	        orderedObjects.push(_objects[id]);
-	    }
+	    // var orderedObjects = [];
+	    // for (var id in _objects) {
+	    //     orderedObjects.push(_objects[id]);
+	    // }
 	}
 	
 	var ObjectStore = assign({}, EventEmitter.prototype, {
@@ -22111,7 +22184,20 @@
 	
 	        case ActionTypes.RECEIVE_CANVAS:
 	            var canvas = action.canvas;
-	            var objects = canvas._objects;
+	            // var objects = canvas._objects;
+	
+	            var objs = canvas._objects;
+	            var copy = [];
+	            for (var i = 0, len = objs.length; i < len; i++) {
+	                var obj = objs[i];
+	                var objcopy = {};
+	                for (var attr in obj) {
+	                    if (obj.hasOwnProperty(attr)) objcopy[attr] = obj[attr];
+	                }
+	                copy[i] = objcopy;
+	            }
+	            var objects = copy;
+	
 	            _addObjects(objects);
 	            _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
 	            ObjectStore.emitChange();
@@ -22147,8 +22233,9 @@
 	            ObjectStore.emitChange();
 	            break;
 	
-	        case ActionTypes.DELETE_LAYER:
-	            // _destroyAllInLayer(action.layerID);
+	        case ActionTypes.DESTROY_LAYER:
+	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+	            _destroyAllInLayer(action.layerID);
 	            ObjectStore.emitChange();
 	            break;
 	
@@ -22165,7 +22252,7 @@
 	module.exports = ObjectStore;
 
 /***/ },
-/* 184 */
+/* 185 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22216,7 +22303,7 @@
 	};
 
 /***/ },
-/* 185 */
+/* 186 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22248,7 +22335,7 @@
 	};
 
 /***/ },
-/* 186 */
+/* 187 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22276,35 +22363,13 @@
 	};
 
 /***/ },
-/* 187 */
+/* 188 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	module.exports = __webpack_require__(5);
 
-
-/***/ },
-/* 188 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	
-	var ActionTypes = AppConstants.ActionTypes;
-	
-	module.exports = {
-	
-	    clickFrame: function clickFrame(frameID) {
-	        AppDispatcher.dispatch({
-	            type: ActionTypes.CLICK_FRAME,
-	            frameID: frameID
-	        });
-	    }
-	
-	};
 
 /***/ }
 /******/ ]);

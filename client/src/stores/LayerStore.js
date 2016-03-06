@@ -191,9 +191,15 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
         case ActionTypes.RECEIVE_RAW_ANIMATION:
             // _layerOrder = action.rawAnimation.layerOrder
             // to prevent tests from altering rawAnimation data
-            _layerOrder = action.rawAnimation.layerOrder.map(function(layerID) {
-                return layerID;
-            });
+            // _layerOrder = AppObjectUtils.clone(action.rawAnimation.layerOrder);
+
+            var obj = action.rawAnimation.layerOrder;
+            var copy = [];
+            for (var i = 0, len = obj.length; i < len; i++) {
+                copy[i] = obj[i];
+            }
+            _layerOrder = copy;
+            
             _currentID = _layerOrder[_layerOrder.length - 1];
             LayerStore.emitChange();
             break;
@@ -235,15 +241,12 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
             break;
 
 
-        case ActionTypes.DELETE_LAYER:
+        case ActionTypes.DESTROY_LAYER:
             var id = action.layerID;
-            console.log('LAYER ID', id);
-            console.log('LAYER ORDER BEFORE', _layerOrder);
             _layerOrder = _layerOrder.filter(function(layerID) {
                 return layerID !== id;
             });
 
-            console.log('LAYER ORDER AFTER', _layerOrder);
             if (_currentIndex > 0 && _layerOrder.indexOf(_currentIndex) !== null) {
                 _currentIndex--;
             }

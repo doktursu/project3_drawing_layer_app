@@ -1,29 +1,10 @@
-function capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 module.exports = {
-
-    convertRawObject: function(rawObject) {
-        var type = capitalize(rawObject.type);
-        return (new fabric[type](rawObject));
-    },
-
-    getCreatedObjectData: function(object, currentLayerID) {
-        object.animationId = 2;
-        object.layerID = currentLayerID;
-        object.layerLock = false;
-        object.layerVisible =true;
-        return object;
-    },
 
     clone: function(obj) {
         var copy;
 
-        console.log('object to copy', obj);
         // Handle the 3 simple types, and null or undefined
         if (null == obj || "object" != typeof obj) return obj;
-
 
         // Handle Date
         if (obj instanceof Date) {

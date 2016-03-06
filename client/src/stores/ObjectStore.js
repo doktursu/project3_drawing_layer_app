@@ -50,14 +50,13 @@ function _toggleAllInLayerVisibility(layerID) {
 function _destroyAllInLayer(layerID) {
     for (var id in _objects) {
         if (_objects[id].layerID === layerID) {
-            _canvas.remove(_objects[id]);
             delete _objects[id];
         }
     }
-    var orderedObjects = [];
-    for (var id in _objects) {
-        orderedObjects.push(_objects[id]);
-    }
+    // var orderedObjects = [];
+    // for (var id in _objects) {
+    //     orderedObjects.push(_objects[id]);
+    // }
 }
 
 var ObjectStore = assign({}, EventEmitter.prototype, {
@@ -148,7 +147,20 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.RECEIVE_CANVAS:
             var canvas = action.canvas;
-            var objects = canvas._objects;
+            // var objects = canvas._objects;
+
+            var objs = canvas._objects;
+            var copy = [];
+            for (var i = 0, len = objs.length; i < len; i++) {
+                var obj = objs[i];
+                var objcopy = {};
+                for (var attr in obj) {
+                    if (obj.hasOwnProperty(attr)) objcopy[attr] = obj[attr];
+                }
+                copy[i] = objcopy;
+            }
+            var objects = copy;
+
             _addObjects(objects);
             _markOnlyAllInLayerSelectable(LayerStore.getCurrentID());
             ObjectStore.emitChange();
@@ -186,8 +198,9 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             ObjectStore.emitChange();
             break;
 
-        case ActionTypes.DELETE_LAYER:
-            // _destroyAllInLayer(action.layerID);
+        case ActionTypes.DESTROY_LAYER:
+            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+            _destroyAllInLayer(action.layerID);
             ObjectStore.emitChange();
             break;
 

@@ -35,11 +35,15 @@ describe('Object Store', function() {
 
 };
     var objects = TestAnimationData.canvasJSON.objects;
-    var rect1 = new fabric.Rect(objects[0]);
-    var circle1 = new fabric.Circle(objects[1]);
-    var rect2 = new fabric.Rect(objects[2]);
-    var circle2 = new fabric.Circle(objects[3]);
-    var canvasObjects = [circle2, rect2, circle1, rect1];
+    // var rectf_3 = new fabric.Rect(objects[0]);
+    // var circlef_2 = new fabric.Circle(objects[1]);
+    // var rectf_1 = new fabric.Rect(objects[2]);
+    // var circlef_4 = new fabric.Circle(objects[3]);
+    var rectf_3 = objects[0];
+    var circlef_2 = objects[1];
+    var rectf_1 = objects[2];
+    var circlef_4 = objects[3];
+    var canvasObjects = [circlef_4, rectf_1, circlef_2, rectf_3];
 
     var canvas = {
         _objects: canvasObjects
@@ -87,21 +91,21 @@ describe('Object Store', function() {
         var objects = ObjectStore.getAll();
         var objects = ObjectStore.getAll();
 
-        expect(objects['f_2'].type).toEqual(circle2.type);
+        expect(objects['f_2'].type).toEqual(circlef_4.type);
         expect(objects['f_2'].selectable).toBeTruthy();
         expect(objects['f_2'].evented).toBeTruthy();
         expect(objects['f_2'].opacity).toBe(1);
 
-        expect(objects['f_4'].type).toEqual(circle1.type);
+        expect(objects['f_4'].type).toEqual(circlef_2.type);
         expect(objects['f_4'].selectable).toBeTruthy();
         expect(objects['f_4'].evented).toBeTruthy();
         expect(objects['f_4'].opacity).toBe(1);
 
-        expect(objects['f_1'].type).toEqual(rect1.type);
+        expect(objects['f_1'].type).toEqual(rectf_3.type);
         expect(objects['f_1'].selectable).toBeFalsy();
         expect(objects['f_1'].evented).toBeFalsy();
 
-        expect(objects['f_3'].type).toEqual(rect2.type);
+        expect(objects['f_3'].type).toEqual(rectf_1.type);
         expect(objects['f_3'].selectable).toBeFalsy();
         expect(objects['f_3'].evented).toBeFalsy();
     });
@@ -111,7 +115,9 @@ describe('Object Store', function() {
         var LayerStore = require('../LayerStore');
         LayerStore.getOrder.mockReturnValue(['l_0', 'l_1', 'l_2']);
         var orderedObjects = ObjectStore.getAllForFrame('f_1');
-        expect(orderedObjects).toEqual([rect1, circle1]);
+        // expect(orderedObjects).toEqual([rectf_3, circlef_2]);
+        expect(orderedObjects[0].type).toEqual(rectf_3.type);
+        expect(orderedObjects[1].type).toEqual(circlef_2.type);
     });
 
     it('gets all objects for current frame, ordered by layer order', function() {
@@ -121,7 +127,9 @@ describe('Object Store', function() {
         var LayerStore = require('../LayerStore');
         LayerStore.getOrder.mockReturnValue(['l_0', 'l_1', 'l_2']);
         var orderedObjects = ObjectStore.getAllForCurrentFrame('f_1');
-        expect(orderedObjects).toEqual([rect2, circle2]);
+        // expect(orderedObjects).toEqual([rectf_1, circlef_4]);
+        expect(orderedObjects[0].type).toEqual(rectf_1.type);
+        expect(orderedObjects[1].type).toEqual(circlef_4.type);
     });
 
     it('marks only all in current layer as selectable on click', function() {
@@ -144,6 +152,16 @@ describe('Object Store', function() {
 
         expect(objects['f_3'].selectable).toBeFalsy();
         expect(objects['f_3'].evented).toBeFalsy();
+    });
+
+    it('toggles visibility on all objects in layer', function() {
+        callback(actionReceiveCanvasObjects);
+        callback(actionToggleVisibility);
+        var objects = ObjectStore.getAll();
+        expect(objects['f_2'].visible).toBeFalsy();
+        expect(objects['f_4'].visible).toBeFalsy();
+        expect(objects['f_3'].visible).toBeTruthy();
+        expect(objects['f_1'].visible).toBeTruthy();
     });
 
     it('toggles visibility on all objects in layer', function() {
