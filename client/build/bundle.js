@@ -20539,11 +20539,12 @@
 	
 	        TOGGLE_VISIBILITY: null,
 	
-	        CREATE_OBJECT: null,
-	        CREATE_LAYER: null,
-	        DELETE_LAYER: null,
 	        MOVE_UP_LAYER: null,
 	        MOVE_DOWN_LAYER: null,
+	        DELETE_LAYER: null,
+	
+	        CREATE_OBJECT: null,
+	        CREATE_LAYER: null,
 	        RECEIVE_CANVAS: null
 	    })
 	
@@ -20806,26 +20807,26 @@
 	
 	function move(old_index, new_index) {
 	    console.log('from', old_index, 'to', new_index);
-	    if (new_index >= _layers.length) {
-	        var k = new_index - _layers.length;
+	    if (new_index >= _layerOrder.length) {
+	        var k = new_index - _layerOrder.length;
 	        while (k-- + 1) {
-	            _layers.push(undefined);
+	            _layerOrder.push(undefined);
 	        }
 	    }
-	    _layers.splice(new_index, 0, _layers.splice(old_index, 1)[0]);
-	    console.log('moved?', _layers); // for testing purposes
+	    _layerOrder.splice(new_index, 0, _layerOrder.splice(old_index, 1)[0]);
+	    console.log('moved?', _layerOrder); // for testing purposes
 	};
 	
 	function moveUpLayer(layerID) {
-	    var index = getIndexForID(layerID);
-	    if (index === _layers.length - 1) {
+	    var index = _layerOrder.indexOf(layerID);
+	    if (index === _layerOrder.length - 1) {
 	        return;
 	    }
 	    move(index, index + 1);
 	}
 	
 	function moveDownLayer(layerID) {
-	    var index = getIndexForID(layerID);
+	    var index = _layerOrder.indexOf(layerID);
 	    if (index === 0) {
 	        return;
 	    }
@@ -20954,7 +20955,11 @@
 	    switch (action.type) {
 	
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
-	            _layerOrder = action.rawAnimation.layerOrder;
+	            // _layerOrder = action.rawAnimation.layerOrder
+	            // to prevent tests from altering rawAnimation data
+	            _layerOrder = action.rawAnimation.layerOrder.map(function (layerID) {
+	                return layerID;
+	            });
 	            _currentID = _layerOrder[_layerOrder.length - 1];
 	            LayerStore.emitChange();
 	            break;
@@ -20966,6 +20971,16 @@
 	            //         _currentIndex = index;
 	            //     }
 	            // });
+	            LayerStore.emitChange();
+	            break;
+	
+	        case ActionTypes.MOVE_UP_LAYER:
+	            moveUpLayer(action.layerID);
+	            LayerStore.emitChange();
+	            break;
+	
+	        case ActionTypes.MOVE_DOWN_LAYER:
+	            moveDownLayer(action.layerID);
 	            LayerStore.emitChange();
 	            break;
 	
@@ -20982,15 +20997,18 @@
 	
 	        case ActionTypes.DELETE_LAYER:
 	            var id = action.layerID;
-	            _layers = _layers.filter(function (layer) {
-	                return layer.id !== id;
+	            console.log('LAYER ID', id);
+	            console.log('LAYER ORDER BEFORE', _layerOrder);
+	            _layerOrder = _layerOrder.filter(function (layerID) {
+	                return layerID !== id;
 	            });
 	
-	            if (_currentIndex > 0 && _layers[_currentIndex] !== null) {
+	            console.log('LAYER ORDER AFTER', _layerOrder);
+	            if (_currentIndex > 0 && _layerOrder.indexOf(_currentIndex) !== null) {
 	                _currentIndex--;
 	            }
 	
-	            _currentID = LayerStore.getIDforIndex(_currentIndex);
+	            // _currentID = LayerStore.getIDforIndex(_currentIndex);
 	
 	            LayerStore.emitChange();
 	            break;
@@ -21005,16 +21023,6 @@
 	
 	        case ActionTypes.RECEIVE_RAW_OBJECTS:
 	            LayerStore.init(action.rawObjects);
-	            LayerStore.emitChange();
-	            break;
-	
-	        case ActionTypes.MOVE_UP_LAYER:
-	            moveUpLayer(action.layerID);
-	            LayerStore.emitChange();
-	            break;
-	
-	        case ActionTypes.MOVE_DOWN_LAYER:
-	            moveDownLayer(action.layerID);
 	            LayerStore.emitChange();
 	            break;
 	
@@ -22125,6 +22133,12 @@
 	            ObjectStore.emitChange();
 	            break;
 	
+	        case ActionTypes.MOVE_UP_LAYER:
+	        case ActionTypes.MOVE_DOWN_LAYER:
+	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+	            ObjectStore.emitChange();
+	            break;
+	
 	        case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
 	            var object = action.object;
 	            _objects[object.id] = object;
@@ -22140,16 +22154,6 @@
 	
 	        case ActionTypes.RECEIVE_RAW_OBJECTS:
 	            _addObjects(action.rawObjects);
-	            ObjectStore.emitChange();
-	            break;
-	
-	        case ActionTypes.MOVE_UP_LAYER:
-	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
-	            ObjectStore.emitChange();
-	            break;
-	
-	        case ActionTypes.MOVE_DOWN_LAYER:
-	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
 	            ObjectStore.emitChange();
 	            break;
 	

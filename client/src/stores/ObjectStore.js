@@ -170,6 +170,12 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             ObjectStore.emitChange();
             break;
 
+        case ActionTypes.MOVE_UP_LAYER:
+        case ActionTypes.MOVE_DOWN_LAYER:
+            AppDispatcher.waitFor([LayerStore.dispatchToken]);
+            ObjectStore.emitChange();
+            break;
+
 
 
         case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
@@ -191,15 +197,7 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             ObjectStore.emitChange();
             break;
 
-        case ActionTypes.MOVE_UP_LAYER:
-            AppDispatcher.waitFor([LayerStore.dispatchToken]);
-            ObjectStore.emitChange();
-            break;
-
-        case ActionTypes.MOVE_DOWN_LAYER:
-            AppDispatcher.waitFor([LayerStore.dispatchToken]);
-            ObjectStore.emitChange();
-            break;
+        
 
         default:
             // do nothing

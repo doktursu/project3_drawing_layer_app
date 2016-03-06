@@ -30,26 +30,26 @@ var _layersOptions = {
 
 function move(old_index, new_index) {
     console.log('from', old_index, 'to', new_index);
-    if (new_index >= _layers.length) {
-        var k = new_index - _layers.length;
+    if (new_index >= _layerOrder.length) {
+        var k = new_index - _layerOrder.length;
         while ((k--) + 1) {
-            _layers.push(undefined);
+            _layerOrder.push(undefined);
         }
     }
-    _layers.splice(new_index, 0, _layers.splice(old_index, 1)[0]);
-    console.log('moved?', _layers); // for testing purposes
+    _layerOrder.splice(new_index, 0, _layerOrder.splice(old_index, 1)[0]);
+    console.log('moved?', _layerOrder); // for testing purposes
 };
 
 function moveUpLayer(layerID) {
-    var index = getIndexForID(layerID);
-    if (index === _layers.length - 1) {
+    var index = _layerOrder.indexOf(layerID);
+    if (index === _layerOrder.length - 1) {
         return;
     }
     move(index, index + 1);
 }
 
 function moveDownLayer(layerID) {
-    var index = getIndexForID(layerID);
+    var index = _layerOrder.indexOf(layerID);
     if (index === 0) {
         return;
     }
@@ -189,7 +189,11 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
     switch(action.type) {
 
         case ActionTypes.RECEIVE_RAW_ANIMATION:
-            _layerOrder = action.rawAnimation.layerOrder;
+            // _layerOrder = action.rawAnimation.layerOrder
+            // to prevent tests from altering rawAnimation data
+            _layerOrder = action.rawAnimation.layerOrder.map(function(layerID) {
+                return layerID;
+            });
             _currentID = _layerOrder[_layerOrder.length - 1];
             LayerStore.emitChange();
             break;
@@ -204,7 +208,15 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
             LayerStore.emitChange();
             break;
 
+        case ActionTypes.MOVE_UP_LAYER:
+            moveUpLayer(action.layerID);
+            LayerStore.emitChange();
+            break;
 
+        case ActionTypes.MOVE_DOWN_LAYER:
+            moveDownLayer(action.layerID);
+            LayerStore.emitChange();
+            break;
 
 
 
@@ -222,17 +234,21 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
             LayerStore.emitChange();
             break;
 
+
         case ActionTypes.DELETE_LAYER:
             var id = action.layerID;
-            _layers = _layers.filter(function(layer) {
-                return layer.id !== id;
+            console.log('LAYER ID', id);
+            console.log('LAYER ORDER BEFORE', _layerOrder);
+            _layerOrder = _layerOrder.filter(function(layerID) {
+                return layerID !== id;
             });
 
-            if (_currentIndex > 0 && _layers[_currentIndex] !== null) {
+            console.log('LAYER ORDER AFTER', _layerOrder);
+            if (_currentIndex > 0 && _layerOrder.indexOf(_currentIndex) !== null) {
                 _currentIndex--;
             }
 
-            _currentID = LayerStore.getIDforIndex(_currentIndex);
+            // _currentID = LayerStore.getIDforIndex(_currentIndex);
 
             LayerStore.emitChange();
             break;
@@ -252,15 +268,9 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
             LayerStore.emitChange();
             break;
 
-        case ActionTypes.MOVE_UP_LAYER:
-            moveUpLayer(action.layerID);
-            LayerStore.emitChange();
-            break;
+        
 
-        case ActionTypes.MOVE_DOWN_LAYER:
-            moveDownLayer(action.layerID);
-            LayerStore.emitChange();
-            break;
+        
 
         default:
             // do nothing

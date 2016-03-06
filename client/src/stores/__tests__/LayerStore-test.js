@@ -61,6 +61,21 @@ describe('Layer Store', function() {
         layerID: 'l_1'
     };
 
+    var actionMoveUpLayer = {
+        type: ActionTypes.MOVE_UP_LAYER,
+        layerID: 'l_1'
+    };
+
+    var actionMoveDownLayer = {
+        type: ActionTypes.MOVE_DOWN_LAYER,
+        layerID: 'l_1'
+    };
+
+    var actionDeleteLayer = {
+        type: ActionTypes.DELETE_LAYER,
+        layerID: 'l_1'
+    };
+
     beforeEach(function() {
         AppDispatcher = require('../../dispatcher/AppDispatcher');
         LayerStore = require('../LayerStore');
@@ -90,6 +105,24 @@ describe('Layer Store', function() {
         callback(actionReceiveRawAnimation);
         callback(actionClickLayer);
         expect(LayerStore.getCurrentID()).toEqual('l_1');
+    });
+
+    it('moves layer up on click', function() {
+        callback(actionReceiveRawAnimation);
+        callback(actionMoveUpLayer);
+        expect(LayerStore.getOrder()).toEqual(['l_0', 'l_2', 'l_1']);
+    });
+
+    it('moves layer down on click', function() {
+        callback(actionReceiveRawAnimation);
+        callback(actionMoveDownLayer);
+        expect(LayerStore.getOrder()).toEqual(['l_1', 'l_0', 'l_2']);
+    });
+
+    it('deletes layerID from layer order', function() {
+        callback(actionReceiveRawAnimation);
+        callback(actionDeleteLayer);
+        expect(LayerStore.getOrder()).toEqual(['l_0', 'l_2']);
     });
 
     // it('adds objects from canvas', function() {
