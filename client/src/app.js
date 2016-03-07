@@ -1,6 +1,8 @@
 var App = require('./components/App.jsx');
 
 var ObjectController = require('./components/ObjectController.jsx');
+var AnimationController = require('./components/AnimationController.jsx');
+
 var FabricObjectsExampleData = require('./FabricObjectsExampleData.js');
 
 var RawAnimationData = require('./RawAnimationData');
@@ -35,7 +37,7 @@ window.onload = function() {
     // AppWebAPIUtils.getAllObjects();
 
     ReactDOM.render(
-        <ObjectController />,
+        <AnimationController />,
         document.querySelector('#react')
     );
 }

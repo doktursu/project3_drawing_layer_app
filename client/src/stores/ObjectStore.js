@@ -173,9 +173,11 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             break;
 
         case ActionTypes.CLICK_FRAME:
+        case ActionTypes.CLICK_NEXT_FRAME:
             AppDispatcher.waitFor([FrameStore.dispatchToken]);
             ObjectStore.emitChange();
             break;
+
 
         case ActionTypes.TOGGLE_VISIBILITY:
             _toggleAllInLayerVisibility(action.layerID);
@@ -201,6 +203,11 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
         case ActionTypes.DESTROY_LAYER:
             AppDispatcher.waitFor([LayerStore.dispatchToken]);
             _destroyAllInLayer(action.layerID);
+            ObjectStore.emitChange();
+            break;
+
+        case ActionTypes.CREATE_FRAME:
+            AppDispatcher.waitFor([FrameStore.dispatchToken]);
             ObjectStore.emitChange();
             break;
 

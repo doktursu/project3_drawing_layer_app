@@ -12,6 +12,12 @@ module.exports = {
         });
     },
 
+    clickNextFrame: function() {
+        AppDispatcher.dispatch({
+            type: ActionTypes.CLICK_NEXT_FRAME
+        });
+    },
+
     createFrame: function() {
         AppDispatcher.dispatch({
             type: ActionTypes.CREATE_FRAME

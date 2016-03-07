@@ -113,6 +113,16 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.CLICK_FRAME:
             _currentID = action.frameID;
+            console.log('CURRENT FRAME IS', _currentID);
+            FrameStore.emitChange();
+            break;
+
+        case ActionTypes.CLICK_NEXT_FRAME:
+            var currentIndex = _frameOrder.indexOf(_currentID);
+            var nextIndex = currentIndex + 1;
+            if (nextIndex >= _frameOrder.length) nextIndex = 0;
+            _currentID = _frameOrder[nextIndex];
+            console.log('NEXT FRAME IS', _currentID);
             FrameStore.emitChange();
             break;
 

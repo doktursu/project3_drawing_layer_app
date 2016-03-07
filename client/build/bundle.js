@@ -49,6 +49,8 @@
 	var App = __webpack_require__(1);
 	
 	var ObjectController = __webpack_require__(176);
+	var AnimationController = __webpack_require__(191);
+	
 	var FabricObjectsExampleData = __webpack_require__(184);
 	
 	var RawAnimationData = __webpack_require__(185);
@@ -82,7 +84,7 @@
 	    // FabricObjectsExampleData.init();
 	    // AppWebAPIUtils.getAllObjects();
 	
-	    ReactDOM.render(React.createElement(ObjectController, null), document.querySelector('#react'));
+	    ReactDOM.render(React.createElement(AnimationController, null), document.querySelector('#react'));
 	};
 
 /***/ },
@@ -20542,6 +20544,7 @@
 	        RECEIVE_CANVAS: null,
 	
 	        ClICK_FRAME: null,
+	        CLICK_NEXT_FRAME: null,
 	        CLICK_LAYER: null,
 	
 	        TOGGLE_VISIBILITY: null,
@@ -21574,6 +21577,16 @@
 	
 	        case ActionTypes.CLICK_FRAME:
 	            _currentID = action.frameID;
+	            console.log('CURRENT FRAME IS', _currentID);
+	            FrameStore.emitChange();
+	            break;
+	
+	        case ActionTypes.CLICK_NEXT_FRAME:
+	            var currentIndex = _frameOrder.indexOf(_currentID);
+	            var nextIndex = currentIndex + 1;
+	            if (nextIndex >= _frameOrder.length) nextIndex = 0;
+	            _currentID = _frameOrder[nextIndex];
+	            console.log('NEXT FRAME IS', _currentID);
 	            FrameStore.emitChange();
 	            break;
 	
@@ -21698,7 +21711,6 @@
 	        return React.createElement(
 	            'div',
 	            null,
-	            React.createElement(LayerSection, null),
 	            React.createElement(
 	                'h1',
 	                null,
@@ -21709,8 +21721,7 @@
 	                'button',
 	                { onClick: this._onDrawingModeClick },
 	                'Cancel Drawing Mode'
-	            ),
-	            React.createElement(FrameSelector, null)
+	            )
 	        );
 	    },
 	
@@ -21934,7 +21945,19 @@
 	
 	
 	    getInitialState: function getInitialState() {
-	        return getStateFromStore();
+	        return {
+	            frames: FrameStore.getOrder(),
+	            currentFrameID: FrameStore.getCurrentID(),
+	            playMode: false
+	        };
+	    },
+	
+	    componentDidMount: function componentDidMount() {
+	        FrameStore.addChangeListener(this._onChange);
+	    },
+	
+	    componentWillUnmount: function componentWillUnmount() {
+	        FrameStore.removeChangeListener(this._onChange);
 	    },
 	
 	    render: function render() {
@@ -21945,24 +21968,93 @@
 	                key: frameID,
 	                name: 'frame',
 	                value: frameID,
-	                onChange: this._onChange,
+	                onChange: this._onRadioChange,
 	                checked: frameID === this.state.currentFrameID });
 	        }, this);
 	
 	        return React.createElement(
-	            'form',
+	            'div',
 	            null,
-	            radioButtons
+	            React.createElement(
+	                'form',
+	                null,
+	                radioButtons
+	            ),
+	            React.createElement(
+	                'button',
+	                { onClick: this._onClick },
+	                'Add Frame'
+	            ),
+	            React.createElement(
+	                'button',
+	                { onClick: this._playAnimation },
+	                'Play'
+	            )
 	        );
 	    },
 	
-	    _onChange: function _onChange(e) {
+	    componentDidUpdate: function componentDidUpdate() {
+	        console.log('COMPONENT DID UPDATE');
+	        if (this.state.playMode) {
+	            console.log('PLAYMODE TRUE');
+	            setTimeout(function () {
+	                AppFrameActionCreators.clickNextFrame();
+	                console.log('NEXT FRAME');
+	            }, 100);
+	        }
+	    },
+	
+	    _onChange: function _onChange() {
+	        this.setState(getStateFromStore());
+	    },
+	
+	    _onRadioChange: function _onRadioChange(e) {
 	        console.log('radio button', e.target.value);
 	        var frameID = e.target.value;
 	        AppFrameActionCreators.clickFrame(frameID);
 	        this.setState(getStateFromStore());
+	    },
+	
+	    _onClick: function _onClick() {
+	        AppFrameActionCreators.createFrame();
+	        this.setState(getStateFromStore());
+	    },
+	
+	    _playAnimation: function _playAnimation() {
+	        // AppFrameActionCreators.togglePlayMode();
+	        // this.setState(getStateFromStore());
+	        var nextPlayMode = !this.state.playMode;
+	        this.setState({ playMode: nextPlayMode });
 	    }
 	
+	    // _playAnimation: function() {
+	    //     // this.state.playMode = !this.state.playMode;
+	
+	    //     var frameOrder = this.state.frames;
+	    //     // while (this.state.playMode) {
+	    //         for (var i = 0; i <= frameOrder.length; i++) {
+	    //             // if (i === frameOrder.length) i = 0;
+	    //             console.log('FRAME', i)
+	    //             var frameID = frameOrder[i];
+	    //             this._createTimeOut(frameID);
+	    //             setTimeout(function() {
+	
+	    //             })
+	    //         }
+	    //     // }
+	
+	    // },
+	
+	    // _createTimeOut: function(frameID) {
+	    //     setTimeout(function() {
+	    //         // console.log('FRAME ORDER', frameOrder);
+	    //         if (this.state.playMode && this.state.)
+	    //         console.log('FRAME ID', frameID);
+	    //       AppFrameActionCreators.clickNextFrame();
+	
+	    //       this.setState(getStateFromStore());
+	    //     }.bind(this), 500);
+	    // }
 	});
 	
 	module.exports = FrameSelector;
@@ -21984,6 +22076,12 @@
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.CLICK_FRAME,
 	            frameID: frameID
+	        });
+	    },
+	
+	    clickNextFrame: function clickNextFrame() {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.CLICK_NEXT_FRAME
 	        });
 	    },
 	
@@ -22237,6 +22335,7 @@
 	            break;
 	
 	        case ActionTypes.CLICK_FRAME:
+	        case ActionTypes.CLICK_NEXT_FRAME:
 	            AppDispatcher.waitFor([FrameStore.dispatchToken]);
 	            ObjectStore.emitChange();
 	            break;
@@ -22263,6 +22362,11 @@
 	        case ActionTypes.DESTROY_LAYER:
 	            AppDispatcher.waitFor([LayerStore.dispatchToken]);
 	            _destroyAllInLayer(action.layerID);
+	            ObjectStore.emitChange();
+	            break;
+	
+	        case ActionTypes.CREATE_FRAME:
+	            AppDispatcher.waitFor([FrameStore.dispatchToken]);
 	            ObjectStore.emitChange();
 	            break;
 	
@@ -22576,6 +22680,36 @@
 	});
 	
 	module.exports = LayerNameEditInput;
+
+/***/ },
+/* 191 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var LayerSection = __webpack_require__(161);
+	var FrameSelector = __webpack_require__(180);
+	var ObjectController = __webpack_require__(176);
+	
+	var React = __webpack_require__(3);
+	
+	var AnimationController = React.createClass({
+	    displayName: 'AnimationController',
+	
+	
+	    render: function render() {
+	        return React.createElement(
+	            'div',
+	            null,
+	            React.createElement(LayerSection, null),
+	            React.createElement(ObjectController, null),
+	            React.createElement(FrameSelector, null)
+	        );
+	    }
+	
+	});
+	
+	module.exports = AnimationController;
 
 /***/ }
 /******/ ]);

@@ -12,6 +12,7 @@ module.exports = {
         RECEIVE_CANVAS: null,
 
         ClICK_FRAME: null,
+        CLICK_NEXT_FRAME: null,
         CLICK_LAYER: null,
 
         TOGGLE_VISIBILITY: null,

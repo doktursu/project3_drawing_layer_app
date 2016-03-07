@@ -94,11 +94,9 @@ var ObjectController = React.createClass({
     render: function() {
         return (
             <div>
-                <LayerSection />
                 <h1>Objects</h1>
                 <canvas id="c" width={300} height={300} />
                 <button onClick={this._onDrawingModeClick}>Cancel Drawing Mode</button>
-                <FrameSelector />
             </div>
         );
     },
