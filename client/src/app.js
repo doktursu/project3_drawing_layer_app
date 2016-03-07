@@ -12,6 +12,7 @@ var AppWebAPIUtils = require('./utils/AppWebAPIUtils.js');
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+
 window.onload = function() {
 
     // add custom attribute to fabric object
@@ -27,6 +28,36 @@ window.onload = function() {
             });
         };
     })(fabric.Object.prototype.toObject);
+
+    // http://stackoverflow.com/questions/1495219/how-can-i-prevent-the-backspace-key-from-navigating-back
+    // Prevent the backspace key from navigating back.
+    document.removeEventListener('keydown');
+    document.addEventListener('keydown', function (event) {
+        var doPrevent = false;
+        if (event.keyCode === 8) {
+            var d = event.srcElement || event.target;
+            if ((d.tagName.toUpperCase() === 'INPUT' && 
+                 (
+                     d.type.toUpperCase() === 'TEXT' ||
+                     d.type.toUpperCase() === 'PASSWORD' || 
+                     d.type.toUpperCase() === 'FILE' || 
+                     d.type.toUpperCase() === 'SEARCH' || 
+                     d.type.toUpperCase() === 'EMAIL' || 
+                     d.type.toUpperCase() === 'NUMBER' || 
+                     d.type.toUpperCase() === 'DATE' )
+                 ) || 
+                 d.tagName.toUpperCase() === 'TEXTAREA') {
+                doPrevent = d.readOnly || d.disabled;
+            }
+            else {
+                doPrevent = true;
+            }
+        }
+
+        if (doPrevent) {
+            event.preventDefault();
+        }
+    });
 
     // AppExampleData.init();
     RawAnimationData.init();

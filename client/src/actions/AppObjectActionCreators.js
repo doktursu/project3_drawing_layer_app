@@ -12,6 +12,13 @@ module.exports = {
         AppWebAPIUtils.createObject(object);
     },
 
+    destroyObject: function(objectID) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.DESTROY_OBJECT,
+            objectID: objectID
+        });
+    },
+
     sendCanvas: function(canvas) {
         AppDispatcher.dispatch({
             type: ActionTypes.RECEIVE_CANVAS,

@@ -92,6 +92,11 @@ describe('Object Store', function() {
         }
     };
 
+    var actionDestroyObject = {
+        type: ActionTypes.DESTROY_OBJECT,
+        objectID: 'f_1'
+    };
+
     beforeEach(function() {
         AppDispatcher = require('../../dispatcher/AppDispatcher');
         ObjectStore = require('../ObjectStore');
@@ -212,6 +217,14 @@ describe('Object Store', function() {
 
         var objects = ObjectStore.getAll();
         expect(objects['f_5']).toBeDefined();
+    });
+
+    it('deletes object, given objectID', function() {
+        callback(actionReceiveCanvas);
+        callback(actionDestroyObject);
+        var objects = ObjectStore.getAll();
+        expect(Object.keys(objects).length).toBe(3);
+        expect(objects['f_1']).toBeUndefined();
     });
 
 

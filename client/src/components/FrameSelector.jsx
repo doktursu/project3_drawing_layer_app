@@ -46,18 +46,15 @@ var FrameSelector = React.createClass({
                     {radioButtons}
                 </form>
                 <button onClick={this._onClick}>Add Frame</button>
-                <button onClick={this._playAnimation}>Play</button>
+                <button onClick={this._toggleAnimation}>Play</button>
             </div>
         );
     },
 
     componentDidUpdate: function() {
-        console.log('COMPONENT DID UPDATE');
         if (this.state.playMode) {
-            console.log('PLAYMODE TRUE');
             setTimeout(function() {
               AppFrameActionCreators.clickNextFrame();
-              console.log('NEXT FRAME');
             }, 100)
         }
     },
@@ -78,41 +75,11 @@ var FrameSelector = React.createClass({
         this.setState(getStateFromStore());
     },
 
-    _playAnimation: function() {
-        // AppFrameActionCreators.togglePlayMode();
-        // this.setState(getStateFromStore());
+    _toggleAnimation: function() {
         var nextPlayMode = !this.state.playMode;
         this.setState({playMode: nextPlayMode});
     }
 
-    // _playAnimation: function() {
-    //     // this.state.playMode = !this.state.playMode;
-
-    //     var frameOrder = this.state.frames;
-    //     // while (this.state.playMode) {
-    //         for (var i = 0; i <= frameOrder.length; i++) {
-    //             // if (i === frameOrder.length) i = 0;
-    //             console.log('FRAME', i)
-    //             var frameID = frameOrder[i];
-    //             this._createTimeOut(frameID);
-    //             setTimeout(function() {
-
-    //             })
-    //         }
-    //     // }
-        
-    // },
-
-    // _createTimeOut: function(frameID) {
-    //     setTimeout(function() {
-    //         // console.log('FRAME ORDER', frameOrder);
-    //         if (this.state.playMode && this.state.)
-    //         console.log('FRAME ID', frameID);
-    //       AppFrameActionCreators.clickNextFrame();
-
-    //       this.setState(getStateFromStore());
-    //     }.bind(this), 500);
-    // }
 });
 
 module.exports = FrameSelector;

@@ -24,6 +24,7 @@ module.exports = {
         RENAME_LAYER: null,
 
         RECEIVE_CREATED_OBJECT: null,
+        DESTROY_OBJECT: null,
 
         CREATE_FRAME: null,
 

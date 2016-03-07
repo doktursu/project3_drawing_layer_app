@@ -178,7 +178,6 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             ObjectStore.emitChange();
             break;
 
-
         case ActionTypes.TOGGLE_VISIBILITY:
             _toggleAllInLayerVisibility(action.layerID);
             ObjectStore.emitChange();
@@ -197,6 +196,11 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             _objects[object.id] = object;
             console.log('----------OBJECT CREATED----------');
             console.log('created object', object);
+            ObjectStore.emitChange();
+            break;
+
+        case ActionTypes.DESTROY_OBJECT:
+            delete _objects[action.objectID];
             ObjectStore.emitChange();
             break;
 
