@@ -24,7 +24,8 @@ var FrameSelector = React.createClass({
                 key={frameID}
                 name="frame"
                 value={frameID}
-                onChange={this._onChange} />
+                onChange={this._onChange}
+                checked={frameID === this.state.currentFrameID} />
         }, this);
 
         return (
@@ -38,6 +39,7 @@ var FrameSelector = React.createClass({
         console.log('radio button', e.target.value);
         var frameID = e.target.value;
         AppFrameActionCreators.clickFrame(frameID);
+        this.setState(getStateFromStore());
     }
 
 });

@@ -10,6 +10,12 @@ module.exports = {
             type: ActionTypes.CLICK_FRAME,
             frameID: frameID
         });
+    },
+
+    createFrame: function() {
+        AppDispatcher.dispatch({
+            type: ActionTypes.CREATE_FRAME
+        });
     }
 
 };

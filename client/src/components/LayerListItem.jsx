@@ -39,7 +39,7 @@ var LayerListItem = React.createClass({
                 onClick={this._onClick}
                 onDoubleClick={this._onDoubleClick}
             >
-                Layer!!! {this.state.layerName}
+                {this.state.layerName}
             </p>
         }
 

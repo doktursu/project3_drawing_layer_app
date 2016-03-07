@@ -133,7 +133,9 @@ var LayerStore = assign({}, EventEmitter.prototype, {
     },
 
     getNameForLayer: function(layerID) {
-        return _layerInfo[layerID].name;
+        var layer = _layerInfo[layerID];
+        if (layer) return layer.name;
+        return layer;
     },
 
 
@@ -196,18 +198,33 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
     switch(action.type) {
 
         case ActionTypes.RECEIVE_RAW_ANIMATION:
-            // _layerOrder = action.rawAnimation.layerOrder
-            // to prevent tests from altering rawAnimation data
-            // _layerOrder = AppObjectUtils.clone(action.rawAnimation.layerOrder);
-
-            var obj = action.rawAnimation.layerOrder;
-            var copy = [];
-            for (var i = 0, len = obj.length; i < len; i++) {
-                copy[i] = obj[i];
-            }
-            _layerOrder = copy;
-
+            _layerOrder = action.rawAnimation.layerOrder
             _layerInfo = action.rawAnimation.layerInfo;
+            
+            // to prevent tests from altering rawAnimation data
+
+            // var obj = action.rawAnimation.layerOrder;
+            // var copy = [];
+            // for (var i = 0, len = obj.length; i < len; i++) {
+            //     copy[i] = obj[i];
+            // }
+            // _layerOrder = copy;
+
+            // var objs = action.rawAnimation.layerInfo;
+            // var copy = {};
+            // for (var layedID in objs) {
+            //     if (objs.hasOwnProperty(layedID)) {
+            //         var obj = objs[layedID];
+            //         var objcopy = {}
+            //         for (var attr in obj) {
+            //             if (obj.hasOwnProperty(attr)) {
+            //                 objcopy[attr] = obj[attr];
+            //             }
+            //         }
+            //         copy[layedID] = objcopy;
+            //     }
+            // }
+            // _layerInfo = copy;
 
             _currentID = _layerOrder[_layerOrder.length - 1];
             LayerStore.emitChange();
@@ -261,12 +278,13 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
 
         case ActionTypes.DESTROY_LAYER:
-            var id = action.layerID;
+            var layerID = action.layerID;
             var currentIndex = _layerOrder.indexOf(_currentID);
 
-            _layerOrder = _layerOrder.filter(function(layerID) {
-                return layerID !== id;
-            });
+            var layerIndex = _layerOrder.indexOf(layerID);
+            _layerOrder.splice(layerIndex, 1);
+
+            delete _layerInfo[layerID]
 
             if (currentIndex > 0 && !_layerOrder[currentIndex]) {
                 currentIndex--;

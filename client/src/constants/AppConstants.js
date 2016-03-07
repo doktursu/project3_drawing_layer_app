@@ -24,6 +24,8 @@ module.exports = {
 
         RECEIVE_CREATED_OBJECT: null,
 
+        CREATE_FRAME: null,
+
         CREATE_OBJECT: null,
 
         RECEIVE_CANVAS: null

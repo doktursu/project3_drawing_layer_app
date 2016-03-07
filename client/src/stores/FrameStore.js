@@ -91,16 +91,15 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
         //     break;
 
         case ActionTypes.RECEIVE_RAW_ANIMATION:
-            // _frameOrder = action.rawAnimation.frameOrder;
+            _frameOrder = action.rawAnimation.frameOrder;
             // to prevent tests from mutating rawAnimation data
-            // _frameOrder = AppObjectUtils.clone(action.rawAnimation.frameOrder);
 
-            var obj = action.rawAnimation.frameOrder;
-            var copy = [];
-            for (var i = 0, len = obj.length; i < len; i++) {
-                copy[i] = obj[i];
-            }
-            _frameOrder = copy;
+            // var obj = action.rawAnimation.frameOrder;
+            // var copy = [];
+            // for (var i = 0, len = obj.length; i < len; i++) {
+            //     copy[i] = obj[i];
+            // }
+            // _frameOrder = copy;
             
 
             _currentID = _frameOrder[0];
@@ -114,6 +113,15 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.CLICK_FRAME:
             _currentID = action.frameID;
+            FrameStore.emitChange();
+            break;
+
+        case ActionTypes.CREATE_FRAME:
+            var newID = 'f_' + AppObjectUtils.newID();
+            var currentIndex = _frameOrder.indexOf(_currentID);
+            var newIndex = currentIndex + 1;
+            _frameOrder.splice(newIndex, 0, newID);
+            _currentID = newID;
             FrameStore.emitChange();
             break;
 

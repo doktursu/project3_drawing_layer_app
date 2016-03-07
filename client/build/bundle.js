@@ -20554,6 +20554,8 @@
 	
 	        RECEIVE_CREATED_OBJECT: null,
 	
+	        CREATE_FRAME: null,
+	
 	        CREATE_OBJECT: null,
 	
 	        RECEIVE_CANVAS: null
@@ -20668,7 +20670,6 @@
 	                    onClick: this._onClick,
 	                    onDoubleClick: this._onDoubleClick
 	                },
-	                'Layer!!! ',
 	                this.state.layerName
 	            );
 	        }
@@ -20844,7 +20845,9 @@
 	    },
 	
 	    getNameForLayer: function getNameForLayer(layerID) {
-	        return _layerInfo[layerID].name;
+	        var layer = _layerInfo[layerID];
+	        if (layer) return layer.name;
+	        return layer;
 	    },
 	
 	    getAllOrdered: function getAllOrdered() {
@@ -20901,18 +20904,33 @@
 	    switch (action.type) {
 	
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
-	            // _layerOrder = action.rawAnimation.layerOrder
-	            // to prevent tests from altering rawAnimation data
-	            // _layerOrder = AppObjectUtils.clone(action.rawAnimation.layerOrder);
-	
-	            var obj = action.rawAnimation.layerOrder;
-	            var copy = [];
-	            for (var i = 0, len = obj.length; i < len; i++) {
-	                copy[i] = obj[i];
-	            }
-	            _layerOrder = copy;
-	
+	            _layerOrder = action.rawAnimation.layerOrder;
 	            _layerInfo = action.rawAnimation.layerInfo;
+	
+	            // to prevent tests from altering rawAnimation data
+	
+	            // var obj = action.rawAnimation.layerOrder;
+	            // var copy = [];
+	            // for (var i = 0, len = obj.length; i < len; i++) {
+	            //     copy[i] = obj[i];
+	            // }
+	            // _layerOrder = copy;
+	
+	            // var objs = action.rawAnimation.layerInfo;
+	            // var copy = {};
+	            // for (var layedID in objs) {
+	            //     if (objs.hasOwnProperty(layedID)) {
+	            //         var obj = objs[layedID];
+	            //         var objcopy = {}
+	            //         for (var attr in obj) {
+	            //             if (obj.hasOwnProperty(attr)) {
+	            //                 objcopy[attr] = obj[attr];
+	            //             }
+	            //         }
+	            //         copy[layedID] = objcopy;
+	            //     }
+	            // }
+	            // _layerInfo = copy;
 	
 	            _currentID = _layerOrder[_layerOrder.length - 1];
 	            LayerStore.emitChange();
@@ -20960,12 +20978,13 @@
 	            break;
 	
 	        case ActionTypes.DESTROY_LAYER:
-	            var id = action.layerID;
+	            var layerID = action.layerID;
 	            var currentIndex = _layerOrder.indexOf(_currentID);
 	
-	            _layerOrder = _layerOrder.filter(function (layerID) {
-	                return layerID !== id;
-	            });
+	            var layerIndex = _layerOrder.indexOf(layerID);
+	            _layerOrder.splice(layerIndex, 1);
+	
+	            delete _layerInfo[layerID];
 	
 	            if (currentIndex > 0 && !_layerOrder[currentIndex]) {
 	                currentIndex--;
@@ -21534,16 +21553,15 @@
 	        //     break;
 	
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
-	            // _frameOrder = action.rawAnimation.frameOrder;
+	            _frameOrder = action.rawAnimation.frameOrder;
 	            // to prevent tests from mutating rawAnimation data
-	            // _frameOrder = AppObjectUtils.clone(action.rawAnimation.frameOrder);
 	
-	            var obj = action.rawAnimation.frameOrder;
-	            var copy = [];
-	            for (var i = 0, len = obj.length; i < len; i++) {
-	                copy[i] = obj[i];
-	            }
-	            _frameOrder = copy;
+	            // var obj = action.rawAnimation.frameOrder;
+	            // var copy = [];
+	            // for (var i = 0, len = obj.length; i < len; i++) {
+	            //     copy[i] = obj[i];
+	            // }
+	            // _frameOrder = copy;
 	
 	            _currentID = _frameOrder[0];
 	            FrameStore.emitChange();
@@ -21556,6 +21574,15 @@
 	
 	        case ActionTypes.CLICK_FRAME:
 	            _currentID = action.frameID;
+	            FrameStore.emitChange();
+	            break;
+	
+	        case ActionTypes.CREATE_FRAME:
+	            var newID = 'f_' + AppObjectUtils.newID();
+	            var currentIndex = _frameOrder.indexOf(_currentID);
+	            var newIndex = currentIndex + 1;
+	            _frameOrder.splice(newIndex, 0, newID);
+	            _currentID = newID;
 	            FrameStore.emitChange();
 	            break;
 	
@@ -21918,7 +21945,8 @@
 	                key: frameID,
 	                name: 'frame',
 	                value: frameID,
-	                onChange: this._onChange });
+	                onChange: this._onChange,
+	                checked: frameID === this.state.currentFrameID });
 	        }, this);
 	
 	        return React.createElement(
@@ -21932,6 +21960,7 @@
 	        console.log('radio button', e.target.value);
 	        var frameID = e.target.value;
 	        AppFrameActionCreators.clickFrame(frameID);
+	        this.setState(getStateFromStore());
 	    }
 	
 	});
@@ -21955,6 +21984,12 @@
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.CLICK_FRAME,
 	            frameID: frameID
+	        });
+	    },
+	
+	    createFrame: function createFrame() {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.CREATE_FRAME
 	        });
 	    }
 	
