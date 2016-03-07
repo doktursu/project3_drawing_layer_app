@@ -109,6 +109,10 @@ var ObjectController = React.createClass({
         this.setState(getStateFromStore());
     },
 
+    _onBlur: function() {
+        canvas.deactivateAll();
+    },
+
     _onCreate: function(object) {
         AppObjectActionCreators.createObject(object, AnimationStore.getCurrentID(), LayerStore.getCurrentID(), FrameStore.getCurrentID());
     },
@@ -117,6 +121,14 @@ var ObjectController = React.createClass({
         var object = canvas.getActiveObject();
         if (object) {
             AppObjectActionCreators.destroyObject(object.id);
+        }
+        var group = canvas.getActiveGroup();
+        if (group) {
+            group.forEachObject(function(o) {
+                AppObjectActionCreators.destroyObject(o.id);
+            });
+            canvas.discardActiveGroup();
+            this._onChange();
         }
     },
 

@@ -21933,6 +21933,10 @@
 	        this.setState(getStateFromStore());
 	    },
 	
+	    _onBlur: function _onBlur() {
+	        canvas.deactivateAll();
+	    },
+	
 	    _onCreate: function _onCreate(object) {
 	        AppObjectActionCreators.createObject(object, AnimationStore.getCurrentID(), LayerStore.getCurrentID(), FrameStore.getCurrentID());
 	    },
@@ -21941,6 +21945,14 @@
 	        var object = canvas.getActiveObject();
 	        if (object) {
 	            AppObjectActionCreators.destroyObject(object.id);
+	        }
+	        var group = canvas.getActiveGroup();
+	        if (group) {
+	            group.forEachObject(function (o) {
+	                AppObjectActionCreators.destroyObject(o.id);
+	            });
+	            canvas.discardActiveGroup();
+	            this._onChange();
 	        }
 	    },
 	
