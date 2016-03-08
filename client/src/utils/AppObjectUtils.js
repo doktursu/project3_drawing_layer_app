@@ -19,7 +19,6 @@ module.exports = {
     },
 
     getCreatedObjectData: function(object, currentAnimationID, currentLayerID, currentFrameID) {
-        object.canvas = null;
         object.id = this.newID();
         object.animationId = currentAnimationID;
         object.layerID = currentLayerID;

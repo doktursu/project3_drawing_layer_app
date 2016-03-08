@@ -20247,6 +20247,15 @@
 	'use strict';
 	
 	var Dispatcher = __webpack_require__(164).Dispatcher;
+	var LogActions = __webpack_require__(198);
+	var assign = __webpack_require__(173);
+	
+	// var AppDispatcher = assign(new Dispatcher(), {
+	//     dispatch: function(action) {
+	//         Dispatcher.dispatch(action);
+	//         LogActions.log(action);
+	//     }
+	// });
 	
 	module.exports = new Dispatcher();
 
@@ -21498,7 +21507,6 @@
 	    },
 	
 	    getCreatedObjectData: function getCreatedObjectData(object, currentAnimationID, currentLayerID, currentFrameID) {
-	        object.canvas = null;
 	        object.id = this.newID();
 	        object.animationId = currentAnimationID;
 	        object.layerID = currentLayerID;
@@ -23356,6 +23364,18 @@
 	});
 	
 	module.exports = AssetListItem;
+
+/***/ },
+/* 198 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = {
+	    log: function log(action) {
+	        console.log('Action', action);
+	    }
+	};
 
 /***/ }
 /******/ ]);
