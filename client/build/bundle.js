@@ -20578,8 +20578,8 @@
 	
 	        ClICK_FRAME: null,
 	        CLICK_NEXT_FRAME: null,
-	        CLICK_NEXT_FRAME_ALT: null,
 	        CLICK_PREVIOUS_FRAME: null,
+	        CLICK_NEXT_FRAME_ALT: null,
 	        CLICK_LAYER: null,
 	
 	        TOGGLE_VISIBILITY: null,
@@ -20599,7 +20599,12 @@
 	
 	        CREATE_OBJECT: null,
 	
-	        RECEIVE_CANVAS: null
+	        RECEIVE_CANVAS: null,
+	
+	        SAVE_ASSET: null,
+	        CLICK_ASSET: null,
+	        DESTROY_ASSET: null
+	
 	    })
 	
 	};
@@ -21478,10 +21483,13 @@
 	    return string.charAt(0).toUpperCase() + string.slice(1);
 	}
 	
+	var idIncrement = 0;
+	
 	module.exports = {
 	
 	    newID: function newID() {
-	        return Date.now();
+	        idIncrement++;
+	        return Date.now() + idIncrement;
 	    },
 	
 	    convertRawObject: function convertRawObject(rawObject) {
@@ -21490,6 +21498,7 @@
 	    },
 	
 	    getCreatedObjectData: function getCreatedObjectData(object, currentAnimationID, currentLayerID, currentFrameID) {
+	        object.canvas = null;
 	        object.id = this.newID();
 	        object.animationId = currentAnimationID;
 	        object.layerID = currentLayerID;
@@ -21497,6 +21506,12 @@
 	        object.layerLock = false;
 	        object.layerVisible = true;
 	        return object;
+	    },
+	
+	    getCreatedAssetData: function getCreatedAssetData(asset, currentAnimationID) {
+	        asset.id = this.newID();
+	        asset.animationID = currentAnimationID;
+	        return asset;
 	    },
 	
 	    clone: function clone(obj) {
@@ -21862,6 +21877,7 @@
 	
 	// var FabricCanvas = require('./FabricCanvas.jsx');
 	var AppObjectActionCreators = __webpack_require__(180);
+	var AppAssetActionCreators = __webpack_require__(196);
 	
 	var DrawingModeOptions = __webpack_require__(160);
 	// var LayerSection = require('./LayerSection.jsx');
@@ -21964,6 +21980,12 @@
 	                    onClick: this._onDelete },
 	                'Delete Object'
 	            ),
+	            React.createElement(
+	                'button',
+	                {
+	                    onClick: this._onSaveAsset },
+	                'Save as Asset'
+	            ),
 	            React.createElement('canvas', {
 	                id: 'c',
 	                width: 300,
@@ -22005,6 +22027,26 @@
 	            });
 	            canvas.discardActiveGroup();
 	            this._onChange();
+	        }
+	    },
+	
+	    _onSaveAsset: function _onSaveAsset() {
+	        var object = canvas.getActiveObject();
+	        if (object) {
+	            console.log('ASSET OBJ', JSON.stringify(object));
+	            canvas.deactivateAll();
+	            var clone = fabric.util.object.clone(object);
+	            AppAssetActionCreators.saveAsset([clone]);
+	        }
+	        var group = canvas.getActiveGroup();
+	        if (group) {
+	            console.log('ASSET GROUP', group._objects);
+	            canvas.deactivateAll();
+	            var clones = [];
+	            group.forEachObject(function (o) {
+	                clones.unshift(fabric.util.object.clone(o));
+	            });
+	            AppAssetActionCreators.saveAsset(clones);
 	        }
 	    },
 	
@@ -22060,9 +22102,10 @@
 	        frameOrder.forEach(function (frameID) {
 	            var objects = ObjectStore.getAllForFrame(frameID);
 	            canvas._objects = objects;
-	            var img = canvas.toDataURL({ format: 'png' });
+	            var img = canvas.toDataURL({ format: 'jpeg' });
+	            // var imgdata = img.getImageData();
 	            console.log('got here');
-	            encoder.addFrame(img, true);
+	            encoder.addFrame(img);
 	        });
 	        encoder.finish();
 	        console.log('and got here');
@@ -22341,8 +22384,10 @@
 	var AppConstants = __webpack_require__(167);
 	var AppObjectUtils = __webpack_require__(174);
 	
+	var AnimationStore = __webpack_require__(183);
 	var FrameStore = __webpack_require__(178);
 	var LayerStore = __webpack_require__(171);
+	var AssetStore = __webpack_require__(195);
 	
 	var EventEmitter = __webpack_require__(172).EventEmitter;
 	var assign = __webpack_require__(173);
@@ -22472,8 +22517,18 @@
 	    },
 	
 	    getAllForCurrentFrame: function getAllForCurrentFrame() {
-	        console.log('frame current id', FrameStore.getCurrentID());
 	        return this.getAllForFrame(FrameStore.getCurrentID());
+	    },
+	
+	    getAllForLayerAndFrame: function getAllForLayerAndFrame(layerID, frameID) {
+	        var filteredObjects = [];
+	        for (var id in _objects) {
+	            var object = _objects[id];
+	            if (object.frameID === frameID && object.layerID === layerID) {
+	                filteredObjects.push(object);
+	            }
+	        }
+	        return filteredObjects;
 	    }
 	
 	});
@@ -22557,6 +22612,21 @@
 	            ObjectStore.emitChange();
 	            break;
 	
+	        case ActionTypes.CLICK_ASSET:
+	            AppDispatcher.waitFor([AssetStore.dispatchToken]);
+	            var rawObjects = AssetStore.getCurrentAsset().objects;
+	            console.log('rawObjects', rawObjects);
+	            var objects = rawObjects.map(function (object) {
+	                var clone = fabric.util.object.clone(object);
+	                return AppObjectUtils.getCreatedObjectData(clone, AnimationStore.getCurrentID(), LayerStore.getCurrentID(), FrameStore.getCurrentID());
+	            });
+	            console.log('mapped objects', objects);
+	
+	            objects.forEach(function (object) {
+	                _objects[object.id] = object;
+	            });
+	            ObjectStore.emitChange();
+	
 	        default:
 	        // do nothing
 	    }
@@ -22573,6 +22643,7 @@
 	var LayerSection = __webpack_require__(161);
 	var FrameSelector = __webpack_require__(186);
 	var ObjectController = __webpack_require__(179);
+	var AssetSection = __webpack_require__(194);
 	
 	var React = __webpack_require__(3);
 	
@@ -22584,9 +22655,10 @@
 	        return React.createElement(
 	            'div',
 	            null,
-	            React.createElement(LayerSection, null),
+	            React.createElement(AssetSection, null),
 	            React.createElement(ObjectController, null),
-	            React.createElement(FrameSelector, null)
+	            React.createElement(FrameSelector, null),
+	            React.createElement(LayerSection, null)
 	        );
 	    }
 	
@@ -22995,6 +23067,295 @@
 	});
 	
 	module.exports = FrameInterval;
+
+/***/ },
+/* 193 */,
+/* 194 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(3);
+	
+	var AssetListItem = __webpack_require__(197);
+	
+	var AssetStore = __webpack_require__(195);
+	
+	function getStateFromStore() {
+	    return {
+	        assets: AssetStore.getAll()
+	    };
+	}
+	
+	var assetCanvas;
+	
+	var AssetSection = React.createClass({
+	    displayName: 'AssetSection',
+	
+	
+	    getInitialState: function getInitialState() {
+	        return getStateFromStore();
+	    },
+	
+	    _initializeFabricCanvas: function _initializeFabricCanvas() {
+	        assetCanvas = new fabric.StaticCanvas("assetCanvas");
+	        // assetCanvas.isDrawingMode = true;
+	        // assetCanvas.selectable = true;
+	
+	        // var json = {};
+	        // json["objects"] = this.state.objects;
+	        // json["background"] = "rgba(0, 0, 0, 0)";
+	        // var json = JSON.stringify(json);
+	
+	        this.state.assets.forEach(function (asset) {
+	            assetCanvas.add(asset);
+	        });
+	        assetCanvas.renderAll();
+	
+	        // canvas.loadFromJSON(this.state.canvasJSON);
+	
+	        // canvas.on('object:added', function() {
+	        //     var objects = canvas.getObjects();
+	        //     var object = objects[objects.length - 1];
+	        //     this._onCreate(object);
+	        // }.bind(this));
+	
+	        console.log('canvas', JSON.stringify(assetCanvas));
+	        // this._sendCanvas(canvas);
+	        // this.setState({canvas: canvas});
+	    },
+	
+	    componentDidMount: function componentDidMount() {
+	        this._initializeFabricCanvas();
+	        AssetStore.addChangeListener(this._onChange);
+	    },
+	
+	    componentWillUnmount: function componentWillUnmount() {
+	        AssetStore.removeChangeListener(this._onChange);
+	    },
+	
+	    componentDidUpdate: function componentDidUpdate() {
+	        var allObjects = [];
+	        console.log('this.state.assets', this.state.assets);
+	        this.state.assets.forEach(function (asset) {
+	            console.log('this asset objects', asset.objects);
+	            allObjects = allObjects.concat(asset.objects);
+	        });
+	        console.log('ALL OBJECTs', allObjects);
+	        assetCanvas._objects = allObjects;
+	        assetCanvas.renderAll();
+	    },
+	
+	    render: function render() {
+	
+	        var assetListItems = this.state.assets.map(function (asset, index) {
+	            // assetCanvas = assetCanvas.cloneWithoutData();
+	            assetCanvas.clear();
+	            asset.objects.forEach(function (object) {
+	                assetCanvas.add(object);
+	            });
+	            var img = assetCanvas.toDataURLWithMultiplier('png', 0.25);
+	            // var img = '';
+	            return React.createElement(AssetListItem, {
+	                key: asset.id,
+	                assetID: asset.id,
+	                img: img
+	            });
+	        }.bind(this));
+	
+	        return React.createElement(
+	            'div',
+	            null,
+	            'Assets.',
+	            React.createElement('canvas', {
+	                id: 'assetCanvas',
+	                width: 300,
+	                height: 300 }),
+	            React.createElement(
+	                'ul',
+	                null,
+	                assetListItems
+	            )
+	        );
+	    },
+	
+	    _onChange: function _onChange() {
+	        console.log('CHANGING');
+	        this.setState(getStateFromStore);
+	    }
+	
+	});
+	
+	module.exports = AssetSection;
+
+/***/ },
+/* 195 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(163);
+	var AppConstants = __webpack_require__(167);
+	var EventEmitter = __webpack_require__(172).EventEmitter;
+	var assign = __webpack_require__(173);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	var CHANGE_EVENT = 'change';
+	
+	var _assets = [];
+	var _currentID = null;
+	
+	function _addAsset(asset) {
+	    _assets.push(asset);
+	}
+	
+	function _destroyAsset(assetID) {
+	    _assets = _assets.filter(function (asset) {
+	        return asset.id !== assetID;
+	    });
+	}
+	
+	var AssetStore = assign({}, EventEmitter.prototype, {
+	
+	    emitChange: function emitChange() {
+	        console.log('----------ASSET STORE----------');
+	        console.log('current assetID', _currentID);
+	        console.log('assets', _assets);
+	        this.emit(CHANGE_EVENT);
+	    },
+	
+	    addChangeListener: function addChangeListener(callback) {
+	        this.on(CHANGE_EVENT, callback);
+	    },
+	
+	    removeChangeListener: function removeChangeListener(callback) {
+	        this.removeListener(CHANGE_EVENT, callback);
+	    },
+	
+	    getAll: function getAll() {
+	        return _assets;
+	    },
+	
+	    getCurrentAsset: function getCurrentAsset() {
+	        var current = _assets.filter(function (asset) {
+	            return asset.id === _currentID;
+	        })[0];
+	        return current;
+	    }
+	
+	});
+	
+	AssetStore.dispatchToken = AppDispatcher.register(function (action) {
+	
+	    switch (action.type) {
+	
+	        case ActionTypes.SAVE_ASSET:
+	            _addAsset(action.asset);
+	            console.log('SAVING ASSET', _assets);
+	            AssetStore.emitChange();
+	            break;
+	
+	        case ActionTypes.CLICK_ASSET:
+	            console.log('ClICKED ASSET', action.assetID);
+	            _currentID = action.assetID;
+	            AssetStore.emitChange();
+	            break;
+	
+	        case ActionTypes.DESTROY_ASSET:
+	            _destroyAsset(action.assetID);
+	            AssetStore.emitChange();
+	            break;
+	
+	        default:
+	        // do nothing
+	    }
+	});
+	
+	module.exports = AssetStore;
+
+/***/ },
+/* 196 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(163);
+	var AppConstants = __webpack_require__(167);
+	var AppObjectUtils = __webpack_require__(174);
+	var AppWebAPIUtils = __webpack_require__(181);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	
+	module.exports = {
+	
+	    saveAsset: function saveAsset(asset) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.SAVE_ASSET,
+	            asset: {
+	                id: AppObjectUtils.newID(),
+	                objects: asset
+	            }
+	        });
+	    },
+	
+	    clickAsset: function clickAsset(assetID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.CLICK_ASSET,
+	            assetID: assetID
+	        });
+	    },
+	
+	    destroyAsset: function destroyAsset(assetID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.DESTROY_ASSET,
+	            assetID: assetID
+	        });
+	    }
+	
+	};
+
+/***/ },
+/* 197 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(3);
+	
+	var AppAssetActionCreators = __webpack_require__(196);
+	
+	var AssetListItem = React.createClass({
+	    displayName: 'AssetListItem',
+	
+	    render: function render() {
+	        return React.createElement(
+	            'li',
+	            null,
+	            React.createElement('img', { src: this.props.img }),
+	            this.props.assetID,
+	            React.createElement(
+	                'button',
+	                { onClick: this._onAddClick },
+	                'Add'
+	            ),
+	            React.createElement(
+	                'button',
+	                { onClick: this._onDeleteClick },
+	                'Delete'
+	            )
+	        );
+	    },
+	
+	    _onAddClick: function _onAddClick() {
+	        AppAssetActionCreators.clickAsset(this.props.assetID);
+	    },
+	
+	    _onDeleteClick: function _onDeleteClick() {
+	        AppAssetActionCreators.destroyAsset(this.props.assetID);
+	    }
+	});
+	
+	module.exports = AssetListItem;
 
 /***/ }
 /******/ ]);

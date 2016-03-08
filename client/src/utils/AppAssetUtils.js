@@ -4,13 +4,10 @@ function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-var idIncrement = 0;
-
 module.exports = {
 
     newID: function() {
-        idIncrement++;
-        return Date.now() + idIncrement;
+        return Date.now();
     },
 
     convertRawObject: function(rawObject) {
@@ -19,7 +16,6 @@ module.exports = {
     },
 
     getCreatedObjectData: function(object, currentAnimationID, currentLayerID, currentFrameID) {
-        object.canvas = null;
         object.id = this.newID();
         object.animationId = currentAnimationID;
         object.layerID = currentLayerID;
@@ -27,12 +23,6 @@ module.exports = {
         object.layerLock = false;
         object.layerVisible =true;
         return object;
-    },
-
-    getCreatedAssetData: function(asset, currentAnimationID) {
-        asset.id = this.newID();
-        asset.animationID = currentAnimationID;
-        return asset;
     },
 
     clone: function(obj) {

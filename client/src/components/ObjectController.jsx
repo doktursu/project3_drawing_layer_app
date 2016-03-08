@@ -1,5 +1,6 @@
 // var FabricCanvas = require('./FabricCanvas.jsx');
 var AppObjectActionCreators = require('../actions/AppObjectActionCreators');
+var AppAssetActionCreators = require('../actions/AppAssetActionCreators');
 
 var DrawingModeOptions = require('./DrawingModeOptions.jsx');
 // var LayerSection = require('./LayerSection.jsx');
@@ -93,6 +94,10 @@ var ObjectController = React.createClass({
                     onClick={this._onDelete}>
                     Delete Object
                 </button>
+                <button
+                    onClick={this._onSaveAsset}>
+                    Save as Asset
+                </button>
                 <canvas 
                     id="c"
                     width={300}
@@ -133,6 +138,26 @@ var ObjectController = React.createClass({
             });
             canvas.discardActiveGroup();
             this._onChange();
+        }
+    },
+
+    _onSaveAsset: function() {
+        var object = canvas.getActiveObject();
+        if (object) {
+            console.log('ASSET OBJ', JSON.stringify(object));
+            canvas.deactivateAll();
+            var clone = fabric.util.object.clone(object);
+            AppAssetActionCreators.saveAsset([clone]);
+        }
+        var group = canvas.getActiveGroup();
+        if (group) {
+            console.log('ASSET GROUP', group._objects);
+            canvas.deactivateAll();
+            var clones = [];
+            group.forEachObject(function(o) {
+                clones.unshift(fabric.util.object.clone(o));
+            });
+            AppAssetActionCreators.saveAsset(clones);
         }
     },
 
@@ -188,9 +213,10 @@ var ObjectController = React.createClass({
         frameOrder.forEach(function(frameID) {
             var objects = ObjectStore.getAllForFrame(frameID);
             canvas._objects = objects;
-            var img = canvas.toDataURL({format:'png'});
+            var img = canvas.toDataURL({format:'jpeg'});
+            // var imgdata = img.getImageData();
             console.log('got here');
-            encoder.addFrame(img, true);
+            encoder.addFrame(img);
         });
         encoder.finish();
         console.log('and got here');

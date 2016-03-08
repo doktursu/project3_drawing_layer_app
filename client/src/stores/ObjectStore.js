@@ -2,8 +2,11 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var AppConstants = require('../constants/AppConstants');
 var AppObjectUtils = require('../utils/AppObjectUtils');
 
+var AnimationStore = require('./AnimationStore');
 var FrameStore = require('./FrameStore');
 var LayerStore = require('./LayerStore');
+var AssetStore = require('./AssetStore');
+
 
 
 var EventEmitter = require('events').EventEmitter;
@@ -135,8 +138,18 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
     },
 
     getAllForCurrentFrame: function() {
-        console.log('frame current id', FrameStore.getCurrentID());
         return this.getAllForFrame(FrameStore.getCurrentID());
+    },
+
+    getAllForLayerAndFrame: function(layerID, frameID) {
+        var filteredObjects = [];
+        for (var id in _objects) {
+            var object = _objects[id];
+            if (object.frameID === frameID && object.layerID === layerID) {
+                filteredObjects.push(object);
+            }
+        }
+        return filteredObjects;
     }
 
 });
@@ -223,7 +236,20 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             ObjectStore.emitChange();
             break;
 
-        
+        case ActionTypes.CLICK_ASSET:
+            AppDispatcher.waitFor([AssetStore.dispatchToken]);
+            var rawObjects = AssetStore.getCurrentAsset().objects;
+            console.log('rawObjects', rawObjects);
+            var objects = rawObjects.map(function(object) {
+                var clone = fabric.util.object.clone(object);
+                return AppObjectUtils.getCreatedObjectData(clone, AnimationStore.getCurrentID(), LayerStore.getCurrentID(), FrameStore.getCurrentID());
+            });
+            console.log('mapped objects', objects);
+
+            objects.forEach(function(object) {
+                _objects[object.id] = object;
+            });
+            ObjectStore.emitChange();
 
         default:
             // do nothing
