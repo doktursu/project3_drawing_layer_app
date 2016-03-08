@@ -1,12 +1,15 @@
 var AppFrameActionCreators = require('../actions/AppFrameActionCreators');
 
+var FrameInterval = require('./FrameInterval');
+
 var React = require('react');
 var FrameStore = require('../stores/FrameStore.js');
 
 function getStateFromStore() {
     return {
         frames: FrameStore.getOrder(),
-        currentFrameID: FrameStore.getCurrentID()
+        currentFrameID: FrameStore.getCurrentID(),
+        interval: FrameStore.getInterval()
     };
 }
 
@@ -16,9 +19,11 @@ var FrameSelector = React.createClass({
         return {
             frames: FrameStore.getOrder(),
             currentFrameID: FrameStore.getCurrentID(),
-            playMode: false
+            interval: FrameStore.getInterval(),
+            isPlayingMode: false,
+            direction: 'normal'
         };
-    },
+    }, 
 
     componentDidMount: function() {
         FrameStore.addChangeListener(this._onChange);
@@ -45,17 +50,52 @@ var FrameSelector = React.createClass({
                 <form>
                     {radioButtons}
                 </form>
-                <button onClick={this._onClick}>Add Frame</button>
-                <button onClick={this._toggleAnimation}>Play</button>
+                <button
+                    onClick={this._onClick}
+                    disabled={this.state.isPlayingMode}>
+                    Add Frame
+                </button>
+                <FrameInterval
+                    onSave={this._onIntervalSave}
+                    interval={this.state.interval}
+                    disabled={this.state.isPlayingMode} 
+                />
+                <select 
+                    onChange={this._onSelectChange}
+                    disabled={this.state.isPlayingMode}>
+                    <option value="normal">Normal</option>
+                    <option value="reverse">Reverse</option>
+                    <option value="alternate">Alternate</option>
+                </select>
+                <button
+                    onClick={this._toggleAnimation}>
+                    {this.state.isPlayingMode ? 'Stop' : 'Play'}
+                </button>
             </div>
         );
     },
 
     componentDidUpdate: function() {
-        if (this.state.playMode) {
-            setTimeout(function() {
-              AppFrameActionCreators.clickNextFrame();
-            }, 100)
+        if (this.state.isPlayingMode) {
+            switch (this.state.direction) {
+                case 'normal':
+                    setTimeout(function() {
+                      AppFrameActionCreators.clickNextFrame();
+                    }, this.state.interval);
+                    break;
+                case 'reverse':
+                    setTimeout(function() {
+                      AppFrameActionCreators.clickPreviousFrame();
+                    }, this.state.interval);
+                    break;
+                case 'alternate':
+                    setTimeout(function() {
+                      AppFrameActionCreators.clickNextFrameAlt();
+                    }, this.state.interval);
+                    break;
+                default:
+            }
+            
         }
     },
 
@@ -75,9 +115,18 @@ var FrameSelector = React.createClass({
         this.setState(getStateFromStore());
     },
 
+    _onIntervalSave: function(frameInterval) {
+        AppFrameActionCreators.setFrameInterval(frameInterval);
+    },
+
+    _onSelectChange: function(e) {
+        var newDirection = e.target.value;
+        this.setState({direction: newDirection});
+    },
+
     _toggleAnimation: function() {
-        var nextPlayMode = !this.state.playMode;
-        this.setState({playMode: nextPlayMode});
+        var nextPlayMode = !this.state.isPlayingMode;
+        this.setState({isPlayingMode: nextPlayMode});
     }
 
 });

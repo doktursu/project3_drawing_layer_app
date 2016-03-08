@@ -174,6 +174,8 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.CLICK_FRAME:
         case ActionTypes.CLICK_NEXT_FRAME:
+        case ActionTypes.CLICK_PREVIOUS_FRAME:
+        case ActionTypes.CLICK_NEXT_FRAME_ALT:
             AppDispatcher.waitFor([FrameStore.dispatchToken]);
             ObjectStore.emitChange();
             break;

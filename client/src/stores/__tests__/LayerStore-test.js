@@ -22,6 +22,7 @@ describe('Layer Store', function() {
                     
             animationID: 1,
             frameOrder: ['f_1', 'f_2'],
+            frameInterval: 100,
             layerOrder: ['l_0', 'l_1', 'l_2'],
             layerInfo: {
                 'l_0':{

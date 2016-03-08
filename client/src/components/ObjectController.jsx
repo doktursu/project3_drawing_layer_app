@@ -99,6 +99,10 @@ var ObjectController = React.createClass({
                     height={300}
                     onKeyDown={this._onKeyDown} />
                 <DrawingModeOptions canvas={canvas} />
+                <button
+                    onClick={this._exportGIF}>
+                    Export to GIF
+                </button>
             </div>
         );
     },
@@ -143,6 +147,68 @@ var ObjectController = React.createClass({
 
     _sendCanvas: function(canvas) {
         AppObjectActionCreators.sendCanvas(canvas);
+    },
+
+    _exportGIF: function() {
+        // var gif = new GIF({
+        //     workers: 2,
+        //     quality: 10
+        // });
+
+        // gif.addFrame(imageElement);
+        // gif.addFrame(canvasElement, {delay: 200});
+
+        // gif.on('finished', function(blob) {
+        //     window.open(URL.createObjectURL(blob));
+        // });
+
+        // gif.render();
+
+        // set 
+        // var gif = new GIF({
+        //     workers: 2,
+        //     quality: 10
+        // });
+
+        // var frameOrder = FrameStore.getOrder();
+        // frameOrder.forEach(function(frameID) {
+        //     var objects = ObjectStore.getAllForFrame(frameID);
+        //     canvas._objects = objects;
+        //     var img = canvas.toDataURL('png')
+        //      window.open(img);
+        // });
+
+        //////
+
+        var encoder = new GIFEncoder();
+        encoder.setRepeat(0);
+        encoder.setDelay(500);
+        encoder.start();
+        var frameOrder = FrameStore.getOrder();
+        frameOrder.forEach(function(frameID) {
+            var objects = ObjectStore.getAllForFrame(frameID);
+            canvas._objects = objects;
+            var img = canvas.toDataURL({format:'png'});
+            console.log('got here');
+            encoder.addFrame(img, true);
+        });
+        encoder.finish();
+        console.log('and got here');
+        var binary_gif = encoder.stream().getData();
+        var data_url = 'data:image/gif;base64,' + encode64(binary_gif);
+        window.open(data_url);
+
+
+        ///////
+
+        //  gif.on('finished', function(blob) {
+        //     window.open(gif);
+        //  });
+
+        //  gif.render();
+
+        // var img = canvas.toDataURL('png');
+        // window.open(img);
     }
 });
 

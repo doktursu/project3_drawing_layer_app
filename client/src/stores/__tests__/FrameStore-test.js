@@ -16,6 +16,7 @@ describe('Frame Store', function() {
                     
             animationID: 1,
             frameOrder: ['f_1', 'f_2'],
+            frameInterval: 100,
             layerOrder: ['l_0', 'l_1', 'l_2'],
             layerInfo: {
                 'l_0':{
@@ -82,6 +83,14 @@ describe('Frame Store', function() {
         type: ActionTypes.CREATE_FRAME
     };
 
+    var actionClickNextFrame = {
+        type: ActionTypes.CLICK_NEXT_FRAME
+    };
+
+    var actionClickPreviousFrame = {
+        type: ActionTypes.CLICK_PREVIOUS_FRAME
+    };
+
     beforeEach(function() {
         AppDispatcher = require('../../dispatcher/AppDispatcher');
         FrameStore = require('../FrameStore');
@@ -138,6 +147,29 @@ describe('Frame Store', function() {
         expect(frameOrder[0]).toEqual('f_1');
         expect(frameOrder[1]).toEqual('f_3');
         expect(frameOrder[2]).toEqual('f_2');
+    });
+
+    it('clicks the next frame', function() {
+        callback(actionReceiveRawAnimation);
+        expect(FrameStore.getCurrentID()).toEqual('f_1');
+        callback(actionClickNextFrame);
+        expect(FrameStore.getCurrentID()).toEqual('f_2');
+    });
+
+    it('clicks the next frame and return to 0 if current frame is last', function() {
+        callback(actionReceiveRawAnimation);
+        expect(FrameStore.getCurrentID()).toEqual('f_1');
+        callback(actionClickNextFrame);
+        expect(FrameStore.getCurrentID()).toEqual('f_2');
+        callback(actionClickNextFrame);
+        expect(FrameStore.getCurrentID()).toEqual('f_1');
+    });
+
+    it('clicks the previous frame and goes to last if current frame is first', function() {
+        callback(actionReceiveRawAnimation);
+        expect(FrameStore.getCurrentID()).toEqual('f_1');
+        callback(actionClickPreviousFrame);
+        expect(FrameStore.getCurrentID()).toEqual('f_2');
     });
 
 

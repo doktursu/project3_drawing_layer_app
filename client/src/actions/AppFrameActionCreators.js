@@ -18,9 +18,28 @@ module.exports = {
         });
     },
 
+    clickNextFrameAlt: function() {
+        AppDispatcher.dispatch({
+            type: ActionTypes.CLICK_NEXT_FRAME_ALT
+        });
+    },
+
+    clickPreviousFrame: function() {
+        AppDispatcher.dispatch({
+            type: ActionTypes.CLICK_PREVIOUS_FRAME
+        });
+    },
+
     createFrame: function() {
         AppDispatcher.dispatch({
             type: ActionTypes.CREATE_FRAME
+        });
+    },
+
+    setFrameInterval: function(frameInterval) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.SET_FRAME_INTERVAL,
+            frameInterval: frameInterval
         });
     }
 

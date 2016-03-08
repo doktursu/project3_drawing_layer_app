@@ -20578,6 +20578,8 @@
 	
 	        ClICK_FRAME: null,
 	        CLICK_NEXT_FRAME: null,
+	        CLICK_NEXT_FRAME_ALT: null,
+	        CLICK_PREVIOUS_FRAME: null,
 	        CLICK_LAYER: null,
 	
 	        TOGGLE_VISIBILITY: null,
@@ -20592,6 +20594,8 @@
 	        DESTROY_OBJECT: null,
 	
 	        CREATE_FRAME: null,
+	
+	        SET_FRAME_INTERVAL: null,
 	
 	        CREATE_OBJECT: null,
 	
@@ -21678,7 +21682,24 @@
 	
 	var _currentID = null;
 	var _frameOrder = [];
+	var _frameInterval = 100;
+	var _direction = 'normal';
+	
 	var _frames = {};
+	
+	function _clickNextFrame() {
+	    var currentIndex = _frameOrder.indexOf(_currentID);
+	    var nextIndex = currentIndex + 1;
+	    if (nextIndex >= _frameOrder.length) nextIndex = 0;
+	    _currentID = _frameOrder[nextIndex];
+	}
+	
+	function _clickPreviousFrame() {
+	    var currentIndex = _frameOrder.indexOf(_currentID);
+	    var nextIndex = currentIndex - 1;
+	    if (nextIndex < 0) nextIndex = _frameOrder.length - 1;
+	    _currentID = _frameOrder[nextIndex];
+	}
 	
 	var FrameStore = assign({}, EventEmitter.prototype, {
 	
@@ -21724,6 +21745,10 @@
 	        return _frameOrder;
 	    },
 	
+	    getInterval: function getInterval() {
+	        return _frameInterval;
+	    },
+	
 	    getAllByFrame: function getAllByFrame(frameID) {
 	        return _frames[frameID];
 	    },
@@ -21759,6 +21784,7 @@
 	
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
 	            _frameOrder = action.rawAnimation.frameOrder;
+	            _frameInterval = action.rawAnimation.frameInterval;
 	            // to prevent tests from mutating rawAnimation data
 	
 	            // var obj = action.rawAnimation.frameOrder;
@@ -21779,16 +21805,31 @@
 	
 	        case ActionTypes.CLICK_FRAME:
 	            _currentID = action.frameID;
-	            console.log('CURRENT FRAME IS', _currentID);
 	            FrameStore.emitChange();
 	            break;
 	
 	        case ActionTypes.CLICK_NEXT_FRAME:
+	            _clickNextFrame();
+	            FrameStore.emitChange();
+	            break;
+	
+	        case ActionTypes.CLICK_PREVIOUS_FRAME:
+	            _clickPreviousFrame();
+	            FrameStore.emitChange();
+	            break;
+	
+	        case ActionTypes.CLICK_NEXT_FRAME_ALT:
 	            var currentIndex = _frameOrder.indexOf(_currentID);
-	            var nextIndex = currentIndex + 1;
-	            if (nextIndex >= _frameOrder.length) nextIndex = 0;
-	            _currentID = _frameOrder[nextIndex];
-	            console.log('NEXT FRAME IS', _currentID);
+	            if (currentIndex === 0) {
+	                _direction = 'normal';
+	            } else if (currentIndex === _frameOrder.length - 1) {
+	                _direction = 'reverse';
+	            }
+	            if (_direction === 'normal') {
+	                _clickNextFrame();
+	            } else {
+	                _clickPreviousFrame();
+	            }
 	            FrameStore.emitChange();
 	            break;
 	
@@ -21798,6 +21839,11 @@
 	            var newIndex = currentIndex + 1;
 	            _frameOrder.splice(newIndex, 0, newID);
 	            _currentID = newID;
+	            FrameStore.emitChange();
+	            break;
+	
+	        case ActionTypes.SET_FRAME_INTERVAL:
+	            _frameInterval = action.frameInterval;
 	            FrameStore.emitChange();
 	            break;
 	
@@ -21923,7 +21969,13 @@
 	                width: 300,
 	                height: 300,
 	                onKeyDown: this._onKeyDown }),
-	            React.createElement(DrawingModeOptions, { canvas: canvas })
+	            React.createElement(DrawingModeOptions, { canvas: canvas }),
+	            React.createElement(
+	                'button',
+	                {
+	                    onClick: this._exportGIF },
+	                'Export to GIF'
+	            )
 	        );
 	    },
 	
@@ -21967,6 +22019,67 @@
 	
 	    _sendCanvas: function _sendCanvas(canvas) {
 	        AppObjectActionCreators.sendCanvas(canvas);
+	    },
+	
+	    _exportGIF: function _exportGIF() {
+	        // var gif = new GIF({
+	        //     workers: 2,
+	        //     quality: 10
+	        // });
+	
+	        // gif.addFrame(imageElement);
+	        // gif.addFrame(canvasElement, {delay: 200});
+	
+	        // gif.on('finished', function(blob) {
+	        //     window.open(URL.createObjectURL(blob));
+	        // });
+	
+	        // gif.render();
+	
+	        // set
+	        // var gif = new GIF({
+	        //     workers: 2,
+	        //     quality: 10
+	        // });
+	
+	        // var frameOrder = FrameStore.getOrder();
+	        // frameOrder.forEach(function(frameID) {
+	        //     var objects = ObjectStore.getAllForFrame(frameID);
+	        //     canvas._objects = objects;
+	        //     var img = canvas.toDataURL('png')
+	        //      window.open(img);
+	        // });
+	
+	        //////
+	
+	        var encoder = new GIFEncoder();
+	        encoder.setRepeat(0);
+	        encoder.setDelay(500);
+	        encoder.start();
+	        var frameOrder = FrameStore.getOrder();
+	        frameOrder.forEach(function (frameID) {
+	            var objects = ObjectStore.getAllForFrame(frameID);
+	            canvas._objects = objects;
+	            var img = canvas.toDataURL({ format: 'png' });
+	            console.log('got here');
+	            encoder.addFrame(img, true);
+	        });
+	        encoder.finish();
+	        console.log('and got here');
+	        var binary_gif = encoder.stream().getData();
+	        var data_url = 'data:image/gif;base64,' + encode64(binary_gif);
+	        window.open(data_url);
+	
+	        ///////
+	
+	        //  gif.on('finished', function(blob) {
+	        //     window.open(gif);
+	        //  });
+	
+	        //  gif.render();
+	
+	        // var img = canvas.toDataURL('png');
+	        // window.open(img);
 	    }
 	});
 	
@@ -22398,6 +22511,8 @@
 	
 	        case ActionTypes.CLICK_FRAME:
 	        case ActionTypes.CLICK_NEXT_FRAME:
+	        case ActionTypes.CLICK_PREVIOUS_FRAME:
+	        case ActionTypes.CLICK_NEXT_FRAME_ALT:
 	            AppDispatcher.waitFor([FrameStore.dispatchToken]);
 	            ObjectStore.emitChange();
 	            break;
@@ -22487,13 +22602,16 @@
 	
 	var AppFrameActionCreators = __webpack_require__(187);
 	
+	var FrameInterval = __webpack_require__(192);
+	
 	var React = __webpack_require__(3);
 	var FrameStore = __webpack_require__(178);
 	
 	function getStateFromStore() {
 	    return {
 	        frames: FrameStore.getOrder(),
-	        currentFrameID: FrameStore.getCurrentID()
+	        currentFrameID: FrameStore.getCurrentID(),
+	        interval: FrameStore.getInterval()
 	    };
 	}
 	
@@ -22505,7 +22623,9 @@
 	        return {
 	            frames: FrameStore.getOrder(),
 	            currentFrameID: FrameStore.getCurrentID(),
-	            playMode: false
+	            interval: FrameStore.getInterval(),
+	            isPlayingMode: false,
+	            direction: 'normal'
 	        };
 	    },
 	
@@ -22539,22 +22659,66 @@
 	            ),
 	            React.createElement(
 	                'button',
-	                { onClick: this._onClick },
+	                {
+	                    onClick: this._onClick,
+	                    disabled: this.state.isPlayingMode },
 	                'Add Frame'
+	            ),
+	            React.createElement(FrameInterval, {
+	                onSave: this._onIntervalSave,
+	                interval: this.state.interval,
+	                disabled: this.state.isPlayingMode
+	            }),
+	            React.createElement(
+	                'select',
+	                {
+	                    onChange: this._onSelectChange,
+	                    disabled: this.state.isPlayingMode },
+	                React.createElement(
+	                    'option',
+	                    { value: 'normal' },
+	                    'Normal'
+	                ),
+	                React.createElement(
+	                    'option',
+	                    { value: 'reverse' },
+	                    'Reverse'
+	                ),
+	                React.createElement(
+	                    'option',
+	                    { value: 'alternate' },
+	                    'Alternate'
+	                )
 	            ),
 	            React.createElement(
 	                'button',
-	                { onClick: this._toggleAnimation },
-	                'Play'
+	                {
+	                    onClick: this._toggleAnimation },
+	                this.state.isPlayingMode ? 'Stop' : 'Play'
 	            )
 	        );
 	    },
 	
 	    componentDidUpdate: function componentDidUpdate() {
-	        if (this.state.playMode) {
-	            setTimeout(function () {
-	                AppFrameActionCreators.clickNextFrame();
-	            }, 100);
+	        if (this.state.isPlayingMode) {
+	            switch (this.state.direction) {
+	                case 'normal':
+	                    setTimeout(function () {
+	                        AppFrameActionCreators.clickNextFrame();
+	                    }, this.state.interval);
+	                    break;
+	                case 'reverse':
+	                    setTimeout(function () {
+	                        AppFrameActionCreators.clickPreviousFrame();
+	                    }, this.state.interval);
+	                    break;
+	                case 'alternate':
+	                    setTimeout(function () {
+	                        AppFrameActionCreators.clickNextFrameAlt();
+	                    }, this.state.interval);
+	                    break;
+	                default:
+	            }
 	        }
 	    },
 	
@@ -22574,9 +22738,18 @@
 	        this.setState(getStateFromStore());
 	    },
 	
+	    _onIntervalSave: function _onIntervalSave(frameInterval) {
+	        AppFrameActionCreators.setFrameInterval(frameInterval);
+	    },
+	
+	    _onSelectChange: function _onSelectChange(e) {
+	        var newDirection = e.target.value;
+	        this.setState({ direction: newDirection });
+	    },
+	
 	    _toggleAnimation: function _toggleAnimation() {
-	        var nextPlayMode = !this.state.playMode;
-	        this.setState({ playMode: nextPlayMode });
+	        var nextPlayMode = !this.state.isPlayingMode;
+	        this.setState({ isPlayingMode: nextPlayMode });
 	    }
 	
 	});
@@ -22609,9 +22782,28 @@
 	        });
 	    },
 	
+	    clickNextFrameAlt: function clickNextFrameAlt() {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.CLICK_NEXT_FRAME_ALT
+	        });
+	    },
+	
+	    clickPreviousFrame: function clickPreviousFrame() {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.CLICK_PREVIOUS_FRAME
+	        });
+	    },
+	
 	    createFrame: function createFrame() {
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.CREATE_FRAME
+	        });
+	    },
+	
+	    setFrameInterval: function setFrameInterval(frameInterval) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.SET_FRAME_INTERVAL,
+	            frameInterval: frameInterval
 	        });
 	    }
 	
@@ -22682,6 +22874,7 @@
 	
 	            animationID: 1,
 	            frameOrder: ['f_1', 'f_2'],
+	            frameInterval: 100,
 	            layerOrder: ['l_0', 'l_1'],
 	            layerInfo: {
 	                'l_0': {
@@ -22747,6 +22940,56 @@
 	
 	module.exports = __webpack_require__(5);
 
+
+/***/ },
+/* 192 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var React = __webpack_require__(3);
+	
+	var FrameInterval = React.createClass({
+	    displayName: "FrameInterval",
+	
+	
+	    getInitialState: function getInitialState() {
+	        return {
+	            interval: this.props.interval || 100
+	        };
+	    },
+	
+	    render: function render() {
+	        return React.createElement("input", {
+	            type: "number",
+	            min: "50",
+	            max: "5000",
+	            step: "100",
+	            value: this.state.interval,
+	            onChange: this._onIntervalChange,
+	            onBlur: this._onIntervalBlur,
+	            disabled: this.props.disabled
+	        });
+	    },
+	
+	    _onIntervalChange: function _onIntervalChange(e) {
+	        var newInterval = parseInt(e.target.value);
+	        this.setState({ interval: newInterval });
+	    },
+	
+	    _onIntervalBlur: function _onIntervalBlur(e) {
+	        var newInterval = parseInt(e.target.value);
+	        this.setState({ interval: newInterval });
+	        this._onIntervalSave();
+	    },
+	
+	    _onIntervalSave: function _onIntervalSave() {
+	        this.props.onSave(this.state.interval);
+	    }
+	
+	});
+	
+	module.exports = FrameInterval;
 
 /***/ }
 /******/ ]);

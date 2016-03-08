@@ -6,6 +6,7 @@ module.exports = {
     
         animationID: 1,
         frameOrder: ['f_1', 'f_2'],
+        frameInterval: 100,
         layerOrder: ['l_0', 'l_1'],
         layerInfo: {
             'l_0':{

@@ -10,7 +10,25 @@ var CHANGE_EVENT = 'change';
 
 var _currentID = null;
 var _frameOrder = [];
+var _frameInterval = 100;
+var _direction = 'normal';
+
+
 var _frames = {};
+
+function _clickNextFrame() {
+    var currentIndex = _frameOrder.indexOf(_currentID);
+    var nextIndex = currentIndex + 1;
+    if (nextIndex >= _frameOrder.length) nextIndex = 0;
+    _currentID = _frameOrder[nextIndex];
+}
+
+function _clickPreviousFrame() {
+    var currentIndex = _frameOrder.indexOf(_currentID);
+    var nextIndex = currentIndex - 1;
+    if (nextIndex < 0) nextIndex = _frameOrder.length - 1;
+    _currentID = _frameOrder[nextIndex];
+}
 
 
 var FrameStore = assign({}, EventEmitter.prototype, {
@@ -57,6 +75,11 @@ var FrameStore = assign({}, EventEmitter.prototype, {
         return _frameOrder;
     },
 
+    getInterval: function() {
+        return _frameInterval;
+    },
+
+
     getAllByFrame: function(frameID) {
         return _frames[frameID];
     },
@@ -92,6 +115,7 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.RECEIVE_RAW_ANIMATION:
             _frameOrder = action.rawAnimation.frameOrder;
+            _frameInterval = action.rawAnimation.frameInterval;
             // to prevent tests from mutating rawAnimation data
 
             // var obj = action.rawAnimation.frameOrder;
@@ -113,16 +137,31 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.CLICK_FRAME:
             _currentID = action.frameID;
-            console.log('CURRENT FRAME IS', _currentID);
             FrameStore.emitChange();
             break;
 
         case ActionTypes.CLICK_NEXT_FRAME:
+            _clickNextFrame();
+            FrameStore.emitChange();
+            break;
+
+        case ActionTypes.CLICK_PREVIOUS_FRAME:
+            _clickPreviousFrame();
+            FrameStore.emitChange();
+            break;
+
+        case ActionTypes.CLICK_NEXT_FRAME_ALT:
             var currentIndex = _frameOrder.indexOf(_currentID);
-            var nextIndex = currentIndex + 1;
-            if (nextIndex >= _frameOrder.length) nextIndex = 0;
-            _currentID = _frameOrder[nextIndex];
-            console.log('NEXT FRAME IS', _currentID);
+            if (currentIndex === 0) {
+                _direction = 'normal';
+            } else if (currentIndex === _frameOrder.length - 1) {
+                _direction = 'reverse';
+            }
+            if (_direction === 'normal') {
+                _clickNextFrame();
+            } else {
+                _clickPreviousFrame();
+            }
             FrameStore.emitChange();
             break;
 
@@ -132,6 +171,11 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
             var newIndex = currentIndex + 1;
             _frameOrder.splice(newIndex, 0, newID);
             _currentID = newID;
+            FrameStore.emitChange();
+            break;
+
+        case ActionTypes.SET_FRAME_INTERVAL:
+            _frameInterval = action.frameInterval;
             FrameStore.emitChange();
             break;
 

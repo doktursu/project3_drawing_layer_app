@@ -13,6 +13,8 @@ module.exports = {
 
         ClICK_FRAME: null,
         CLICK_NEXT_FRAME: null,
+        CLICK_NEXT_FRAME_ALT: null,
+        CLICK_PREVIOUS_FRAME: null,
         CLICK_LAYER: null,
 
         TOGGLE_VISIBILITY: null,
@@ -27,6 +29,8 @@ module.exports = {
         DESTROY_OBJECT: null,
 
         CREATE_FRAME: null,
+
+        SET_FRAME_INTERVAL: null,
 
         CREATE_OBJECT: null,
 
