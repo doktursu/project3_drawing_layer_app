@@ -22974,6 +22974,11 @@
 	
 	    _onIntervalChange: function _onIntervalChange(e) {
 	        var newInterval = parseInt(e.target.value);
+	        if (newInterval > 5000) {
+	            newInterval = 5000;
+	        } else if (newInterval < 50) {
+	            newInterval = 50;
+	        }
 	        this.setState({ interval: newInterval });
 	    },
 	
