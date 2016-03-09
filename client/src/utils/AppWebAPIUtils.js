@@ -87,6 +87,27 @@ module.exports = {
         request.send(JSON.stringify(asset));
     },
 
+    updateAsset: function(assetID, assetName) {
+
+        var asset = {
+            asset: {
+                name: assetName
+            }
+        }
+
+        var url = 'http://localhost:3000/api/assets' + '/' + assetID;
+        var request = new XMLHttpRequest();
+        request.open('PUT', url);
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.onload = function() {
+            if (request.status === 200) {
+                var rawAsset = JSON.parse(request.responseText);
+                AppAssetActionCreators.renameAsset(assetID, assetName);
+            }
+        };
+        request.send(JSON.stringify(asset));
+    },
+
     destroyAsset: function(assetID) {
         var url = 'http://localhost:3000/api/assets' + '/' + assetID;
         var request = new XMLHttpRequest();

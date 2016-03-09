@@ -27,6 +27,13 @@ function _destroyAsset(assetID) {
     });
 }
 
+function _renameAsset(assetID, assetName) {
+    var asset = _assets.filter(function(asset) {
+        return asset.id === assetID;
+    });
+    asset.name = assetName;
+}
+
 var AssetStore = assign({}, EventEmitter.prototype, {
 
     emitChange: function() {
@@ -85,6 +92,11 @@ AssetStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.DESTROY_ASSET:
             _destroyAsset(action.assetID);
+            AssetStore.emitChange();
+            break;
+
+        case ActionTypes.RENAME_ASSET:
+            _renameAsset(action.assetID, action.assetName);
             AssetStore.emitChange();
             break;
 

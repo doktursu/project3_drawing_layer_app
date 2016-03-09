@@ -20674,6 +20674,7 @@
 	        SAVE_ASSET: null,
 	        CLICK_ASSET: null,
 	        DESTROY_ASSET: null,
+	        RENAME_ASSET: null,
 	
 	        RECEIVE_RAW_ASSETS: null,
 	        RECEIVE_CREATED_RAW_ASSET: null,
@@ -22312,6 +22313,27 @@
 	        request.send(JSON.stringify(asset));
 	    },
 	
+	    updateAsset: function updateAsset(assetID, assetName) {
+	
+	        var asset = {
+	            asset: {
+	                name: assetName
+	            }
+	        };
+	
+	        var url = 'http://localhost:3000/api/assets' + '/' + assetID;
+	        var request = new XMLHttpRequest();
+	        request.open('PUT', url);
+	        request.setRequestHeader('Content-Type', 'application/json');
+	        request.onload = function () {
+	            if (request.status === 200) {
+	                var rawAsset = JSON.parse(request.responseText);
+	                AppAssetActionCreators.renameAsset(assetID, assetName);
+	            }
+	        };
+	        request.send(JSON.stringify(asset));
+	    },
+	
 	    destroyAsset: function destroyAsset(assetID) {
 	        var url = 'http://localhost:3000/api/assets' + '/' + assetID;
 	        var request = new XMLHttpRequest();
@@ -22553,6 +22575,14 @@
 	        AppDispatcher.dispatch({
 	            type: ActionTypes.DESTROY_ASSET,
 	            assetID: assetID
+	        });
+	    },
+	
+	    renameAsset: function renameAsset(assetID, assetName) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.RENAME_ASSET,
+	            assetID: assetID,
+	            assetName: assetName
 	        });
 	    }
 	
@@ -22929,6 +22959,13 @@
 	    });
 	}
 	
+	function _renameAsset(assetID, assetName) {
+	    var asset = _assets.filter(function (asset) {
+	        return asset.id === assetID;
+	    });
+	    asset.name = assetName;
+	}
+	
 	var AssetStore = assign({}, EventEmitter.prototype, {
 	
 	    emitChange: function emitChange() {
@@ -22987,6 +23024,11 @@
 	
 	        case ActionTypes.DESTROY_ASSET:
 	            _destroyAsset(action.assetID);
+	            AssetStore.emitChange();
+	            break;
+	
+	        case ActionTypes.RENAME_ASSET:
+	            _renameAsset(action.assetID, action.assetName);
 	            AssetStore.emitChange();
 	            break;
 	
@@ -23389,6 +23431,7 @@
 	            return React.createElement(AssetListItem, {
 	                key: asset.id,
 	                assetID: asset.id,
+	                assetName: asset.name,
 	                img: img
 	            });
 	        }.bind(this));
@@ -23429,15 +23472,45 @@
 	var AppWebAPIUtils = __webpack_require__(182);
 	var AppAssetActionCreators = __webpack_require__(184);
 	
+	var NameEditInput = __webpack_require__(198);
+	
 	var AssetListItem = React.createClass({
 	    displayName: 'AssetListItem',
 	
+	
+	    getInitialState: function getInitialState() {
+	        return {
+	            isEditingName: false,
+	            assetName: this.props.assetName
+	        };
+	    },
+	
 	    render: function render() {
+	
+	        var assetID = this.props.assetID;
+	
+	        var input;
+	        if (this.state.isEditingName) {
+	            input = React.createElement(NameEditInput, {
+	                className: 'edit',
+	                onSave: this._onSave,
+	                name: this.state.assetName
+	            });
+	        } else {
+	            input = React.createElement(
+	                'p',
+	                {
+	                    onDoubleClick: this._onDoubleClick
+	                },
+	                this.state.assetName
+	            );
+	        }
+	
 	        return React.createElement(
 	            'li',
 	            null,
 	            React.createElement('img', { src: this.props.img }),
-	            this.props.assetID,
+	            input,
 	            React.createElement(
 	                'button',
 	                { onClick: this._onAddClick },
@@ -23457,6 +23530,18 @@
 	
 	    _onDeleteClick: function _onDeleteClick() {
 	        AppWebAPIUtils.destroyAsset(this.props.assetID);
+	    },
+	
+	    _onDoubleClick: function _onDoubleClick() {
+	        this.setState({ isEditingName: true });
+	    },
+	
+	    _onSave: function _onSave(name) {
+	        this.setState({
+	            isEditingName: false,
+	            assetName: name
+	        });
+	        AppWebAPIUtils.updateAsset(this.props.assetID, name);
 	    }
 	});
 	

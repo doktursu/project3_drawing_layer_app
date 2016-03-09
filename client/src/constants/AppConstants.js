@@ -39,6 +39,7 @@ module.exports = {
         SAVE_ASSET: null,
         CLICK_ASSET: null,
         DESTROY_ASSET: null,
+        RENAME_ASSET: null,
 
         RECEIVE_RAW_ASSETS: null,
         RECEIVE_CREATED_RAW_ASSET: null,

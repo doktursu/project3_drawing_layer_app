@@ -40,6 +40,14 @@ module.exports = {
             type: ActionTypes.DESTROY_ASSET,
             assetID: assetID
         });
+    },
+
+    renameAsset: function(assetID, assetName) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.RENAME_ASSET,
+            assetID: assetID,
+            assetName: assetName
+        });
     }
 
 };

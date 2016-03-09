@@ -81,6 +81,7 @@ var AssetSection = React.createClass({
                 <AssetListItem
                     key={asset.id}
                     assetID={asset.id}
+                    assetName={asset.name}
                     img={img}
                 />
             );
