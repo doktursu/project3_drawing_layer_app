@@ -109,8 +109,10 @@ module.exports = {
             animation: {
                 frameOrder: JSON.stringify([frameID]),
                 frameInterval: 100,
+                currentFrameID: frameID,
                 layerOrder: JSON.stringify([layerID]),
                 layerInfo: {},
+                currentLayerID: layerID,
                 layerNameCount: 1,
                 canvasJSON: ''
             }
@@ -138,8 +140,10 @@ module.exports = {
             animation: {
                 frameOrder: JSON.stringify(FrameStore.getOrder()),
                 frameInterval: FrameStore.getInterval(),
+                currentFrameID: FrameStore.getCurrentID(),
                 layerOrder: JSON.stringify(LayerStore.getOrder()),
                 layerInfo: JSON.stringify(LayerStore.getInfo()),
+                currentLayerID: LayerStore.getCurrentID(),
                 layerNameCount: LayerStore.getNameCount(),
                 canvasJSON: canvasJSON
             }

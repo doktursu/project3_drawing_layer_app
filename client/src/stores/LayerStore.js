@@ -207,7 +207,7 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
             _layerOrder = action.rawAnimation.layerOrder;
             _layerInfo = action.rawAnimation.layerInfo;
             _layerNameCount = action.rawAnimation.layerNameCount;
-            _currentID = _layerOrder[_layerOrder.length - 1];
+            _currentID = action.rawAnimation.currentLayerID;
             LayerStore.emitChange();
             break;
 

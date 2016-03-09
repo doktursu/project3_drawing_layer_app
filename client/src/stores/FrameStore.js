@@ -116,7 +116,7 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
         case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
             _frameOrder = action.rawAnimation.frameOrder;
             _frameInterval = action.rawAnimation.frameInterval;
-            _currentID = _frameOrder[0];
+            _currentID = action.rawAnimation.currentFrameID;
             FrameStore.emitChange();
             break;
 

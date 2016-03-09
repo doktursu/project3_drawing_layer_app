@@ -21089,7 +21089,7 @@
 	            _layerOrder = action.rawAnimation.layerOrder;
 	            _layerInfo = action.rawAnimation.layerInfo;
 	            _layerNameCount = action.rawAnimation.layerNameCount;
-	            _currentID = _layerOrder[_layerOrder.length - 1];
+	            _currentID = action.rawAnimation.currentLayerID;
 	            LayerStore.emitChange();
 	            break;
 	
@@ -21885,7 +21885,7 @@
 	        case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
 	            _frameOrder = action.rawAnimation.frameOrder;
 	            _frameInterval = action.rawAnimation.frameInterval;
-	            _currentID = _frameOrder[0];
+	            _currentID = action.rawAnimation.currentFrameID;
 	            FrameStore.emitChange();
 	            break;
 	
@@ -22390,8 +22390,10 @@
 	            animation: {
 	                frameOrder: JSON.stringify([frameID]),
 	                frameInterval: 100,
+	                currentFrameID: frameID,
 	                layerOrder: JSON.stringify([layerID]),
 	                layerInfo: {},
+	                currentLayerID: layerID,
 	                layerNameCount: 1,
 	                canvasJSON: ''
 	            }
@@ -22418,8 +22420,10 @@
 	            animation: {
 	                frameOrder: JSON.stringify(FrameStore.getOrder()),
 	                frameInterval: FrameStore.getInterval(),
+	                currentFrameID: FrameStore.getCurrentID(),
 	                layerOrder: JSON.stringify(LayerStore.getOrder()),
 	                layerInfo: JSON.stringify(LayerStore.getInfo()),
+	                currentLayerID: LayerStore.getCurrentID(),
 	                layerNameCount: LayerStore.getNameCount(),
 	                canvasJSON: canvasJSON
 	            }
