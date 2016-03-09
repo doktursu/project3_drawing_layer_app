@@ -14,3 +14,7 @@
 .layer-active {
     color: red;
 }
+
+#assetCanvas {
+    display: none;
+}

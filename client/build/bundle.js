@@ -23439,7 +23439,11 @@
 	        return React.createElement(
 	            'div',
 	            null,
-	            'Assets.',
+	            React.createElement(
+	                'h2',
+	                null,
+	                'Assets'
+	            ),
 	            React.createElement('canvas', {
 	                id: 'assetCanvas',
 	                width: 300,

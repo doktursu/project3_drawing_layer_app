@@ -89,7 +89,7 @@ var AssetSection = React.createClass({
 
         return (
             <div>
-                Assets.
+                <h2>Assets</h2>
                 <canvas
                     id="assetCanvas"
                     width={300}
