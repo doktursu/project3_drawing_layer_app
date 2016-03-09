@@ -43,6 +43,11 @@ AnimationStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
 
+        case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
+            AnimationStore.init(action.rawAnimation);
+            AnimationStore.emitChange();
+            break;
+
         case ActionTypes.RECEIVE_RAW_ANIMATION:
             AnimationStore.init(action.rawAnimation);
             AnimationStore.emitChange();

@@ -1,5 +1,6 @@
 var AppServerActionCreators = require('../actions/AppServerActionCreators');
 var AppAssetActionCreators = require('../actions/AppAssetActionCreators');
+var AppUtils = require('./AppUtils');
 
 // !!! Please Note !!!
 // We are using localStorage as an example, but in a real-world scenario, this
@@ -47,7 +48,7 @@ module.exports = {
     //////////////////////////////////////////
 
     getAllAssets: function() {
-        var url = "http://localhost:3000/project/assets";
+        var url = "http://localhost:3000/api/assets";
         var request = new XMLHttpRequest();
         request.open("GET", url);
         request.setRequestHeader('Content-Type', 'application/json');
@@ -69,7 +70,7 @@ module.exports = {
             }
         };
 
-        var url = 'http://localhost:3000/project/assets';
+        var url = 'http://localhost:3000/api/assets';
         var request = new XMLHttpRequest();
         request.open('POST', url);
         request.setRequestHeader('Content-Type', 'application/json');
@@ -83,7 +84,7 @@ module.exports = {
     },
 
     destroyAsset: function(assetID) {
-        var url = 'http://localhost:3000/project/assets' + '/' + assetID;
+        var url = 'http://localhost:3000/api/assets' + '/' + assetID;
         var request = new XMLHttpRequest();
         request.open('DELETE', url);
         request.setRequestHeader('Content-Type', 'application/json');
@@ -95,7 +96,38 @@ module.exports = {
         request.send(null);
     },
 
+    //////////////////////////////////////////
 
+    createAnimation: function() {
+        var frameID = AppUtils.newFrameID();
+        var layerID = AppUtils.newLayerID();
+        var animation = {
+            animation: {
+                frameOrder: JSON.stringify([frameID]),
+                frameInterval: 100,
+                layerOrder: JSON.stringify([layerID]),
+                layerInfo: {},
+                layerNameCount: 1,
+                canvasJSON: ''
+            }
+        }
+        animation.animation.layerInfo[layerID] = {name: 'Background'};
+        animation.animation.layerInfo = JSON.stringify(animation.animation.layerInfo);
+        console.log('animation to save', animation);
+
+
+        var url = 'http://localhost:3000/api/animations';
+        var request = new XMLHttpRequest();
+        request.open('POST', url);
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.onload = function() {
+            if (request.status === 200) {
+                var rawAnimation = JSON.parse(request.responseText);
+                AppServerActionCreators.receiveCreatedRawAnimation(rawAnimation);
+            }
+        };
+        request.send(JSON.stringify(animation));
+    },
 
     //////////////////////////////////////////
 

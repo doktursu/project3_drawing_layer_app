@@ -197,9 +197,18 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
 
-        case ActionTypes.RECEIVE_RAW_ANIMATION:
-            _layerOrder = action.rawAnimation.layerOrder
+        case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
+            _layerOrder = action.rawAnimation.layerOrder;
             _layerInfo = action.rawAnimation.layerInfo;
+            _layerNameCount = action.rawAnimation.layerNameCount;
+            _currentID = _layerOrder[_layerOrder.length - 1];
+            LayerStore.emitChange();
+            break;
+
+        case ActionTypes.RECEIVE_RAW_ANIMATION:
+            _layerOrder = action.rawAnimation.layerOrder;
+            _layerInfo = action.rawAnimation.layerInfo;
+            _layerNameCount = action.rawAnimation.layerNameCount;
             
             // to prevent tests from altering rawAnimation data
 

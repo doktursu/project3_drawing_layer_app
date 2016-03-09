@@ -2,10 +2,21 @@ function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+var idIncrement = 0;
+
 module.exports = {
 
     newID: function() {
-        return Date.now();
+        idIncrement++;
+        return Date.now() + idIncrement;
+    },
+
+    newFrameID: function() {
+        return 'f_' + this.newID();
+    },
+
+    newLayerID: function() {
+        return 'l_' + this.newID();
     },
 
     convertRawAsset: function(rawAsset) {

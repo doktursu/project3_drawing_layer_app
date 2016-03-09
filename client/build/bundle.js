@@ -96,9 +96,12 @@
 	    });
 	
 	    // AppExampleData.init();
-	    RawAnimationData.init();
-	    AppWebAPIUtils.getRawAnimation();
+	    // RawAnimationData.init();
+	    // AppWebAPIUtils.getRawAnimation();
 	    AppWebAPIUtils.getAllAssets();
+	
+	    AppWebAPIUtils.createAnimation();
+	
 	    // AppWebAPIUtils.getAllFrames();
 	
 	    // FabricObjectsExampleData.init();
@@ -20673,7 +20676,9 @@
 	        DESTROY_ASSET: null,
 	
 	        RECEIVE_RAW_ASSETS: null,
-	        RECEIVE_CREATED_RAW_ASSET: null
+	        RECEIVE_CREATED_RAW_ASSET: null,
+	
+	        RECEIVE_CREATED_RAW_ANIMATION: null
 	
 	    })
 	
@@ -21073,9 +21078,18 @@
 	
 	    switch (action.type) {
 	
+	        case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
+	            _layerOrder = action.rawAnimation.layerOrder;
+	            _layerInfo = action.rawAnimation.layerInfo;
+	            _layerNameCount = action.rawAnimation.layerNameCount;
+	            _currentID = _layerOrder[_layerOrder.length - 1];
+	            LayerStore.emitChange();
+	            break;
+	
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
 	            _layerOrder = action.rawAnimation.layerOrder;
 	            _layerInfo = action.rawAnimation.layerInfo;
+	            _layerNameCount = action.rawAnimation.layerNameCount;
 	
 	            // to prevent tests from altering rawAnimation data
 	
@@ -21590,10 +21604,21 @@
 	    return string.charAt(0).toUpperCase() + string.slice(1);
 	}
 	
+	var idIncrement = 0;
+	
 	module.exports = {
 	
 	    newID: function newID() {
-	        return Date.now();
+	        idIncrement++;
+	        return Date.now() + idIncrement;
+	    },
+	
+	    newFrameID: function newFrameID() {
+	        return 'f_' + this.newID();
+	    },
+	
+	    newLayerID: function newLayerID() {
+	        return 'l_' + this.newID();
 	    },
 	
 	    convertRawAsset: function convertRawAsset(rawAsset) {
@@ -21850,6 +21875,13 @@
 	        //     FrameStore.emitChange();
 	        //     break;
 	
+	        case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
+	            _frameOrder = action.rawAnimation.frameOrder;
+	            _frameInterval = action.rawAnimation.frameInterval;
+	            _currentID = _frameOrder[0];
+	            FrameStore.emitChange();
+	            break;
+	
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
 	            _frameOrder = action.rawAnimation.frameOrder;
 	            _frameInterval = action.rawAnimation.frameInterval;
@@ -21983,7 +22015,8 @@
 	        // json["background"] = "rgba(0, 0, 0, 0)";
 	        // var json = JSON.stringify(json);
 	
-	        canvas.loadFromJSON(this.state.canvasJSON);
+	        // canvas.loadFromJSON(this.state.canvasJSON);
+	        canvas.loadFromJSON('');
 	
 	        canvas.on('object:added', function () {
 	            var objects = canvas.getObjects();
@@ -22228,6 +22261,7 @@
 	
 	var AppServerActionCreators = __webpack_require__(183);
 	var AppAssetActionCreators = __webpack_require__(184);
+	var AppUtils = __webpack_require__(176);
 	
 	// !!! Please Note !!!
 	// We are using localStorage as an example, but in a real-world scenario, this
@@ -22275,7 +22309,7 @@
 	    //////////////////////////////////////////
 	
 	    getAllAssets: function getAllAssets() {
-	        var url = "http://localhost:3000/project/assets";
+	        var url = "http://localhost:3000/api/assets";
 	        var request = new XMLHttpRequest();
 	        request.open("GET", url);
 	        request.setRequestHeader('Content-Type', 'application/json');
@@ -22297,7 +22331,7 @@
 	            }
 	        };
 	
-	        var url = 'http://localhost:3000/project/assets';
+	        var url = 'http://localhost:3000/api/assets';
 	        var request = new XMLHttpRequest();
 	        request.open('POST', url);
 	        request.setRequestHeader('Content-Type', 'application/json');
@@ -22311,7 +22345,7 @@
 	    },
 	
 	    destroyAsset: function destroyAsset(assetID) {
-	        var url = 'http://localhost:3000/project/assets' + '/' + assetID;
+	        var url = 'http://localhost:3000/api/assets' + '/' + assetID;
 	        var request = new XMLHttpRequest();
 	        request.open('DELETE', url);
 	        request.setRequestHeader('Content-Type', 'application/json');
@@ -22321,6 +22355,38 @@
 	            }
 	        };
 	        request.send(null);
+	    },
+	
+	    //////////////////////////////////////////
+	
+	    createAnimation: function createAnimation() {
+	        var frameID = AppUtils.newFrameID();
+	        var layerID = AppUtils.newLayerID();
+	        var animation = {
+	            animation: {
+	                frameOrder: JSON.stringify([frameID]),
+	                frameInterval: 100,
+	                layerOrder: JSON.stringify([layerID]),
+	                layerInfo: {},
+	                layerNameCount: 1,
+	                canvasJSON: ''
+	            }
+	        };
+	        animation.animation.layerInfo[layerID] = { name: 'Background' };
+	        animation.animation.layerInfo = JSON.stringify(animation.animation.layerInfo);
+	        console.log('animation to save', animation);
+	
+	        var url = 'http://localhost:3000/api/animations';
+	        var request = new XMLHttpRequest();
+	        request.open('POST', url);
+	        request.setRequestHeader('Content-Type', 'application/json');
+	        request.onload = function () {
+	            if (request.status === 200) {
+	                var rawAnimation = JSON.parse(request.responseText);
+	                AppServerActionCreators.receiveCreatedRawAnimation(rawAnimation);
+	            }
+	        };
+	        request.send(JSON.stringify(animation));
 	    },
 	
 	    //////////////////////////////////////////
@@ -22383,6 +22449,13 @@
 	var ActionTypes = AppConstants.ActionTypes;
 	
 	module.exports = {
+	
+	    receiveCreatedRawAnimation: function receiveCreatedRawAnimation(rawAnimation) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.RECEIVE_CREATED_RAW_ANIMATION,
+	            rawAnimation: rawAnimation
+	        });
+	    },
 	
 	    receiveRawAssets: function receiveRawAssets(rawAssets) {
 	        AppDispatcher.dispatch({
@@ -22537,6 +22610,11 @@
 	AnimationStore.dispatchToken = AppDispatcher.register(function (action) {
 	
 	    switch (action.type) {
+	
+	        case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
+	            AnimationStore.init(action.rawAnimation);
+	            AnimationStore.emitChange();
+	            break;
 	
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
 	            AnimationStore.init(action.rawAnimation);

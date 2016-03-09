@@ -41,7 +41,9 @@ module.exports = {
         DESTROY_ASSET: null,
 
         RECEIVE_RAW_ASSETS: null,
-        RECEIVE_CREATED_RAW_ASSET: null
+        RECEIVE_CREATED_RAW_ASSET: null,
+
+        RECEIVE_CREATED_RAW_ANIMATION: null
 
     })
 

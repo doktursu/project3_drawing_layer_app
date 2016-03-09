@@ -113,6 +113,13 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
         //     FrameStore.emitChange();
         //     break;
 
+        case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
+            _frameOrder = action.rawAnimation.frameOrder;
+            _frameInterval = action.rawAnimation.frameInterval;
+            _currentID = _frameOrder[0];
+            FrameStore.emitChange();
+            break;
+
         case ActionTypes.RECEIVE_RAW_ANIMATION:
             _frameOrder = action.rawAnimation.frameOrder;
             _frameInterval = action.rawAnimation.frameInterval;
@@ -125,7 +132,6 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
             // }
             // _frameOrder = copy;
             
-
             _currentID = _frameOrder[0];
             FrameStore.emitChange();
             break;

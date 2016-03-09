@@ -51,7 +51,8 @@ var ObjectController = React.createClass({
         // json["background"] = "rgba(0, 0, 0, 0)";
         // var json = JSON.stringify(json);
 
-        canvas.loadFromJSON(this.state.canvasJSON);
+        // canvas.loadFromJSON(this.state.canvasJSON);
+        canvas.loadFromJSON('');
 
         canvas.on('object:added', function() {
             var objects = canvas.getObjects();

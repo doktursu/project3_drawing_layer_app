@@ -60,9 +60,12 @@ window.onload = function() {
     });
 
     // AppExampleData.init();
-    RawAnimationData.init();
-    AppWebAPIUtils.getRawAnimation();
+    // RawAnimationData.init();
+    // AppWebAPIUtils.getRawAnimation();
     AppWebAPIUtils.getAllAssets();
+
+    AppWebAPIUtils.createAnimation();
+
     // AppWebAPIUtils.getAllFrames();
 
     // FabricObjectsExampleData.init();
