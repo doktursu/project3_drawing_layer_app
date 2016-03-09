@@ -36,8 +36,13 @@ class AnimationsController < ApplicationController
   def update
     @animation = Animation.find(params[:id])
 
+    params[:animation][:frameOrder] = JSON.parse(params[:animation][:frameOrder])
+    params[:animation][:layerOrder] = JSON.parse(params[:animation][:layerOrder])
+    params[:animation][:layerInfo] = JSON.parse(params[:animation][:layerInfo])
+
     if @animation.update(animation_params)
-      head :no_content
+      # head :no_content
+      render json: @animation, status: 200, location: @animation
     else
       render json: @animation.errors, status: :unprocessable_entity
     end
