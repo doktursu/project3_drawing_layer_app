@@ -100,6 +100,10 @@ var ObjectController = React.createClass({
                     onClick={this._onSaveAsset}>
                     Save as Asset
                 </button>
+                <button
+                    onClick={this._saveAnimation}>
+                    Save Animation
+                </button>
                 <canvas 
                     id="c"
                     width={300}
@@ -176,6 +180,13 @@ var ObjectController = React.createClass({
 
     _sendCanvas: function(canvas) {
         AppObjectActionCreators.sendCanvas(canvas);
+    },
+
+    _saveAnimation: function() {
+        canvas._objects = ObjectStore.getAllArray();
+        var canvasJSON = JSON.stringify(canvas);
+        console.log('CANVAS JSON', canvasJSON);
+        AppWebAPIUtils.updateAnimation(canvasJSON);
     },
 
     _exportGIF: function() {

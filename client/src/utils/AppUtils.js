@@ -37,6 +37,6 @@ module.exports = {
             return (path);
         }
         return (new fabric[type](rawObject));
-    }
+    },
 
 };

@@ -20947,8 +20947,7 @@
 	}
 	
 	function _createLayerName() {
-	    _layerNameCount++;
-	    return 'Layer ' + _layerNameCount;
+	    return 'Layer ' + _layerNameCount++;
 	}
 	
 	function getIDforIndex(index) {
@@ -21017,6 +21016,14 @@
 	
 	    getCurrentID: function getCurrentID() {
 	        return _currentID;
+	    },
+	
+	    getInfo: function getInfo() {
+	        return _layerInfo;
+	    },
+	
+	    getNameCount: function getNameCount() {
+	        return _layerNameCount;
 	    },
 	
 	    getNameForLayer: function getNameForLayer(layerID) {
@@ -22073,6 +22080,12 @@
 	                    onClick: this._onSaveAsset },
 	                'Save as Asset'
 	            ),
+	            React.createElement(
+	                'button',
+	                {
+	                    onClick: this._saveAnimation },
+	                'Save Animation'
+	            ),
 	            React.createElement('canvas', {
 	                id: 'c',
 	                width: 300,
@@ -22150,6 +22163,13 @@
 	
 	    _sendCanvas: function _sendCanvas(canvas) {
 	        AppObjectActionCreators.sendCanvas(canvas);
+	    },
+	
+	    _saveAnimation: function _saveAnimation() {
+	        canvas._objects = ObjectStore.getAllArray();
+	        var canvasJSON = JSON.stringify(canvas);
+	        console.log('CANVAS JSON', canvasJSON);
+	        AppWebAPIUtils.updateAnimation(canvasJSON);
 	    },
 	
 	    _exportGIF: function _exportGIF() {
@@ -22262,6 +22282,10 @@
 	var AppServerActionCreators = __webpack_require__(183);
 	var AppAssetActionCreators = __webpack_require__(184);
 	var AppUtils = __webpack_require__(176);
+	
+	var FrameStore = __webpack_require__(179);
+	var LayerStore = __webpack_require__(173);
+	var AnimationStore = __webpack_require__(185);
 	
 	// !!! Please Note !!!
 	// We are using localStorage as an example, but in a real-world scenario, this
@@ -22379,6 +22403,32 @@
 	        var url = 'http://localhost:3000/api/animations';
 	        var request = new XMLHttpRequest();
 	        request.open('POST', url);
+	        request.setRequestHeader('Content-Type', 'application/json');
+	        request.onload = function () {
+	            if (request.status === 200) {
+	                var rawAnimation = JSON.parse(request.responseText);
+	                AppServerActionCreators.receiveCreatedRawAnimation(rawAnimation);
+	            }
+	        };
+	        request.send(JSON.stringify(animation));
+	    },
+	
+	    updateAnimation: function updateAnimation(canvasJSON) {
+	        var animation = {
+	            animation: {
+	                frameOrder: JSON.stringify(FrameStore.getOrder()),
+	                frameInterval: FrameStore.getInterval(),
+	                layerOrder: JSON.stringify(LayerStore.getOrder()),
+	                layerInfo: JSON.stringify(LayerStore.getInfo()),
+	                layerNameCount: LayerStore.getNameCount(),
+	                canvasJSON: canvasJSON
+	            }
+	        };
+	        console.log('animation to save', animation);
+	
+	        var url = 'http://localhost:3000/api/animations' + '/' + AnimationStore.getCurrentID();
+	        var request = new XMLHttpRequest();
+	        request.open('PUT', url);
 	        request.setRequestHeader('Content-Type', 'application/json');
 	        request.onload = function () {
 	            if (request.status === 200) {
@@ -22582,7 +22632,7 @@
 	
 	    init: function init(rawAnimation) {
 	        _canvasJSON = rawAnimation.canvasJSON;
-	        _currentID = rawAnimation.animationID;
+	        _currentID = rawAnimation.id;
 	    },
 	
 	    emitChange: function emitChange() {
@@ -22714,6 +22764,14 @@
 	
 	    getAll: function getAll() {
 	        return _objects;
+	    },
+	
+	    getAllArray: function getAllArray() {
+	        var all = [];
+	        for (var id in _objects) {
+	            all.push(_objects[id]);
+	        }
+	        return all;
 	    },
 	
 	    getAllForAnimation: function getAllForAnimation(animationId) {

@@ -82,6 +82,13 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
         return _objects;
     },
 
+    getAllArray: function() {
+        var all = [];
+        for (var id in _objects) {
+            all.push(_objects[id]);
+        }
+        return all;
+    },
 
     getAllForAnimation: function(animationId) {
         var animationObjects = [];

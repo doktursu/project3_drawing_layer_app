@@ -2,6 +2,10 @@ var AppServerActionCreators = require('../actions/AppServerActionCreators');
 var AppAssetActionCreators = require('../actions/AppAssetActionCreators');
 var AppUtils = require('./AppUtils');
 
+var FrameStore = require('../stores/FrameStore');
+var LayerStore = require('../stores/LayerStore');
+var AnimationStore = require('../stores/AnimationStore');
+
 // !!! Please Note !!!
 // We are using localStorage as an example, but in a real-world scenario, this
 // would involve XMLHttpRequest, or perhaps a newer client-server protocol.
@@ -119,6 +123,32 @@ module.exports = {
         var url = 'http://localhost:3000/api/animations';
         var request = new XMLHttpRequest();
         request.open('POST', url);
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.onload = function() {
+            if (request.status === 200) {
+                var rawAnimation = JSON.parse(request.responseText);
+                AppServerActionCreators.receiveCreatedRawAnimation(rawAnimation);
+            }
+        };
+        request.send(JSON.stringify(animation));
+    },
+
+    updateAnimation: function(canvasJSON) {
+        var animation = {
+            animation: {
+                frameOrder: JSON.stringify(FrameStore.getOrder()),
+                frameInterval: FrameStore.getInterval(),
+                layerOrder: JSON.stringify(LayerStore.getOrder()),
+                layerInfo: JSON.stringify(LayerStore.getInfo()),
+                layerNameCount: LayerStore.getNameCount(),
+                canvasJSON: canvasJSON
+            }
+        }
+        console.log('animation to save', animation);
+
+        var url = 'http://localhost:3000/api/animations' + '/' + AnimationStore.getCurrentID();
+        var request = new XMLHttpRequest();
+        request.open('PUT', url);
         request.setRequestHeader('Content-Type', 'application/json');
         request.onload = function() {
             if (request.status === 200) {

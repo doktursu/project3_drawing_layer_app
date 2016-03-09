@@ -59,8 +59,7 @@ function moveDownLayer(layerID) {
 }
 
 function _createLayerName() {
-    _layerNameCount++;
-    return 'Layer ' + _layerNameCount;
+    return 'Layer ' + _layerNameCount++;
 }
 
 function getIDforIndex(index) {
@@ -123,13 +122,20 @@ var LayerStore = assign({}, EventEmitter.prototype, {
         this.removeListener(CHANGE_EVENT, callback);
     },
 
-
     getOrder: function() {
         return _layerOrder;
     },
 
     getCurrentID: function() {
         return _currentID;
+    },
+
+    getInfo: function() {
+        return _layerInfo;
+    },
+
+    getNameCount: function() {
+        return _layerNameCount;
     },
 
     getNameForLayer: function(layerID) {

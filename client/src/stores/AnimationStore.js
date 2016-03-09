@@ -14,7 +14,7 @@ var AnimationStore = assign({}, EventEmitter.prototype, {
 
     init: function(rawAnimation) {
         _canvasJSON = rawAnimation.canvasJSON;
-        _currentID = rawAnimation.animationID;
+        _currentID = rawAnimation.id;
     },
 
     emitChange: function() {
