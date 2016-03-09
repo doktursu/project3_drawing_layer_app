@@ -22227,6 +22227,7 @@
 	'use strict';
 	
 	var AppServerActionCreators = __webpack_require__(183);
+	var AppAssetActionCreators = __webpack_require__(184);
 	
 	// !!! Please Note !!!
 	// We are using localStorage as an example, but in a real-world scenario, this
@@ -22278,15 +22279,12 @@
 	        var request = new XMLHttpRequest();
 	        request.open("GET", url);
 	        request.setRequestHeader('Content-Type', 'application/json');
-	        // res.setHeader('Access-Control-Allow-Origin', '*'); // Or can specify 'http://localhost:3000'
-	        // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-	        console.log("DATA FROM RAILS!!!!");
 	        request.onload = function () {
 	            if (request.status === 200) {
-	                var data = JSON.parse(request.responseText);
-	                console.log("DATA FROM RAILS!!!!", data);
+	                var rawAssets = JSON.parse(request.responseText);
+	                AppServerActionCreators.receiveRawAssets(rawAssets);
 	            }
-	        }.bind(this);
+	        };
 	        request.send(null);
 	    },
 	
@@ -22303,15 +22301,26 @@
 	        var request = new XMLHttpRequest();
 	        request.open('POST', url);
 	        request.setRequestHeader('Content-Type', 'application/json');
-	
 	        request.onload = function () {
 	            if (request.status === 200) {
-	                var data = JSON.parse(request.responseText);
-	                console.log('DATA FROM RAILS', data);
-	                AppServerActionCreators.receiveCreatedRawAsset(data);
+	                var rawAsset = JSON.parse(request.responseText);
+	                AppServerActionCreators.receiveCreatedRawAsset(rawAsset);
 	            }
-	        }.bind(this);
+	        };
 	        request.send(JSON.stringify(asset));
+	    },
+	
+	    destroyAsset: function destroyAsset(assetID) {
+	        var url = 'http://localhost:3000/project/assets' + '/' + assetID;
+	        var request = new XMLHttpRequest();
+	        request.open('DELETE', url);
+	        request.setRequestHeader('Content-Type', 'application/json');
+	        request.onload = function () {
+	            if (request.status === 200) {
+	                AppAssetActionCreators.destroyAsset(assetID);
+	            }
+	        };
+	        request.send(null);
 	    },
 	
 	    //////////////////////////////////////////
@@ -22374,6 +22383,13 @@
 	var ActionTypes = AppConstants.ActionTypes;
 	
 	module.exports = {
+	
+	    receiveRawAssets: function receiveRawAssets(rawAssets) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.RECEIVE_RAW_ASSETS,
+	            rawAssets: rawAssets
+	        });
+	    },
 	
 	    receiveCreatedRawAsset: function receiveCreatedRawAsset(rawAsset) {
 	        AppDispatcher.dispatch({
@@ -22818,7 +22834,7 @@
 	}
 	
 	function _addRawAssets(rawAssets) {
-	    rawAsset.forEach(function (rawAsset) {
+	    rawAssets.forEach(function (rawAsset) {
 	        _addRawAsset(rawAsset);
 	    });
 	}
@@ -23326,6 +23342,7 @@
 	
 	var React = __webpack_require__(3);
 	
+	var AppWebAPIUtils = __webpack_require__(182);
 	var AppAssetActionCreators = __webpack_require__(184);
 	
 	var AssetListItem = React.createClass({
@@ -23355,7 +23372,7 @@
 	    },
 	
 	    _onDeleteClick: function _onDeleteClick() {
-	        AppAssetActionCreators.destroyAsset(this.props.assetID);
+	        AppWebAPIUtils.destroyAsset(this.props.assetID);
 	    }
 	});
 	

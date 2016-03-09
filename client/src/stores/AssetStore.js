@@ -16,7 +16,7 @@ function _addRawAsset(rawAsset) {
 }
 
 function _addRawAssets(rawAssets) {
-    rawAsset.forEach(function(rawAsset) {
+    rawAssets.forEach(function(rawAsset) {
         _addRawAsset(rawAsset);
     });
 }

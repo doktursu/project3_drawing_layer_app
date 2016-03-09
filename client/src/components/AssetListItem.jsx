@@ -1,5 +1,6 @@
 var React = require('react');
 
+var AppWebAPIUtils = require('../utils/AppWebAPIUtils');
 var AppAssetActionCreators = require('../actions/AppAssetActionCreators');
 
 var AssetListItem = React.createClass({
@@ -23,7 +24,7 @@ var AssetListItem = React.createClass({
     },
 
     _onDeleteClick: function() {
-        AppAssetActionCreators.destroyAsset(this.props.assetID);
+        AppWebAPIUtils.destroyAsset(this.props.assetID);
     }
 });
 

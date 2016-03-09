@@ -5,6 +5,13 @@ var ActionTypes = AppConstants.ActionTypes;
 
 module.exports = {
 
+    receiveRawAssets: function(rawAssets) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.RECEIVE_RAW_ASSETS,
+            rawAssets: rawAssets
+        });
+    },
+
     receiveCreatedRawAsset: function(rawAsset) {
         AppDispatcher.dispatch({
             type: ActionTypes.RECEIVE_CREATED_RAW_ASSET,

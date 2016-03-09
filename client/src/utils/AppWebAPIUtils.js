@@ -1,4 +1,5 @@
 var AppServerActionCreators = require('../actions/AppServerActionCreators');
+var AppAssetActionCreators = require('../actions/AppAssetActionCreators');
 
 // !!! Please Note !!!
 // We are using localStorage as an example, but in a real-world scenario, this
@@ -50,15 +51,12 @@ module.exports = {
         var request = new XMLHttpRequest();
         request.open("GET", url);
         request.setRequestHeader('Content-Type', 'application/json');
-        // res.setHeader('Access-Control-Allow-Origin', '*'); // Or can specify 'http://localhost:3000'
-        // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-        console.log("DATA FROM RAILS!!!!");
         request.onload = function() {
             if (request.status === 200) {
-                var data = JSON.parse(request.responseText);
-                console.log("DATA FROM RAILS!!!!", data);
+                var rawAssets = JSON.parse(request.responseText);
+                AppServerActionCreators.receiveRawAssets(rawAssets);
             }
-        }.bind(this);
+        };
         request.send(null);
     },
 
@@ -75,15 +73,26 @@ module.exports = {
         var request = new XMLHttpRequest();
         request.open('POST', url);
         request.setRequestHeader('Content-Type', 'application/json');
-
         request.onload = function() {
             if (request.status === 200) {
-                var data = JSON.parse(request.responseText);
-                console.log('DATA FROM RAILS', data);
-                AppServerActionCreators.receiveCreatedRawAsset(data);
+                var rawAsset = JSON.parse(request.responseText);
+                AppServerActionCreators.receiveCreatedRawAsset(rawAsset);
             }
-        }.bind(this);
+        };
         request.send(JSON.stringify(asset));
+    },
+
+    destroyAsset: function(assetID) {
+        var url = 'http://localhost:3000/project/assets' + '/' + assetID;
+        var request = new XMLHttpRequest();
+        request.open('DELETE', url);
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.onload = function() {
+            if (request.status === 200) {
+                AppAssetActionCreators.destroyAsset(assetID);
+            }
+        };
+        request.send(null);
     },
 
 
