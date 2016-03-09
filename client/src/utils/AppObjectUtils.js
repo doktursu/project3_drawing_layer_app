@@ -18,6 +18,11 @@ module.exports = {
         return (new fabric[type](rawObject));
     },
 
+    castRawObject: function(rawObject) {
+        var type = capitalize(rawObject.type);
+        return (new fabric[type](rawObject));
+    },
+
     getCreatedObjectData: function(object, currentAnimationID, currentLayerID, currentFrameID) {
         object.id = this.newID();
         object.animationId = currentAnimationID;

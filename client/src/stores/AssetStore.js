@@ -3,14 +3,22 @@ var AppConstants = require('../constants/AppConstants.js');
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
+var AppUtils = require('../utils/AppUtils');
+
 var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
 var _assets = [];
 var _currentID = null;
 
-function _addAsset(asset) {
-    _assets.push(asset);
+function _addRawAsset(rawAsset) {
+    _assets.push(AppUtils.convertRawAsset(rawAsset));
+}
+
+function _addRawAssets(rawAssets) {
+    rawAsset.forEach(function(rawAsset) {
+        _addRawAsset(rawAsset);
+    });
 }
 
 function _destroyAsset(assetID) {
@@ -52,6 +60,16 @@ var AssetStore = assign({}, EventEmitter.prototype, {
 AssetStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
+
+        case ActionTypes.RECEIVE_RAW_ASSETS:
+            _addRawAssets(action.rawAssets);
+            AssetStore.emitChange();
+            break;
+
+        case ActionTypes.RECEIVE_CREATED_RAW_ASSET:
+            _addRawAsset(action.rawAsset);
+            AssetStore.emitChange();
+            break;
 
         case ActionTypes.SAVE_ASSET:
             _addAsset(action.asset);

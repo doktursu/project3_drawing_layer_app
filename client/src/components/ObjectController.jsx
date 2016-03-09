@@ -5,6 +5,7 @@ var AppAssetActionCreators = require('../actions/AppAssetActionCreators');
 var DrawingModeOptions = require('./DrawingModeOptions.jsx');
 // var LayerSection = require('./LayerSection.jsx');
 // var FrameSelector = require('./FrameSelector.jsx');
+var AppWebAPIUtils = require('../utils/AppWebAPIUtils');
 
 var AnimationStore = require('../stores/AnimationStore');
 var LayerStore = require('../stores/LayerStore');
@@ -147,7 +148,8 @@ var ObjectController = React.createClass({
             console.log('ASSET OBJ', JSON.stringify(object));
             canvas.deactivateAll();
             var clone = fabric.util.object.clone(object);
-            AppAssetActionCreators.saveAsset([clone]);
+            // AppAssetActionCreators.saveAsset([clone]);
+            AppWebAPIUtils.createAsset([clone]);
         }
         var group = canvas.getActiveGroup();
         if (group) {
@@ -157,7 +159,8 @@ var ObjectController = React.createClass({
             group.forEachObject(function(o) {
                 clones.unshift(fabric.util.object.clone(o));
             });
-            AppAssetActionCreators.saveAsset(clones);
+            // AppAssetActionCreators.saveAsset(clones);
+            AppWebAPIUtils.createAsset(clones);
         }
     },
 

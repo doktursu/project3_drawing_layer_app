@@ -62,6 +62,7 @@ window.onload = function() {
     // AppExampleData.init();
     RawAnimationData.init();
     AppWebAPIUtils.getRawAnimation();
+    AppWebAPIUtils.getAllAssets();
     // AppWebAPIUtils.getAllFrames();
 
     // FabricObjectsExampleData.init();

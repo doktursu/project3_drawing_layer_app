@@ -43,6 +43,53 @@ module.exports = {
         AppServerActionCreators.receiveAllObjects(rawObjects);
     },
 
+    //////////////////////////////////////////
+
+    getAllAssets: function() {
+        var url = "http://localhost:3000/project/assets";
+        var request = new XMLHttpRequest();
+        request.open("GET", url);
+        request.setRequestHeader('Content-Type', 'application/json');
+        // res.setHeader('Access-Control-Allow-Origin', '*'); // Or can specify 'http://localhost:3000'
+        // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        console.log("DATA FROM RAILS!!!!");
+        request.onload = function() {
+            if (request.status === 200) {
+                var data = JSON.parse(request.responseText);
+                console.log("DATA FROM RAILS!!!!", data);
+            }
+        }.bind(this);
+        request.send(null);
+    },
+
+    createAsset: function(objects) {
+
+        var asset = {
+            asset: {
+                name: objects[0].type, 
+                objects: JSON.stringify(objects)
+            }
+        };
+
+        var url = 'http://localhost:3000/project/assets';
+        var request = new XMLHttpRequest();
+        request.open('POST', url);
+        request.setRequestHeader('Content-Type', 'application/json');
+
+        request.onload = function() {
+            if (request.status === 200) {
+                var data = JSON.parse(request.responseText);
+                console.log('DATA FROM RAILS', data);
+                AppServerActionCreators.receiveCreatedRawAsset(data);
+            }
+        }.bind(this);
+        request.send(JSON.stringify(asset));
+    },
+
+
+
+    //////////////////////////////////////////
+
     getRawAnimation: function() {
         var rawAnimation = JSON.parse(localStorage.getItem('animation'));
         AppServerActionCreators.receiveRawAnimation(rawAnimation);

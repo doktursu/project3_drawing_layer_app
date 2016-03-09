@@ -7,6 +7,13 @@ var ActionTypes = AppConstants.ActionTypes;
 
 module.exports = {
 
+    receiveRawAsset: function(rawAsset) {
+        AppDispatcher.dispatch({
+            type: ActionTypes.SAVE_ASSET,
+            rawAsset: rawAsset
+        });
+    },
+
     saveAsset: function(asset) {
         AppDispatcher.dispatch({
             type: ActionTypes.SAVE_ASSET,
@@ -14,7 +21,11 @@ module.exports = {
                 id: AppObjectUtils.newID(),
                 objects: asset
             }
-        })
+        });
+    },
+
+    createAsset: function(objects) {
+        AppWebAPIUtils.createAsset(objects);
     },
 
     clickAsset: function(assetID) {

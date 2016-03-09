@@ -48,17 +48,17 @@
 	
 	var App = __webpack_require__(1);
 	
-	var ObjectController = __webpack_require__(179);
-	var AnimationController = __webpack_require__(185);
+	var ObjectController = __webpack_require__(180);
+	var AnimationController = __webpack_require__(188);
 	
-	var FabricObjectsExampleData = __webpack_require__(188);
+	var FabricObjectsExampleData = __webpack_require__(194);
 	
-	var RawAnimationData = __webpack_require__(189);
+	var RawAnimationData = __webpack_require__(195);
 	
-	var AppExampleData = __webpack_require__(190);
-	var AppWebAPIUtils = __webpack_require__(181);
+	var AppExampleData = __webpack_require__(196);
+	var AppWebAPIUtils = __webpack_require__(182);
 	var React = __webpack_require__(3);
-	var ReactDOM = __webpack_require__(191);
+	var ReactDOM = __webpack_require__(197);
 	
 	window.onload = function () {
 	
@@ -98,6 +98,7 @@
 	    // AppExampleData.init();
 	    RawAnimationData.init();
 	    AppWebAPIUtils.getRawAnimation();
+	    AppWebAPIUtils.getAllAssets();
 	    // AppWebAPIUtils.getAllFrames();
 	
 	    // FabricObjectsExampleData.init();
@@ -117,7 +118,7 @@
 	
 	var LayerSection = __webpack_require__(161);
 	
-	var FrameStore = __webpack_require__(178);
+	var FrameStore = __webpack_require__(179);
 	var React = __webpack_require__(3);
 	
 	function getStateFromStore() {
@@ -20105,10 +20106,10 @@
 	
 	var AppLayerActionCreators = __webpack_require__(162);
 	
-	var LayerListItem = __webpack_require__(169);
+	var LayerListItem = __webpack_require__(171);
 	var React = __webpack_require__(3);
 	
-	var LayerStore = __webpack_require__(171);
+	var LayerStore = __webpack_require__(173);
 	
 	function getStateFromStore() {
 	    return {
@@ -20183,7 +20184,7 @@
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
+	var AppConstants = __webpack_require__(169);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	
@@ -20247,8 +20248,8 @@
 	'use strict';
 	
 	var Dispatcher = __webpack_require__(164).Dispatcher;
-	var LogActions = __webpack_require__(198);
-	var assign = __webpack_require__(173);
+	var LogActions = __webpack_require__(167);
+	var assign = __webpack_require__(168);
 	
 	// var AppDispatcher = assign(new Dispatcher(), {
 	//     dispatch: function(action) {
@@ -20569,11 +20570,68 @@
 
 /***/ },
 /* 167 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = {
+	    log: function log(action) {
+	        console.log('Action', action);
+	    }
+	};
+
+/***/ },
+/* 168 */
+/***/ function(module, exports) {
+
+	/* eslint-disable no-unused-vars */
+	'use strict';
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+	
+	function toObject(val) {
+		if (val === null || val === undefined) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+	
+		return Object(val);
+	}
+	
+	module.exports = Object.assign || function (target, source) {
+		var from;
+		var to = toObject(target);
+		var symbols;
+	
+		for (var s = 1; s < arguments.length; s++) {
+			from = Object(arguments[s]);
+	
+			for (var key in from) {
+				if (hasOwnProperty.call(from, key)) {
+					to[key] = from[key];
+				}
+			}
+	
+			if (Object.getOwnPropertySymbols) {
+				symbols = Object.getOwnPropertySymbols(from);
+				for (var i = 0; i < symbols.length; i++) {
+					if (propIsEnumerable.call(from, symbols[i])) {
+						to[symbols[i]] = from[symbols[i]];
+					}
+				}
+			}
+		}
+	
+		return to;
+	};
+
+
+/***/ },
+/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var keyMirror = __webpack_require__(168);
+	var keyMirror = __webpack_require__(170);
 	
 	module.exports = {
 	
@@ -20612,14 +20670,17 @@
 	
 	        SAVE_ASSET: null,
 	        CLICK_ASSET: null,
-	        DESTROY_ASSET: null
+	        DESTROY_ASSET: null,
+	
+	        RECEIVE_RAW_ASSETS: null,
+	        RECEIVE_CREATED_RAW_ASSET: null
 	
 	    })
 	
 	};
 
 /***/ },
-/* 168 */
+/* 170 */
 /***/ function(module, exports) {
 
 	/**
@@ -20678,18 +20739,18 @@
 
 
 /***/ },
-/* 169 */
+/* 171 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppLayerActionCreators = __webpack_require__(162);
 	var React = __webpack_require__(3);
-	var classNames = __webpack_require__(170);
-	var LayerStore = __webpack_require__(171);
+	var classNames = __webpack_require__(172);
+	var LayerStore = __webpack_require__(173);
 	
-	var LayerNameEditInput = __webpack_require__(176);
-	var LayerListOptions = __webpack_require__(177);
+	var LayerNameEditInput = __webpack_require__(177);
+	var LayerListOptions = __webpack_require__(178);
 	var ReactPropTypes = React.PropTypes;
 	
 	var LayerListItem = React.createClass({
@@ -20763,7 +20824,7 @@
 	module.exports = LayerListItem;
 
 /***/ },
-/* 170 */
+/* 172 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -20817,17 +20878,17 @@
 
 
 /***/ },
-/* 171 */
+/* 173 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(172).EventEmitter;
-	var assign = __webpack_require__(173);
+	var AppConstants = __webpack_require__(169);
+	var EventEmitter = __webpack_require__(174).EventEmitter;
+	var assign = __webpack_require__(168);
 	
-	var AppObjectUtils = __webpack_require__(174);
+	var AppObjectUtils = __webpack_require__(175);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -21130,7 +21191,7 @@
 	module.exports = LayerStore;
 
 /***/ },
-/* 172 */
+/* 174 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -21434,59 +21495,14 @@
 
 
 /***/ },
-/* 173 */
-/***/ function(module, exports) {
-
-	/* eslint-disable no-unused-vars */
-	'use strict';
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
-	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-	
-	function toObject(val) {
-		if (val === null || val === undefined) {
-			throw new TypeError('Object.assign cannot be called with null or undefined');
-		}
-	
-		return Object(val);
-	}
-	
-	module.exports = Object.assign || function (target, source) {
-		var from;
-		var to = toObject(target);
-		var symbols;
-	
-		for (var s = 1; s < arguments.length; s++) {
-			from = Object(arguments[s]);
-	
-			for (var key in from) {
-				if (hasOwnProperty.call(from, key)) {
-					to[key] = from[key];
-				}
-			}
-	
-			if (Object.getOwnPropertySymbols) {
-				symbols = Object.getOwnPropertySymbols(from);
-				for (var i = 0; i < symbols.length; i++) {
-					if (propIsEnumerable.call(from, symbols[i])) {
-						to[symbols[i]] = from[symbols[i]];
-					}
-				}
-			}
-		}
-	
-		return to;
-	};
-
-
-/***/ },
-/* 174 */
+/* 175 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 	
-	var AppUtils = __webpack_require__(175);
+	var AppUtils = __webpack_require__(176);
 	
 	function capitalize(string) {
 	    return string.charAt(0).toUpperCase() + string.slice(1);
@@ -21502,6 +21518,11 @@
 	    },
 	
 	    convertRawObject: function convertRawObject(rawObject) {
+	        var type = capitalize(rawObject.type);
+	        return new fabric[type](rawObject);
+	    },
+	
+	    castRawObject: function castRawObject(rawObject) {
 	        var type = capitalize(rawObject.type);
 	        return new fabric[type](rawObject);
 	    },
@@ -21560,21 +21581,45 @@
 	};
 
 /***/ },
-/* 175 */
+/* 176 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
+	
+	function capitalize(string) {
+	    return string.charAt(0).toUpperCase() + string.slice(1);
+	}
 	
 	module.exports = {
 	
 	    newID: function newID() {
 	        return Date.now();
+	    },
+	
+	    convertRawAsset: function convertRawAsset(rawAsset) {
+	        return {
+	            id: rawAsset.id,
+	            name: rawAsset.name,
+	            objects: rawAsset.objects.map(function (object) {
+	                return this.convertRawObject(object);
+	            }.bind(this))
+	        };
+	    },
+	
+	    convertRawObject: function convertRawObject(rawObject) {
+	        var type = capitalize(rawObject.type);
+	        if (type === 'Path') {
+	            var path = new fabric[type](rawObject.path);
+	            path.set(rawObject);
+	            return path;
+	        }
+	        return new fabric[type](rawObject);
 	    }
 	
 	};
 
 /***/ },
-/* 176 */
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21630,7 +21675,7 @@
 	module.exports = LayerNameEditInput;
 
 /***/ },
-/* 177 */
+/* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21688,17 +21733,17 @@
 	module.exports = LayerListOptions;
 
 /***/ },
-/* 178 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(172).EventEmitter;
-	var assign = __webpack_require__(173);
+	var AppConstants = __webpack_require__(169);
+	var EventEmitter = __webpack_require__(174).EventEmitter;
+	var assign = __webpack_require__(168);
 	
-	var AppObjectUtils = __webpack_require__(174);
+	var AppObjectUtils = __webpack_require__(175);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -21878,24 +21923,25 @@
 	module.exports = FrameStore;
 
 /***/ },
-/* 179 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	// var FabricCanvas = require('./FabricCanvas.jsx');
-	var AppObjectActionCreators = __webpack_require__(180);
-	var AppAssetActionCreators = __webpack_require__(196);
+	var AppObjectActionCreators = __webpack_require__(181);
+	var AppAssetActionCreators = __webpack_require__(184);
 	
 	var DrawingModeOptions = __webpack_require__(160);
 	// var LayerSection = require('./LayerSection.jsx');
 	// var FrameSelector = require('./FrameSelector.jsx');
+	var AppWebAPIUtils = __webpack_require__(182);
 	
-	var AnimationStore = __webpack_require__(183);
-	var LayerStore = __webpack_require__(171);
-	var FrameStore = __webpack_require__(178);
+	var AnimationStore = __webpack_require__(185);
+	var LayerStore = __webpack_require__(173);
+	var FrameStore = __webpack_require__(179);
 	// var JsonObjectStore = require('../stores/JsonObjectStore.js');
-	var ObjectStore = __webpack_require__(184);
+	var ObjectStore = __webpack_require__(186);
 	var React = __webpack_require__(3);
 	
 	var canvas;
@@ -22044,7 +22090,8 @@
 	            console.log('ASSET OBJ', JSON.stringify(object));
 	            canvas.deactivateAll();
 	            var clone = fabric.util.object.clone(object);
-	            AppAssetActionCreators.saveAsset([clone]);
+	            // AppAssetActionCreators.saveAsset([clone]);
+	            AppWebAPIUtils.createAsset([clone]);
 	        }
 	        var group = canvas.getActiveGroup();
 	        if (group) {
@@ -22054,7 +22101,8 @@
 	            group.forEachObject(function (o) {
 	                clones.unshift(fabric.util.object.clone(o));
 	            });
-	            AppAssetActionCreators.saveAsset(clones);
+	            // AppAssetActionCreators.saveAsset(clones);
+	            AppWebAPIUtils.createAsset(clones);
 	        }
 	    },
 	
@@ -22137,15 +22185,15 @@
 	module.exports = ObjectController;
 
 /***/ },
-/* 180 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	var AppObjectUtils = __webpack_require__(174);
-	var AppWebAPIUtils = __webpack_require__(181);
+	var AppConstants = __webpack_require__(169);
+	var AppObjectUtils = __webpack_require__(175);
+	var AppWebAPIUtils = __webpack_require__(182);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	
@@ -22173,12 +22221,12 @@
 	};
 
 /***/ },
-/* 181 */
+/* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var AppServerActionCreators = __webpack_require__(182);
+	var AppServerActionCreators = __webpack_require__(183);
 	
 	// !!! Please Note !!!
 	// We are using localStorage as an example, but in a real-world scenario, this
@@ -22222,6 +22270,51 @@
 	        // simulate success callback
 	        AppServerActionCreators.receiveAllObjects(rawObjects);
 	    },
+	
+	    //////////////////////////////////////////
+	
+	    getAllAssets: function getAllAssets() {
+	        var url = "http://localhost:3000/project/assets";
+	        var request = new XMLHttpRequest();
+	        request.open("GET", url);
+	        request.setRequestHeader('Content-Type', 'application/json');
+	        // res.setHeader('Access-Control-Allow-Origin', '*'); // Or can specify 'http://localhost:3000'
+	        // res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+	        console.log("DATA FROM RAILS!!!!");
+	        request.onload = function () {
+	            if (request.status === 200) {
+	                var data = JSON.parse(request.responseText);
+	                console.log("DATA FROM RAILS!!!!", data);
+	            }
+	        }.bind(this);
+	        request.send(null);
+	    },
+	
+	    createAsset: function createAsset(objects) {
+	
+	        var asset = {
+	            asset: {
+	                name: objects[0].type,
+	                objects: JSON.stringify(objects)
+	            }
+	        };
+	
+	        var url = 'http://localhost:3000/project/assets';
+	        var request = new XMLHttpRequest();
+	        request.open('POST', url);
+	        request.setRequestHeader('Content-Type', 'application/json');
+	
+	        request.onload = function () {
+	            if (request.status === 200) {
+	                var data = JSON.parse(request.responseText);
+	                console.log('DATA FROM RAILS', data);
+	                AppServerActionCreators.receiveCreatedRawAsset(data);
+	            }
+	        }.bind(this);
+	        request.send(JSON.stringify(asset));
+	    },
+	
+	    //////////////////////////////////////////
 	
 	    getRawAnimation: function getRawAnimation() {
 	        var rawAnimation = JSON.parse(localStorage.getItem('animation'));
@@ -22270,17 +22363,24 @@
 	};
 
 /***/ },
-/* 182 */
+/* 183 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
+	var AppConstants = __webpack_require__(169);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	
 	module.exports = {
+	
+	    receiveCreatedRawAsset: function receiveCreatedRawAsset(rawAsset) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.RECEIVE_CREATED_RAW_ASSET,
+	            rawAsset: rawAsset
+	        });
+	    },
 	
 	    receiveAllFrames: function receiveAllFrames(rawFrames) {
 	        AppDispatcher.dispatch({
@@ -22320,15 +22420,67 @@
 	};
 
 /***/ },
-/* 183 */
+/* 184 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(172).EventEmitter;
-	var assign = __webpack_require__(173);
+	var AppConstants = __webpack_require__(169);
+	var AppObjectUtils = __webpack_require__(175);
+	var AppWebAPIUtils = __webpack_require__(182);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	
+	module.exports = {
+	
+	    receiveRawAsset: function receiveRawAsset(rawAsset) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.SAVE_ASSET,
+	            rawAsset: rawAsset
+	        });
+	    },
+	
+	    saveAsset: function saveAsset(asset) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.SAVE_ASSET,
+	            asset: {
+	                id: AppObjectUtils.newID(),
+	                objects: asset
+	            }
+	        });
+	    },
+	
+	    createAsset: function createAsset(objects) {
+	        AppWebAPIUtils.createAsset(objects);
+	    },
+	
+	    clickAsset: function clickAsset(assetID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.CLICK_ASSET,
+	            assetID: assetID
+	        });
+	    },
+	
+	    destroyAsset: function destroyAsset(assetID) {
+	        AppDispatcher.dispatch({
+	            type: ActionTypes.DESTROY_ASSET,
+	            assetID: assetID
+	        });
+	    }
+	
+	};
+
+/***/ },
+/* 185 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(163);
+	var AppConstants = __webpack_require__(169);
+	var EventEmitter = __webpack_require__(174).EventEmitter;
+	var assign = __webpack_require__(168);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -22383,22 +22535,22 @@
 	module.exports = AnimationStore;
 
 /***/ },
-/* 184 */
+/* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	var AppObjectUtils = __webpack_require__(174);
+	var AppConstants = __webpack_require__(169);
+	var AppObjectUtils = __webpack_require__(175);
 	
-	var AnimationStore = __webpack_require__(183);
-	var FrameStore = __webpack_require__(178);
-	var LayerStore = __webpack_require__(171);
-	var AssetStore = __webpack_require__(195);
+	var AnimationStore = __webpack_require__(185);
+	var FrameStore = __webpack_require__(179);
+	var LayerStore = __webpack_require__(173);
+	var AssetStore = __webpack_require__(187);
 	
-	var EventEmitter = __webpack_require__(172).EventEmitter;
-	var assign = __webpack_require__(173);
+	var EventEmitter = __webpack_require__(174).EventEmitter;
+	var assign = __webpack_require__(168);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	var CHANGE_EVENT = 'change';
@@ -22643,15 +22795,118 @@
 	module.exports = ObjectStore;
 
 /***/ },
-/* 185 */
+/* 187 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var AppDispatcher = __webpack_require__(163);
+	var AppConstants = __webpack_require__(169);
+	var EventEmitter = __webpack_require__(174).EventEmitter;
+	var assign = __webpack_require__(168);
+	
+	var AppUtils = __webpack_require__(176);
+	
+	var ActionTypes = AppConstants.ActionTypes;
+	var CHANGE_EVENT = 'change';
+	
+	var _assets = [];
+	var _currentID = null;
+	
+	function _addRawAsset(rawAsset) {
+	    _assets.push(AppUtils.convertRawAsset(rawAsset));
+	}
+	
+	function _addRawAssets(rawAssets) {
+	    rawAsset.forEach(function (rawAsset) {
+	        _addRawAsset(rawAsset);
+	    });
+	}
+	
+	function _destroyAsset(assetID) {
+	    _assets = _assets.filter(function (asset) {
+	        return asset.id !== assetID;
+	    });
+	}
+	
+	var AssetStore = assign({}, EventEmitter.prototype, {
+	
+	    emitChange: function emitChange() {
+	        console.log('----------ASSET STORE----------');
+	        console.log('current assetID', _currentID);
+	        console.log('assets', _assets);
+	        this.emit(CHANGE_EVENT);
+	    },
+	
+	    addChangeListener: function addChangeListener(callback) {
+	        this.on(CHANGE_EVENT, callback);
+	    },
+	
+	    removeChangeListener: function removeChangeListener(callback) {
+	        this.removeListener(CHANGE_EVENT, callback);
+	    },
+	
+	    getAll: function getAll() {
+	        return _assets;
+	    },
+	
+	    getCurrentAsset: function getCurrentAsset() {
+	        var current = _assets.filter(function (asset) {
+	            return asset.id === _currentID;
+	        })[0];
+	        return current;
+	    }
+	
+	});
+	
+	AssetStore.dispatchToken = AppDispatcher.register(function (action) {
+	
+	    switch (action.type) {
+	
+	        case ActionTypes.RECEIVE_RAW_ASSETS:
+	            _addRawAssets(action.rawAssets);
+	            AssetStore.emitChange();
+	            break;
+	
+	        case ActionTypes.RECEIVE_CREATED_RAW_ASSET:
+	            _addRawAsset(action.rawAsset);
+	            AssetStore.emitChange();
+	            break;
+	
+	        case ActionTypes.SAVE_ASSET:
+	            _addAsset(action.asset);
+	            console.log('SAVING ASSET', _assets);
+	            AssetStore.emitChange();
+	            break;
+	
+	        case ActionTypes.CLICK_ASSET:
+	            console.log('ClICKED ASSET', action.assetID);
+	            _currentID = action.assetID;
+	            AssetStore.emitChange();
+	            break;
+	
+	        case ActionTypes.DESTROY_ASSET:
+	            _destroyAsset(action.assetID);
+	            AssetStore.emitChange();
+	            break;
+	
+	        default:
+	        // do nothing
+	    }
+	});
+	
+	module.exports = AssetStore;
+
+/***/ },
+/* 188 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var LayerSection = __webpack_require__(161);
-	var FrameSelector = __webpack_require__(186);
-	var ObjectController = __webpack_require__(179);
-	var AssetSection = __webpack_require__(194);
+	var FrameSelector = __webpack_require__(189);
+	var ObjectController = __webpack_require__(180);
+	var AssetSection = __webpack_require__(192);
 	
 	var React = __webpack_require__(3);
 	
@@ -22675,17 +22930,17 @@
 	module.exports = AnimationController;
 
 /***/ },
-/* 186 */
+/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var AppFrameActionCreators = __webpack_require__(187);
+	var AppFrameActionCreators = __webpack_require__(190);
 	
-	var FrameInterval = __webpack_require__(192);
+	var FrameInterval = __webpack_require__(191);
 	
 	var React = __webpack_require__(3);
-	var FrameStore = __webpack_require__(178);
+	var FrameStore = __webpack_require__(179);
 	
 	function getStateFromStore() {
 	    return {
@@ -22837,13 +23092,13 @@
 	module.exports = FrameSelector;
 
 /***/ },
-/* 187 */
+/* 190 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
+	var AppConstants = __webpack_require__(169);
 	
 	var ActionTypes = AppConstants.ActionTypes;
 	
@@ -22890,139 +23145,7 @@
 	};
 
 /***/ },
-/* 188 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	module.exports = {
-	
-	    init: function init() {
-	        localStorage.clear();
-	        localStorage.setItem('objects', JSON.stringify([{
-	            "id": "f_1",
-	            "animationId": 1,
-	            "layerIndex": 0,
-	            "layerID": 'l_2',
-	            "frameIndex": 1,
-	            "layerLock": false,
-	            "layerVisible": true,
-	            "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
-	        }, {
-	            "id": "f_2",
-	            "animationId": 1,
-	            "layerIndex": 1,
-	            "layerID": 'l_1',
-	            "frameIndex": 1,
-	            "layerLock": false,
-	            "layerVisible": true,
-	            "type": "circle", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50
-	        }, {
-	            "id": "f_3",
-	            "animationId": 2,
-	            "layerIndex": 0,
-	            "layerID": 'l_0',
-	            "frameIndex": 1,
-	            "layerLock": false,
-	            "layerVisible": true,
-	            "type": "rect", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
-	        }, {
-	            "id": "f_4",
-	            "animationId": 2,
-	            "layerIndex": 2,
-	            "layerID": 'l_2',
-	            "frameIndex": 1,
-	            "layerLock": false,
-	            "layerVisible": true,
-	            "type": "circle", "left": 100, "top": 100, "width": 50, "height": 100, "fill": "yellow", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50
-	        }]));
-	    }
-	
-	};
-
-/***/ },
-/* 189 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	module.exports = {
-	
-	    init: function init() {
-	        localStorage.clear();
-	        localStorage.setItem('animation', JSON.stringify({
-	
-	            animationID: 1,
-	            frameOrder: ['f_1', 'f_2'],
-	            frameInterval: 100,
-	            layerOrder: ['l_0', 'l_1'],
-	            layerInfo: {
-	                'l_0': {
-	                    name: 'Rectangles'
-	                },
-	                'l_1': {
-	                    name: 'Circles'
-	                },
-	                'l_2': {
-	                    name: 'Empty'
-	                }
-	            },
-	            timerInterval: 500,
-	            canvasJSON: {
-	                "objects": [{
-	                    "type": "rect", "originX": "left", "originY": "top", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_3", "animationID": 1, "layerID": "l_0", "frameID": "f_1", "layerLock": false, "layerVisible": true, "rx": 0, "ry": 0
-	                }, {
-	                    "type": "circle", "originX": "left", "originY": "top", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_2", "animationID": 1, "layerID": "l_1", "frameID": "f_1", "layerLock": false, "layerVisible": true, "radius": 50, "startAngle": 0, "endAngle": 6.283185307179586
-	                }, {
-	                    "type": "rect", "originX": "left", "originY": "top", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_1", "animationID": 1, "layerID": "l_0", "frameID": "f_2", "layerLock": false, "layerVisible": true, "rx": 0, "ry": 0
-	                }, {
-	                    "type": "circle", "originX": "left", "originY": "top", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "yellow", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_4", "animationID": 1, "layerID": "l_1", "frameID": "f_2", "layerLock": false, "layerVisible": true, "radius": 50, "startAngle": 0, "endAngle": 6.283185307179586
-	                }],
-	                "background": ""
-	            }
-	        }));
-	    }
-	};
-
-/***/ },
-/* 190 */
-/***/ function(module, exports) {
-
-	'use strict';
-	
-	module.exports = {
-	
-	    init: function init() {
-	        localStorage.clear();
-	        localStorage.setItem('frames', JSON.stringify([{
-	            id: 'f_1',
-	            layerIndex: 1,
-	            layerID: 'l_1',
-	            data: { "objects": [{ "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0 }, { "type": "circle", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50 }], "background": "rgba(0, 0, 0, 0)" },
-	            timestamp: Date.now()
-	        }, { "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
-	        }, {
-	            id: 'f_2',
-	            layerIndex: 2,
-	            layerID: 'l_2',
-	            data: { "objects": [{ "type": "rect", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0 }, { "type": "circle", "left": 100, "top": 100, "width": 50, "height": 100, "fill": "yellow", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50 }], "background": "rgba(0, 0, 0, 0)" },
-	            timestamp: Date.now()
-	        }]));
-	    }
-	
-	};
-
-/***/ },
 /* 191 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	module.exports = __webpack_require__(5);
-
-
-/***/ },
-/* 192 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -23077,17 +23200,16 @@
 	module.exports = FrameInterval;
 
 /***/ },
-/* 193 */,
-/* 194 */
+/* 192 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var React = __webpack_require__(3);
 	
-	var AssetListItem = __webpack_require__(197);
+	var AssetListItem = __webpack_require__(193);
 	
-	var AssetStore = __webpack_require__(195);
+	var AssetStore = __webpack_require__(187);
 	
 	function getStateFromStore() {
 	    return {
@@ -23197,140 +23319,14 @@
 	module.exports = AssetSection;
 
 /***/ },
-/* 195 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	var EventEmitter = __webpack_require__(172).EventEmitter;
-	var assign = __webpack_require__(173);
-	
-	var ActionTypes = AppConstants.ActionTypes;
-	var CHANGE_EVENT = 'change';
-	
-	var _assets = [];
-	var _currentID = null;
-	
-	function _addAsset(asset) {
-	    _assets.push(asset);
-	}
-	
-	function _destroyAsset(assetID) {
-	    _assets = _assets.filter(function (asset) {
-	        return asset.id !== assetID;
-	    });
-	}
-	
-	var AssetStore = assign({}, EventEmitter.prototype, {
-	
-	    emitChange: function emitChange() {
-	        console.log('----------ASSET STORE----------');
-	        console.log('current assetID', _currentID);
-	        console.log('assets', _assets);
-	        this.emit(CHANGE_EVENT);
-	    },
-	
-	    addChangeListener: function addChangeListener(callback) {
-	        this.on(CHANGE_EVENT, callback);
-	    },
-	
-	    removeChangeListener: function removeChangeListener(callback) {
-	        this.removeListener(CHANGE_EVENT, callback);
-	    },
-	
-	    getAll: function getAll() {
-	        return _assets;
-	    },
-	
-	    getCurrentAsset: function getCurrentAsset() {
-	        var current = _assets.filter(function (asset) {
-	            return asset.id === _currentID;
-	        })[0];
-	        return current;
-	    }
-	
-	});
-	
-	AssetStore.dispatchToken = AppDispatcher.register(function (action) {
-	
-	    switch (action.type) {
-	
-	        case ActionTypes.SAVE_ASSET:
-	            _addAsset(action.asset);
-	            console.log('SAVING ASSET', _assets);
-	            AssetStore.emitChange();
-	            break;
-	
-	        case ActionTypes.CLICK_ASSET:
-	            console.log('ClICKED ASSET', action.assetID);
-	            _currentID = action.assetID;
-	            AssetStore.emitChange();
-	            break;
-	
-	        case ActionTypes.DESTROY_ASSET:
-	            _destroyAsset(action.assetID);
-	            AssetStore.emitChange();
-	            break;
-	
-	        default:
-	        // do nothing
-	    }
-	});
-	
-	module.exports = AssetStore;
-
-/***/ },
-/* 196 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var AppDispatcher = __webpack_require__(163);
-	var AppConstants = __webpack_require__(167);
-	var AppObjectUtils = __webpack_require__(174);
-	var AppWebAPIUtils = __webpack_require__(181);
-	
-	var ActionTypes = AppConstants.ActionTypes;
-	
-	module.exports = {
-	
-	    saveAsset: function saveAsset(asset) {
-	        AppDispatcher.dispatch({
-	            type: ActionTypes.SAVE_ASSET,
-	            asset: {
-	                id: AppObjectUtils.newID(),
-	                objects: asset
-	            }
-	        });
-	    },
-	
-	    clickAsset: function clickAsset(assetID) {
-	        AppDispatcher.dispatch({
-	            type: ActionTypes.CLICK_ASSET,
-	            assetID: assetID
-	        });
-	    },
-	
-	    destroyAsset: function destroyAsset(assetID) {
-	        AppDispatcher.dispatch({
-	            type: ActionTypes.DESTROY_ASSET,
-	            assetID: assetID
-	        });
-	    }
-	
-	};
-
-/***/ },
-/* 197 */
+/* 193 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var React = __webpack_require__(3);
 	
-	var AppAssetActionCreators = __webpack_require__(196);
+	var AppAssetActionCreators = __webpack_require__(184);
 	
 	var AssetListItem = React.createClass({
 	    displayName: 'AssetListItem',
@@ -23366,16 +23362,136 @@
 	module.exports = AssetListItem;
 
 /***/ },
-/* 198 */
+/* 194 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	module.exports = {
+	
+	    init: function init() {
+	        localStorage.clear();
+	        localStorage.setItem('objects', JSON.stringify([{
+	            "id": "f_1",
+	            "animationId": 1,
+	            "layerIndex": 0,
+	            "layerID": 'l_2',
+	            "frameIndex": 1,
+	            "layerLock": false,
+	            "layerVisible": true,
+	            "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
+	        }, {
+	            "id": "f_2",
+	            "animationId": 1,
+	            "layerIndex": 1,
+	            "layerID": 'l_1',
+	            "frameIndex": 1,
+	            "layerLock": false,
+	            "layerVisible": true,
+	            "type": "circle", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50
+	        }, {
+	            "id": "f_3",
+	            "animationId": 2,
+	            "layerIndex": 0,
+	            "layerID": 'l_0',
+	            "frameIndex": 1,
+	            "layerLock": false,
+	            "layerVisible": true,
+	            "type": "rect", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
+	        }, {
+	            "id": "f_4",
+	            "animationId": 2,
+	            "layerIndex": 2,
+	            "layerID": 'l_2',
+	            "frameIndex": 1,
+	            "layerLock": false,
+	            "layerVisible": true,
+	            "type": "circle", "left": 100, "top": 100, "width": 50, "height": 100, "fill": "yellow", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50
+	        }]));
+	    }
+	
+	};
+
+/***/ },
+/* 195 */
 /***/ function(module, exports) {
 
 	'use strict';
 	
 	module.exports = {
-	    log: function log(action) {
-	        console.log('Action', action);
+	
+	    init: function init() {
+	        localStorage.clear();
+	        localStorage.setItem('animation', JSON.stringify({
+	
+	            animationID: 1,
+	            frameOrder: ['f_1', 'f_2'],
+	            frameInterval: 100,
+	            layerOrder: ['l_0', 'l_1'],
+	            layerInfo: {
+	                'l_0': {
+	                    name: 'Rectangles'
+	                },
+	                'l_1': {
+	                    name: 'Circles'
+	                },
+	                'l_2': {
+	                    name: 'Empty'
+	                }
+	            },
+	            timerInterval: 500,
+	            canvasJSON: {
+	                "objects": [{
+	                    "type": "rect", "originX": "left", "originY": "top", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_3", "animationID": 1, "layerID": "l_0", "frameID": "f_1", "layerLock": false, "layerVisible": true, "rx": 0, "ry": 0
+	                }, {
+	                    "type": "circle", "originX": "left", "originY": "top", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_2", "animationID": 1, "layerID": "l_1", "frameID": "f_1", "layerLock": false, "layerVisible": true, "radius": 50, "startAngle": 0, "endAngle": 6.283185307179586
+	                }, {
+	                    "type": "rect", "originX": "left", "originY": "top", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_1", "animationID": 1, "layerID": "l_0", "frameID": "f_2", "layerLock": false, "layerVisible": true, "rx": 0, "ry": 0
+	                }, {
+	                    "type": "circle", "originX": "left", "originY": "top", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "yellow", "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "strokeLineCap": "butt", "strokeLineJoin": "miter", "strokeMiterLimit": 10, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "shadow": null, "visible": true, "clipTo": null, "backgroundColor": "", "fillRule": "nonzero", "globalCompositeOperation": "source-over", "id": "f_4", "animationID": 1, "layerID": "l_1", "frameID": "f_2", "layerLock": false, "layerVisible": true, "radius": 50, "startAngle": 0, "endAngle": 6.283185307179586
+	                }],
+	                "background": ""
+	            }
+	        }));
 	    }
 	};
+
+/***/ },
+/* 196 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	module.exports = {
+	
+	    init: function init() {
+	        localStorage.clear();
+	        localStorage.setItem('frames', JSON.stringify([{
+	            id: 'f_1',
+	            layerIndex: 1,
+	            layerID: 'l_1',
+	            data: { "objects": [{ "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0 }, { "type": "circle", "left": 100, "top": 100, "width": 100, "height": 100, "fill": "red", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50 }], "background": "rgba(0, 0, 0, 0)" },
+	            timestamp: Date.now()
+	        }, { "type": "rect", "left": 50, "top": 50, "width": 20, "height": 20, "fill": "green", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0
+	        }, {
+	            id: 'f_2',
+	            layerIndex: 2,
+	            layerID: 'l_2',
+	            data: { "objects": [{ "type": "rect", "left": 70, "top": 50, "width": 20, "height": 20, "fill": "blue", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "rx": 0, "ry": 0 }, { "type": "circle", "left": 100, "top": 100, "width": 50, "height": 100, "fill": "yellow", "overlayFill": null, "stroke": null, "strokeWidth": 1, "strokeDashArray": null, "scaleX": 1, "scaleY": 1, "angle": 0, "flipX": false, "flipY": false, "opacity": 1, "selectable": true, "hasControls": true, "hasBorders": true, "hasRotatingPoint": false, "transparentCorners": true, "perPixelTargetFind": false, "radius": 50 }], "background": "rgba(0, 0, 0, 0)" },
+	            timestamp: Date.now()
+	        }]));
+	    }
+	
+	};
+
+/***/ },
+/* 197 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	module.exports = __webpack_require__(5);
+
 
 /***/ }
 /******/ ]);
