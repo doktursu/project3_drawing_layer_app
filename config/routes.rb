@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-  scope '/project' do
+  scope '/api' do
+    resources :animations, except: [:new, :edit]
     resources :assets, except: [:new, :edit]
   end
   # The priority is based upon order of creation: first created -> highest priority.
