@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160309150053) do
+ActiveRecord::Schema.define(version: 20160309160314) do
 
   create_table "animations", force: :cascade do |t|
     t.text     "frameOrder"
@@ -22,6 +22,8 @@ ActiveRecord::Schema.define(version: 20160309150053) do
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
     t.integer  "layerNameCount"
+    t.string   "currentFrameID"
+    t.string   "currentLayerID"
   end
 
   create_table "assets", force: :cascade do |t|
