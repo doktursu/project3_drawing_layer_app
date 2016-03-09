@@ -46,9 +46,11 @@ class AssetsController < ApplicationController
   # DELETE /assets/1
   # DELETE /assets/1.json
   def destroy
-    @asset.destroy
+    if @asset.destroy
+      render json: {}, status: 200
+    end
 
-    head :no_content
+    # head :no_content
   end
 
   private
