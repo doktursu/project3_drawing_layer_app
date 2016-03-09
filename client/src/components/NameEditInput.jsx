@@ -2,7 +2,7 @@ var React = require('react');
 
 var ENTER_KEY_CODE = 13;
 
-var LayerNameEditInput = React.createClass({
+var NameEditInput = React.createClass({
 
     getInitialState: function() {
         return {
@@ -46,4 +46,4 @@ var LayerNameEditInput = React.createClass({
 
 });
 
-module.exports = LayerNameEditInput;
+module.exports = NameEditInput;

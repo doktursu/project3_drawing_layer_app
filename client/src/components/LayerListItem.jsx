@@ -3,7 +3,7 @@ var React = require('react');
 var classNames = require('classnames');
 var LayerStore = require('../stores/LayerStore');
 
-var LayerNameEditInput = require('./LayerNameEditInput');
+var NameEditInput = require('./NameEditInput');
 var LayerListOptions = require('./LayerListOptions.jsx');
 var ReactPropTypes = React.PropTypes;
 
@@ -27,7 +27,7 @@ var LayerListItem = React.createClass({
         var input;
         if (this.state.isEditingName) {
             input =
-                <LayerNameEditInput
+                <NameEditInput
                     className="edit"
                     onSave={this._onSave}
                     name={this.state.layerName}
@@ -70,7 +70,7 @@ var LayerListItem = React.createClass({
             isEditingName: false,
             layerName: name
         });
-        AppLayerActionCreators.renameLayer(this.props.layerID, this.state.layerName);
+        AppLayerActionCreators.renameLayer(this.props.layerID, name);
     }
 });
 

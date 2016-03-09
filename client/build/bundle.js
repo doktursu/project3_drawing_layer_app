@@ -20754,7 +20754,7 @@
 	var classNames = __webpack_require__(172);
 	var LayerStore = __webpack_require__(173);
 	
-	var LayerNameEditInput = __webpack_require__(177);
+	var NameEditInput = __webpack_require__(198);
 	var LayerListOptions = __webpack_require__(178);
 	var ReactPropTypes = React.PropTypes;
 	
@@ -20779,7 +20779,7 @@
 	
 	        var input;
 	        if (this.state.isEditingName) {
-	            input = React.createElement(LayerNameEditInput, {
+	            input = React.createElement(NameEditInput, {
 	                className: 'edit',
 	                onSave: this._onSave,
 	                name: this.state.layerName
@@ -20822,7 +20822,7 @@
 	            isEditingName: false,
 	            layerName: name
 	        });
-	        AppLayerActionCreators.renameLayer(this.props.layerID, this.state.layerName);
+	        AppLayerActionCreators.renameLayer(this.props.layerID, name);
 	    }
 	});
 	
@@ -21188,8 +21188,7 @@
 	        case ActionTypes.RENAME_LAYER:
 	            var id = action.layerID;
 	            var name = action.layerName;
-	
-	            _layerInfo[id].name = name;
+	            _layerInfo[action.layerID].name = name;
 	            break;
 	        // case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
 	        //     var object = action.object;
@@ -21651,62 +21650,7 @@
 	};
 
 /***/ },
-/* 177 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(3);
-	
-	var ENTER_KEY_CODE = 13;
-	
-	var LayerNameEditInput = React.createClass({
-	    displayName: 'LayerNameEditInput',
-	
-	
-	    getInitialState: function getInitialState() {
-	        return {
-	            name: this.props.name || ''
-	        };
-	    },
-	
-	    render: function render() {
-	        return React.createElement('input', {
-	            id: this.props.id,
-	            placeholder: this.state.name,
-	            value: this.state.name,
-	            onBlur: this._save,
-	            onChange: this._onChange,
-	            onKeyDown: this._onKeyDown,
-	            autoFocus: true
-	        });
-	    },
-	
-	    _save: function _save() {
-	        var name = this.state.name.trim();
-	        this.props.onSave(name);
-	        this.setState({
-	            name: ''
-	        });
-	    },
-	
-	    _onChange: function _onChange(event) {
-	        this.setState({
-	            name: event.target.value
-	        });
-	    },
-	
-	    _onKeyDown: function _onKeyDown(event) {
-	        if (event.keyCode === ENTER_KEY_CODE) {
-	            this._save();
-	        }
-	    }
-	
-	});
-	
-	module.exports = LayerNameEditInput;
-
-/***/ },
+/* 177 */,
 /* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -23649,6 +23593,62 @@
 	
 	module.exports = __webpack_require__(5);
 
+
+/***/ },
+/* 198 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(3);
+	
+	var ENTER_KEY_CODE = 13;
+	
+	var NameEditInput = React.createClass({
+	    displayName: 'NameEditInput',
+	
+	
+	    getInitialState: function getInitialState() {
+	        return {
+	            name: this.props.name || ''
+	        };
+	    },
+	
+	    render: function render() {
+	        return React.createElement('input', {
+	            id: this.props.id,
+	            placeholder: this.state.name,
+	            value: this.state.name,
+	            onBlur: this._save,
+	            onChange: this._onChange,
+	            onKeyDown: this._onKeyDown,
+	            autoFocus: true
+	        });
+	    },
+	
+	    _save: function _save() {
+	        var name = this.state.name.trim();
+	        this.props.onSave(name);
+	        this.setState({
+	            name: ''
+	        });
+	    },
+	
+	    _onChange: function _onChange(event) {
+	        this.setState({
+	            name: event.target.value
+	        });
+	    },
+	
+	    _onKeyDown: function _onKeyDown(event) {
+	        if (event.keyCode === ENTER_KEY_CODE) {
+	            this._save();
+	        }
+	    }
+	
+	});
+	
+	module.exports = NameEditInput;
 
 /***/ }
 /******/ ]);

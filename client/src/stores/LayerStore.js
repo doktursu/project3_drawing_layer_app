@@ -312,8 +312,7 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
         case ActionTypes.RENAME_LAYER:
             var id = action.layerID;
             var name = action.layerName;
-
-            _layerInfo[id].name = name;
+            _layerInfo[action.layerID].name = name;
             break;
         // case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
         //     var object = action.object;
