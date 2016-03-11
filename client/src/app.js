@@ -1,5 +1,3 @@
-var App = require('./components/App.jsx');
-
 var ObjectController = require('./components/ObjectController.jsx');
 var AnimationController = require('./components/AnimationController.jsx');
 
