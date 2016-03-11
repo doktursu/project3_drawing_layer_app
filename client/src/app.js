@@ -62,9 +62,12 @@ window.onload = function() {
     // AppExampleData.init();
     // RawAnimationData.init();
     // AppWebAPIUtils.getRawAnimation();
+
+
+    // AppWebAPIUtils.getAnimation(31);
+    AppWebAPIUtils.createAnimation();
     AppWebAPIUtils.getAllAssets();
 
-    AppWebAPIUtils.createAnimation();
 
     // AppWebAPIUtils.getAllFrames();
 

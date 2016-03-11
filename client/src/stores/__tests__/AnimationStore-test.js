@@ -32,7 +32,7 @@ describe('Animation Store', function() {
 };
 
     var actionReceiveRawAnimation = {
-        type: ActionTypes.RECEIVE_RAW_ANIMATION,
+         type: ActionTypes.RECEIVE_RAW_ANIMATION,   
         rawAnimation: TestAnimationData
     }
 

@@ -9,29 +9,11 @@ var ActionTypes = AppConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
 
 var _currentID = null;
-var _currentIndex = null;
-var _layers = [];
-var _layersMap = [];
-
 var _layerOrder = [];
 var _layerInfo = {};
 var _layerNameCount = 0;
 
-var _layersOptions = {
-    'l_0': 
-    {
-        visible: true,
-        selectable: true
-    },
-    'l_1':
-    {
-        visible: true,
-        selectable: true
-    }
-};
-
 function move(old_index, new_index) {
-    console.log('from', old_index, 'to', new_index);
     if (new_index >= _layerOrder.length) {
         var k = new_index - _layerOrder.length;
         while ((k--) + 1) {
@@ -39,10 +21,9 @@ function move(old_index, new_index) {
         }
     }
     _layerOrder.splice(new_index, 0, _layerOrder.splice(old_index, 1)[0]);
-    console.log('moved?', _layerOrder); // for testing purposes
 };
 
-function moveUpLayer(layerID) {
+function _moveUpLayer(layerID) {
     var index = _layerOrder.indexOf(layerID);
     if (index === _layerOrder.length - 1) {
         return;
@@ -50,7 +31,7 @@ function moveUpLayer(layerID) {
     move(index, index + 1);
 }
 
-function moveDownLayer(layerID) {
+function _moveDownLayer(layerID) {
     var index = _layerOrder.indexOf(layerID);
     if (index === 0) {
         return;
@@ -62,50 +43,7 @@ function _createLayerName() {
     return 'Layer ' + _layerNameCount++;
 }
 
-function getIDforIndex(index) {
-    var layer = _layers[index];
-    if (layer) {
-        return layer.id;
-    }
-    return null;
-}
-
-function getIndexForID(layerID) {
-    var index;
-    for (index = 0; index < _layers.length; index++) {
-        if (_layers[index].id === layerID) {
-            return index;
-        }
-    }
-    return null;
-}
-
 var LayerStore = assign({}, EventEmitter.prototype, {
-
-    init: function(rawObjects) {
-        var layers = rawObjects.reduce(function(layers, object) {
-            var id = object.layerID;
-            var object = AppObjectUtils.convertRawObject(object);
-            if (layers[id]) {
-                layers[id].objects.push(object);
-            } else {
-                layers[id] = {
-                    id: id,
-                    objects: [object]
-                };
-            }
-            return layers;
-        }, {});
-
-        _layerOrder.forEach(function(id) {
-            _layers.push(layers[id]);
-        });
-
-        if (!_currentIndex) {
-            _currentIndex = _layers.length - 1;
-            _currentID = _layers[_currentIndex].id;
-        }
-    },
 
     emitChange: function() {
         console.log('----------LAYER STORE----------')
@@ -142,59 +80,6 @@ var LayerStore = assign({}, EventEmitter.prototype, {
         var layer = _layerInfo[layerID];
         if (layer) return layer.name;
         return layer;
-    },
-
-
-
-
-
-
-
-    getAllOrdered: function() {
-        var orderedLayers = [];
-        for (var id in _layers) {
-            var layer = _layers[id];
-            orderedLayers.push(layer);
-        }
-        orderedLayers.sort(function(a, b) {
-            return a.index + b.index;
-        });
-        return orderedLayers;
-    },
-
-    getAllLayers: function() {
-        return _layers;
-    },
-
-    getIDforIndex: function(index) {
-        var layer = _layers[index];
-        if (layer) {
-            return layer.id;
-        }
-        return null;
-    },
-
-    getIndexForID: function(layerID) {
-        var index;
-        for (index = 0; index < _layers.length; index++) {
-            if (_layers[index].id === layerID) {
-                return index;
-            }
-        }
-        return null;
-    },
-
-    getCurrentIndex: function() {
-        return _currentIndex;
-    },
-
-    getCurrentInsertionIndex: function() {
-        var layerCount = 0;
-        for (var i = 0; i <= _currentIndex; i++) {
-            layerCount += _layers[i].objects.length;
-        }
-        console.log('inserting at', layerCount);
-        return layerCount;
     }
 
 });
@@ -247,36 +132,20 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
 
         case ActionTypes.CLICK_LAYER:
             _currentID = action.layerID;
-            // _layers.forEach(function(layer, index) {
-            //     if (layer.id === _currentID) {
-            //         _currentIndex = index;
-            //     }
-            // });
             LayerStore.emitChange();
             break;
 
         case ActionTypes.MOVE_UP_LAYER:
-            moveUpLayer(action.layerID);
+            _moveUpLayer(action.layerID);
             LayerStore.emitChange();
             break;
 
         case ActionTypes.MOVE_DOWN_LAYER:
-            moveDownLayer(action.layerID);
+            _moveDownLayer(action.layerID);
             LayerStore.emitChange();
             break;
 
-
-
-
-
-
         case ActionTypes.CREATE_LAYER:
-            // var newIndex = _layers.length;
-            // _layers[newIndex] = {
-            //     id: 'l_' + AppObjectUtils.newID(),
-            //     objects: []
-            // };
-
             var newID = 'l_' + AppObjectUtils.newID();
             var currentIndex = _layerOrder.indexOf(_currentID);
             var newIndex = currentIndex + 1;
@@ -314,24 +183,11 @@ LayerStore.dispatchToken = AppDispatcher.register(function(action) {
             var name = action.layerName;
             _layerInfo[action.layerID].name = name;
             break;
-        // case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
-        //     var object = action.object;
-        //     console.log('received', object);
-        //     var index = LayerStore.getIndexForID(object.layerID);
-        //     _layers[index].objects.push(object);
-        //     LayerStore.emitChange();
-        //     break;
-
-        
 
         case ActionTypes.RECEIVE_RAW_OBJECTS:
             LayerStore.init(action.rawObjects);
             LayerStore.emitChange();
             break;
-
-        
-
-        
 
         default:
             // do nothing

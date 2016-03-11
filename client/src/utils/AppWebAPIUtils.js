@@ -140,8 +140,6 @@ module.exports = {
         }
         animation.animation.layerInfo[layerID] = {name: 'Background'};
         animation.animation.layerInfo = JSON.stringify(animation.animation.layerInfo);
-        console.log('animation to save', animation);
-
 
         var url = 'http://localhost:3000/api/animations';
         var request = new XMLHttpRequest();
@@ -169,7 +167,6 @@ module.exports = {
                 canvasJSON: canvasJSON
             }
         }
-        console.log('animation to save', animation);
 
         var url = 'http://localhost:3000/api/animations' + '/' + AnimationStore.getCurrentID();
         var request = new XMLHttpRequest();
@@ -182,6 +179,20 @@ module.exports = {
             }
         };
         request.send(JSON.stringify(animation));
+    },
+
+    getAnimation: function(animationID) {
+        var url = 'http://localhost:3000/api/animations' + '/' + animationID;
+        var request = new XMLHttpRequest();
+        request.open('GET', url);
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.onload = function() {
+            if (request.status === 200) {
+                var rawAnimation = JSON.parse(request.responseText);
+                AppServerActionCreators.receiveCreatedRawAnimation(rawAnimation);
+            }
+        };
+        request.send(null);
     },
 
     //////////////////////////////////////////

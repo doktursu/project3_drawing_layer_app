@@ -102,9 +102,9 @@ describe('Frame Store', function() {
         expect(AppDispatcher.register.mock.calls.length).toBe(1);
     });
 
-    it('initializes with no frames', function() {
-        var frames = FrameStore.getAll();
-        expect(frames).toEqual({});
+    it('initializes with no frame order', function() {
+        var frameOrder = FrameStore.getOrder();
+        expect(frameOrder).toEqual([]);
     });
 
     it('gets frame order from Animation', function() {
@@ -117,23 +117,10 @@ describe('Frame Store', function() {
         expect(FrameStore.getCurrentID()).toEqual('f_1');
     });
 
-    it('adds objects from canvas', function() {
-        callback(actionReceiveCanvas);
-        var frames = FrameStore.getAll();
-        expect(frames['f_1'].objects.length).toBe(2);
-        expect(frames['f_2'].objects.length).toBe(2);
-    });
-
     it('sets current frame ID on frame click', function() {
         callback(actionReceiveRawAnimation);
         callback(actionClickFrame);
         expect(FrameStore.getCurrentID()).toEqual('f_2');
-    });
-
-    it('gets frame by frameID', function() {
-        callback(actionReceiveCanvas);
-        var frames = FrameStore.getAllByFrame('f_1');
-        expect(frames.objects.length).toBe(2);
     });
 
     it('creates a new frameID and adds it to the frame order', function() {
@@ -171,7 +158,6 @@ describe('Frame Store', function() {
         callback(actionClickPreviousFrame);
         expect(FrameStore.getCurrentID()).toEqual('f_2');
     });
-
 
 
 

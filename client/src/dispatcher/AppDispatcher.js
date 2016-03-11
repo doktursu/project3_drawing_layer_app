@@ -9,5 +9,4 @@ var assign = require('object-assign');
 //     }
 // });
 
-
 module.exports = new Dispatcher();

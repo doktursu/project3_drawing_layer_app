@@ -98,9 +98,10 @@
 	    // AppExampleData.init();
 	    // RawAnimationData.init();
 	    // AppWebAPIUtils.getRawAnimation();
-	    AppWebAPIUtils.getAllAssets();
 	
+	    // AppWebAPIUtils.getAnimation(31);
 	    AppWebAPIUtils.createAnimation();
+	    AppWebAPIUtils.getAllAssets();
 	
 	    // AppWebAPIUtils.getAllFrames();
 	
@@ -20755,7 +20756,7 @@
 	var classNames = __webpack_require__(172);
 	var LayerStore = __webpack_require__(173);
 	
-	var NameEditInput = __webpack_require__(198);
+	var NameEditInput = __webpack_require__(177);
 	var LayerListOptions = __webpack_require__(178);
 	var ReactPropTypes = React.PropTypes;
 	
@@ -20900,27 +20901,11 @@
 	var CHANGE_EVENT = 'change';
 	
 	var _currentID = null;
-	var _currentIndex = null;
-	var _layers = [];
-	var _layersMap = [];
-	
 	var _layerOrder = [];
 	var _layerInfo = {};
 	var _layerNameCount = 0;
 	
-	var _layersOptions = {
-	    'l_0': {
-	        visible: true,
-	        selectable: true
-	    },
-	    'l_1': {
-	        visible: true,
-	        selectable: true
-	    }
-	};
-	
 	function move(old_index, new_index) {
-	    console.log('from', old_index, 'to', new_index);
 	    if (new_index >= _layerOrder.length) {
 	        var k = new_index - _layerOrder.length;
 	        while (k-- + 1) {
@@ -20928,10 +20913,9 @@
 	        }
 	    }
 	    _layerOrder.splice(new_index, 0, _layerOrder.splice(old_index, 1)[0]);
-	    console.log('moved?', _layerOrder); // for testing purposes
 	};
 	
-	function moveUpLayer(layerID) {
+	function _moveUpLayer(layerID) {
 	    var index = _layerOrder.indexOf(layerID);
 	    if (index === _layerOrder.length - 1) {
 	        return;
@@ -20939,7 +20923,7 @@
 	    move(index, index + 1);
 	}
 	
-	function moveDownLayer(layerID) {
+	function _moveDownLayer(layerID) {
 	    var index = _layerOrder.indexOf(layerID);
 	    if (index === 0) {
 	        return;
@@ -20951,50 +20935,7 @@
 	    return 'Layer ' + _layerNameCount++;
 	}
 	
-	function getIDforIndex(index) {
-	    var layer = _layers[index];
-	    if (layer) {
-	        return layer.id;
-	    }
-	    return null;
-	}
-	
-	function getIndexForID(layerID) {
-	    var index;
-	    for (index = 0; index < _layers.length; index++) {
-	        if (_layers[index].id === layerID) {
-	            return index;
-	        }
-	    }
-	    return null;
-	}
-	
 	var LayerStore = assign({}, EventEmitter.prototype, {
-	
-	    init: function init(rawObjects) {
-	        var layers = rawObjects.reduce(function (layers, object) {
-	            var id = object.layerID;
-	            var object = AppObjectUtils.convertRawObject(object);
-	            if (layers[id]) {
-	                layers[id].objects.push(object);
-	            } else {
-	                layers[id] = {
-	                    id: id,
-	                    objects: [object]
-	                };
-	            }
-	            return layers;
-	        }, {});
-	
-	        _layerOrder.forEach(function (id) {
-	            _layers.push(layers[id]);
-	        });
-	
-	        if (!_currentIndex) {
-	            _currentIndex = _layers.length - 1;
-	            _currentID = _layers[_currentIndex].id;
-	        }
-	    },
 	
 	    emitChange: function emitChange() {
 	        console.log('----------LAYER STORE----------');
@@ -21031,53 +20972,6 @@
 	        var layer = _layerInfo[layerID];
 	        if (layer) return layer.name;
 	        return layer;
-	    },
-	
-	    getAllOrdered: function getAllOrdered() {
-	        var orderedLayers = [];
-	        for (var id in _layers) {
-	            var layer = _layers[id];
-	            orderedLayers.push(layer);
-	        }
-	        orderedLayers.sort(function (a, b) {
-	            return a.index + b.index;
-	        });
-	        return orderedLayers;
-	    },
-	
-	    getAllLayers: function getAllLayers() {
-	        return _layers;
-	    },
-	
-	    getIDforIndex: function getIDforIndex(index) {
-	        var layer = _layers[index];
-	        if (layer) {
-	            return layer.id;
-	        }
-	        return null;
-	    },
-	
-	    getIndexForID: function getIndexForID(layerID) {
-	        var index;
-	        for (index = 0; index < _layers.length; index++) {
-	            if (_layers[index].id === layerID) {
-	                return index;
-	            }
-	        }
-	        return null;
-	    },
-	
-	    getCurrentIndex: function getCurrentIndex() {
-	        return _currentIndex;
-	    },
-	
-	    getCurrentInsertionIndex: function getCurrentInsertionIndex() {
-	        var layerCount = 0;
-	        for (var i = 0; i <= _currentIndex; i++) {
-	            layerCount += _layers[i].objects.length;
-	        }
-	        console.log('inserting at', layerCount);
-	        return layerCount;
 	    }
 	
 	});
@@ -21130,31 +21024,20 @@
 	
 	        case ActionTypes.CLICK_LAYER:
 	            _currentID = action.layerID;
-	            // _layers.forEach(function(layer, index) {
-	            //     if (layer.id === _currentID) {
-	            //         _currentIndex = index;
-	            //     }
-	            // });
 	            LayerStore.emitChange();
 	            break;
 	
 	        case ActionTypes.MOVE_UP_LAYER:
-	            moveUpLayer(action.layerID);
+	            _moveUpLayer(action.layerID);
 	            LayerStore.emitChange();
 	            break;
 	
 	        case ActionTypes.MOVE_DOWN_LAYER:
-	            moveDownLayer(action.layerID);
+	            _moveDownLayer(action.layerID);
 	            LayerStore.emitChange();
 	            break;
 	
 	        case ActionTypes.CREATE_LAYER:
-	            // var newIndex = _layers.length;
-	            // _layers[newIndex] = {
-	            //     id: 'l_' + AppObjectUtils.newID(),
-	            //     objects: []
-	            // };
-	
 	            var newID = 'l_' + AppObjectUtils.newID();
 	            var currentIndex = _layerOrder.indexOf(_currentID);
 	            var newIndex = currentIndex + 1;
@@ -21191,13 +21074,6 @@
 	            var name = action.layerName;
 	            _layerInfo[action.layerID].name = name;
 	            break;
-	        // case ActionTypes.RECEIVE_RAW_CREATED_OBJECT:
-	        //     var object = action.object;
-	        //     console.log('received', object);
-	        //     var index = LayerStore.getIndexForID(object.layerID);
-	        //     _layers[index].objects.push(object);
-	        //     LayerStore.emitChange();
-	        //     break;
 	
 	        case ActionTypes.RECEIVE_RAW_OBJECTS:
 	            LayerStore.init(action.rawObjects);
@@ -21651,7 +21527,62 @@
 	};
 
 /***/ },
-/* 177 */,
+/* 177 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var React = __webpack_require__(3);
+	
+	var ENTER_KEY_CODE = 13;
+	
+	var NameEditInput = React.createClass({
+	    displayName: 'NameEditInput',
+	
+	
+	    getInitialState: function getInitialState() {
+	        return {
+	            name: this.props.name || ''
+	        };
+	    },
+	
+	    render: function render() {
+	        return React.createElement('input', {
+	            id: this.props.id,
+	            placeholder: this.state.name,
+	            value: this.state.name,
+	            onBlur: this._save,
+	            onChange: this._onChange,
+	            onKeyDown: this._onKeyDown,
+	            autoFocus: true
+	        });
+	    },
+	
+	    _save: function _save() {
+	        var name = this.state.name.trim();
+	        this.props.onSave(name);
+	        this.setState({
+	            name: ''
+	        });
+	    },
+	
+	    _onChange: function _onChange(event) {
+	        this.setState({
+	            name: event.target.value
+	        });
+	    },
+	
+	    _onKeyDown: function _onKeyDown(event) {
+	        if (event.keyCode === ENTER_KEY_CODE) {
+	            this._save();
+	        }
+	    }
+	
+	});
+	
+	module.exports = NameEditInput;
+
+/***/ },
 /* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -21730,8 +21661,6 @@
 	var _frameInterval = 100;
 	var _direction = 'normal';
 	
-	var _frames = {};
-	
 	function _clickNextFrame() {
 	    var currentIndex = _frameOrder.indexOf(_currentID);
 	    var nextIndex = currentIndex + 1;
@@ -21748,25 +21677,6 @@
 	
 	var FrameStore = assign({}, EventEmitter.prototype, {
 	
-	    addObjects: function addObjects(objects) {
-	        objects.forEach(function (object) {
-	            var frameID = object.frameID;
-	            var frame = _frames[frameID];
-	            if (frame) {
-	                frame.objects.push(object);
-	                return;
-	            }
-	            _frames[frameID] = {
-	                objects: [object]
-	            };
-	        }, this);
-	
-	        if (!_currentID) {
-	            var allOrdered = this.getAllOrdered();
-	            _currentID = allOrdered[allOrdered.length - 1].id;
-	        }
-	    },
-	
 	    emitChange: function emitChange() {
 	        console.log('----------FRAME STORE----------');
 	        console.log('frames', _frameOrder);
@@ -21782,10 +21692,6 @@
 	        this.removeListener(CHANGE_EVENT, callback);
 	    },
 	
-	    getAll: function getAll() {
-	        return _frames;
-	    },
-	
 	    getOrder: function getOrder() {
 	        return _frameOrder;
 	    },
@@ -21798,20 +21704,6 @@
 	        return _frames[frameID];
 	    },
 	
-	    getAllOrdered: function getAllOrdered() {
-	        // var orderedFrames = [];
-	        // for (var id in _frames) {
-	        //     var frame = _frames[id];
-	        //     orderedFrames.push(frame);
-	        // }
-	        // orderedFrames.sort(function(a, b) {
-	        //     return a.id - b.id;
-	        // })
-	        // return orderedFrames;
-	
-	        return [1, 2, 3, 4, 5];
-	    },
-	
 	    getCurrentID: function getCurrentID() {
 	        return _currentID;
 	    }
@@ -21821,11 +21713,6 @@
 	FrameStore.dispatchToken = AppDispatcher.register(function (action) {
 	
 	    switch (action.type) {
-	
-	        // case ActionTypes.RECEIVE_RAW_OBJECTS:
-	        //     FrameStore.addObjects(action.rawObjects);
-	        //     FrameStore.emitChange();
-	        //     break;
 	
 	        case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
 	            _frameOrder = action.rawAnimation.frameOrder;
@@ -21848,11 +21735,6 @@
 	
 	            _currentID = _frameOrder[0];
 	            FrameStore.emitChange();
-	            break;
-	
-	        case ActionTypes.RECEIVE_CANVAS:
-	            var objects = action.canvas._objects;
-	            FrameStore.addObjects(objects);
 	            break;
 	
 	        case ActionTypes.CLICK_FRAME:
@@ -21912,19 +21794,17 @@
 
 	'use strict';
 	
-	// var FabricCanvas = require('./FabricCanvas.jsx');
 	var AppObjectActionCreators = __webpack_require__(181);
 	var AppAssetActionCreators = __webpack_require__(184);
 	
 	var DrawingModeOptions = __webpack_require__(160);
-	// var LayerSection = require('./LayerSection.jsx');
-	// var FrameSelector = require('./FrameSelector.jsx');
+	
 	var AppWebAPIUtils = __webpack_require__(182);
 	
 	var AnimationStore = __webpack_require__(185);
 	var LayerStore = __webpack_require__(173);
 	var FrameStore = __webpack_require__(179);
-	// var JsonObjectStore = require('../stores/JsonObjectStore.js');
+	
 	var ObjectStore = __webpack_require__(186);
 	var React = __webpack_require__(3);
 	
@@ -21958,6 +21838,7 @@
 	    },
 	
 	    _initializeFabricCanvas: function _initializeFabricCanvas() {
+	        console.log('CANVAS JSON', this.state.canvasJSON);
 	        canvas = new fabric.Canvas("c");
 	        canvas.isDrawingMode = true;
 	        canvas.selectable = true;
@@ -21966,9 +21847,8 @@
 	        // json["objects"] = this.state.objects;
 	        // json["background"] = "rgba(0, 0, 0, 0)";
 	        // var json = JSON.stringify(json);
-	
-	        // canvas.loadFromJSON(this.state.canvasJSON);
-	        canvas.loadFromJSON('');
+	        canvas.loadFromJSON(this.state.canvasJSON);
+	        // canvas.loadFromJSON("{\"objects\":[],\"background\":\"\"}");
 	
 	        canvas.on('object:added', function () {
 	            var objects = canvas.getObjects();
@@ -21976,7 +21856,7 @@
 	            this._onCreate(object);
 	        }.bind(this));
 	
-	        console.log('canvas', JSON.stringify(canvas));
+	        console.log('FABRIC CANVAS', canvas);
 	        this._sendCanvas(canvas);
 	        this.setState({ canvas: canvas });
 	    },
@@ -21986,19 +21866,6 @@
 	        canvas._objects = this.state.objects;
 	        canvas.renderAll();
 	    },
-	
-	    // componentDidUpdate: function() {
-	    //     canvas.clear();
-	
-	    //     var json = {};
-	    //     json["objects"] = this.state.objects;
-	    //     json["background"] = "rgba(0, 0, 0, 0)";
-	    //     var json = JSON.stringify(json);
-	
-	    //     canvas.loadFromJSON(json);
-	    //     console.log(json);
-	    //     console.log(canvas);
-	    // },
 	
 	    componentWillUnmount: function componentWillUnmount() {
 	        ObjectStore.removeChangeListener(this._onChange);
@@ -22366,7 +22233,6 @@
 	        };
 	        animation.animation.layerInfo[layerID] = { name: 'Background' };
 	        animation.animation.layerInfo = JSON.stringify(animation.animation.layerInfo);
-	        console.log('animation to save', animation);
 	
 	        var url = 'http://localhost:3000/api/animations';
 	        var request = new XMLHttpRequest();
@@ -22394,7 +22260,6 @@
 	                canvasJSON: canvasJSON
 	            }
 	        };
-	        console.log('animation to save', animation);
 	
 	        var url = 'http://localhost:3000/api/animations' + '/' + AnimationStore.getCurrentID();
 	        var request = new XMLHttpRequest();
@@ -22407,6 +22272,20 @@
 	            }
 	        };
 	        request.send(JSON.stringify(animation));
+	    },
+	
+	    getAnimation: function getAnimation(animationID) {
+	        var url = 'http://localhost:3000/api/animations' + '/' + animationID;
+	        var request = new XMLHttpRequest();
+	        request.open('GET', url);
+	        request.setRequestHeader('Content-Type', 'application/json');
+	        request.onload = function () {
+	            if (request.status === 200) {
+	                var rawAnimation = JSON.parse(request.responseText);
+	                AppServerActionCreators.receiveCreatedRawAnimation(rawAnimation);
+	            }
+	        };
+	        request.send(null);
 	    },
 	
 	    //////////////////////////////////////////
@@ -22603,7 +22482,6 @@
 	var CHANGE_EVENT = 'change';
 	
 	var _currentID = null;
-	var _layers = {};
 	var _canvasJSON = null;
 	
 	var AnimationStore = assign({}, EventEmitter.prototype, {
@@ -22640,12 +22518,17 @@
 	    switch (action.type) {
 	
 	        case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
+	            console.log('RAW ANIMATION LOADING', action.rawAnimation);
 	            AnimationStore.init(action.rawAnimation);
 	            AnimationStore.emitChange();
 	            break;
 	
 	        case ActionTypes.RECEIVE_RAW_ANIMATION:
 	            AnimationStore.init(action.rawAnimation);
+	            AnimationStore.emitChange();
+	            break;
+	
+	        case ActionTypes.RECEIVE_CANVAS:
 	            AnimationStore.emitChange();
 	            break;
 	
@@ -22698,7 +22581,7 @@
 	        } else {
 	            object.selectable = false;
 	            object.evented = false;
-	            object.opacity = 0.5;
+	            object.opacity = 0.9;
 	        }
 	    }
 	}
@@ -22718,10 +22601,6 @@
 	            delete _objects[id];
 	        }
 	    }
-	    // var orderedObjects = [];
-	    // for (var id in _objects) {
-	    //     orderedObjects.push(_objects[id]);
-	    // }
 	}
 	
 	var ObjectStore = assign({}, EventEmitter.prototype, {
@@ -22760,27 +22639,6 @@
 	            }
 	        }
 	        return animationObjects;
-	    },
-	
-	    getAllOrdered: function getAllOrdered() {
-	        // var orderedObjects = [];
-	        // for (var id in _objects) {
-	        //     orderedObjects.push(_objects[id]);
-	        // }
-	        // orderedObjects.sort(function(a, b) {
-	        //     return LayerStore.getIndexForID(a.layerID) - LayerStore.getIndexForID(b.layerID);
-	        // });
-	        // return orderedObjects;
-	
-	        var layers = LayerStore.getAllLayers();
-	        var orderedObjects = layers.reduce(function (orderedObjects, layer) {
-	            layer.objects.forEach(function (object) {
-	                orderedObjects.push(object);
-	            });
-	            return orderedObjects;
-	        }, []);
-	
-	        return orderedObjects;
 	    },
 	
 	    getAllForFrame: function getAllForFrame(frameID) {
@@ -22828,6 +22686,7 @@
 	    switch (action.type) {
 	
 	        case ActionTypes.RECEIVE_CANVAS:
+	            AppDispatcher.waitFor([AnimationStore.dispatchToken]);
 	            var canvas = action.canvas;
 	            var objects = canvas._objects;
 	
@@ -22905,12 +22764,11 @@
 	        case ActionTypes.CLICK_ASSET:
 	            AppDispatcher.waitFor([AssetStore.dispatchToken]);
 	            var rawObjects = AssetStore.getCurrentAsset().objects;
-	            console.log('rawObjects', rawObjects);
+	
 	            var objects = rawObjects.map(function (object) {
 	                var clone = fabric.util.object.clone(object);
 	                return AppObjectUtils.getCreatedObjectData(clone, AnimationStore.getCurrentID(), LayerStore.getCurrentID(), FrameStore.getCurrentID());
 	            });
-	            console.log('mapped objects', objects);
 	
 	            objects.forEach(function (object) {
 	                _objects[object.id] = object;
@@ -23050,13 +22908,39 @@
 	var ObjectController = __webpack_require__(180);
 	var AssetSection = __webpack_require__(192);
 	
+	var AnimationStore = __webpack_require__(185);
+	
 	var React = __webpack_require__(3);
+	
+	// function getStateFromStore() {
+	//     return {canvasJSON: AnimationStore.getCanvasJSON()};
+	// }
 	
 	var AnimationController = React.createClass({
 	    displayName: 'AnimationController',
 	
 	
+	    // getInitialState: function() {
+	    //     return getStateFromStore();
+	    // },
+	
+	    // componentDidMount: function() {
+	    //     AnimationStore.addChangeListener(this._onChange);
+	    // },
+	
+	    // componentWillUnmount: function() {
+	    //     AnimationStore.removeChangeListener(this._onChange);
+	    // },
+	
 	    render: function render() {
+	
+	        // var canvas;
+	        // console.log('this.state.json', this.state.canvasJSON)
+	        // if (this.state.canvasJSON) {
+	        //     console.log('rendering object controller');
+	        //     canvas = <ObjectController />;
+	        // }
+	
 	        return React.createElement(
 	            'div',
 	            null,
@@ -23068,6 +22952,10 @@
 	    }
 	
 	});
+	
+	// _onChange: function() {
+	//     this.setState(getStateFromStore());
+	// }
 	
 	module.exports = AnimationController;
 
@@ -23476,7 +23364,7 @@
 	var AppWebAPIUtils = __webpack_require__(182);
 	var AppAssetActionCreators = __webpack_require__(184);
 	
-	var NameEditInput = __webpack_require__(198);
+	var NameEditInput = __webpack_require__(177);
 	
 	var AssetListItem = React.createClass({
 	    displayName: 'AssetListItem',
@@ -23682,62 +23570,6 @@
 	
 	module.exports = __webpack_require__(5);
 
-
-/***/ },
-/* 198 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var React = __webpack_require__(3);
-	
-	var ENTER_KEY_CODE = 13;
-	
-	var NameEditInput = React.createClass({
-	    displayName: 'NameEditInput',
-	
-	
-	    getInitialState: function getInitialState() {
-	        return {
-	            name: this.props.name || ''
-	        };
-	    },
-	
-	    render: function render() {
-	        return React.createElement('input', {
-	            id: this.props.id,
-	            placeholder: this.state.name,
-	            value: this.state.name,
-	            onBlur: this._save,
-	            onChange: this._onChange,
-	            onKeyDown: this._onKeyDown,
-	            autoFocus: true
-	        });
-	    },
-	
-	    _save: function _save() {
-	        var name = this.state.name.trim();
-	        this.props.onSave(name);
-	        this.setState({
-	            name: ''
-	        });
-	    },
-	
-	    _onChange: function _onChange(event) {
-	        this.setState({
-	            name: event.target.value
-	        });
-	    },
-	
-	    _onKeyDown: function _onKeyDown(event) {
-	        if (event.keyCode === ENTER_KEY_CODE) {
-	            this._save();
-	        }
-	    }
-	
-	});
-	
-	module.exports = NameEditInput;
 
 /***/ }
 /******/ ]);

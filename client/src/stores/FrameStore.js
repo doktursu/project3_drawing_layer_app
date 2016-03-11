@@ -13,9 +13,6 @@ var _frameOrder = [];
 var _frameInterval = 100;
 var _direction = 'normal';
 
-
-var _frames = {};
-
 function _clickNextFrame() {
     var currentIndex = _frameOrder.indexOf(_currentID);
     var nextIndex = currentIndex + 1;
@@ -33,25 +30,6 @@ function _clickPreviousFrame() {
 
 var FrameStore = assign({}, EventEmitter.prototype, {
 
-    addObjects: function(objects) {
-        objects.forEach(function(object) {
-            var frameID = object.frameID;
-            var frame = _frames[frameID];
-            if (frame) {
-                frame.objects.push(object);
-                return;
-            }
-            _frames[frameID] = {
-                objects: [object]
-            };
-        }, this);
-
-        if (!_currentID) {
-          var allOrdered = this.getAllOrdered();
-          _currentID = allOrdered[allOrdered.length - 1].id;
-        }
-    },
-
     emitChange: function() {
         console.log('----------FRAME STORE----------')
         console.log('frames', _frameOrder);
@@ -67,10 +45,6 @@ var FrameStore = assign({}, EventEmitter.prototype, {
         this.removeListener(CHANGE_EVENT, callback);
     },
 
-    getAll: function() {
-        return _frames;
-    },
-
     getOrder: function() {
         return _frameOrder;
     },
@@ -79,23 +53,8 @@ var FrameStore = assign({}, EventEmitter.prototype, {
         return _frameInterval;
     },
 
-
     getAllByFrame: function(frameID) {
         return _frames[frameID];
-    },
-
-    getAllOrdered: function() {
-        // var orderedFrames = [];
-        // for (var id in _frames) {
-        //     var frame = _frames[id];
-        //     orderedFrames.push(frame);
-        // }
-        // orderedFrames.sort(function(a, b) {
-        //     return a.id - b.id;
-        // })
-        // return orderedFrames;
-
-        return [1,2,3,4,5];
     },
 
     getCurrentID: function() {
@@ -107,11 +66,6 @@ var FrameStore = assign({}, EventEmitter.prototype, {
 FrameStore.dispatchToken = AppDispatcher.register(function(action) {
 
     switch(action.type) {
-
-        // case ActionTypes.RECEIVE_RAW_OBJECTS:
-        //     FrameStore.addObjects(action.rawObjects);
-        //     FrameStore.emitChange();
-        //     break;
 
         case ActionTypes.RECEIVE_CREATED_RAW_ANIMATION:
             _frameOrder = action.rawAnimation.frameOrder;
@@ -134,11 +88,6 @@ FrameStore.dispatchToken = AppDispatcher.register(function(action) {
             
             _currentID = _frameOrder[0];
             FrameStore.emitChange();
-            break;
-
-        case ActionTypes.RECEIVE_CANVAS:
-            var objects = action.canvas._objects;
-            FrameStore.addObjects(objects);
             break;
 
         case ActionTypes.CLICK_FRAME:

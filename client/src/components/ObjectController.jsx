@@ -1,16 +1,14 @@
-// var FabricCanvas = require('./FabricCanvas.jsx');
 var AppObjectActionCreators = require('../actions/AppObjectActionCreators');
 var AppAssetActionCreators = require('../actions/AppAssetActionCreators');
 
 var DrawingModeOptions = require('./DrawingModeOptions.jsx');
-// var LayerSection = require('./LayerSection.jsx');
-// var FrameSelector = require('./FrameSelector.jsx');
+
 var AppWebAPIUtils = require('../utils/AppWebAPIUtils');
 
 var AnimationStore = require('../stores/AnimationStore');
 var LayerStore = require('../stores/LayerStore');
 var FrameStore = require('../stores/FrameStore');
-// var JsonObjectStore = require('../stores/JsonObjectStore.js');
+
 var ObjectStore = require('../stores/ObjectStore');
 var React = require('react');
 
@@ -42,6 +40,7 @@ var ObjectController = React.createClass({
     },
 
     _initializeFabricCanvas: function() {
+        console.log('CANVAS JSON', this.state.canvasJSON);
         canvas = new fabric.Canvas("c");
         canvas.isDrawingMode = true;
         canvas.selectable = true;
@@ -50,9 +49,8 @@ var ObjectController = React.createClass({
         // json["objects"] = this.state.objects;
         // json["background"] = "rgba(0, 0, 0, 0)";
         // var json = JSON.stringify(json);
-
-        // canvas.loadFromJSON(this.state.canvasJSON);
-        canvas.loadFromJSON('');
+        canvas.loadFromJSON(this.state.canvasJSON);
+        // canvas.loadFromJSON("{\"objects\":[],\"background\":\"\"}");
 
         canvas.on('object:added', function() {
             var objects = canvas.getObjects();
@@ -60,7 +58,7 @@ var ObjectController = React.createClass({
             this._onCreate(object);
         }.bind(this));
 
-        console.log('canvas', JSON.stringify(canvas));
+        console.log('FABRIC CANVAS', canvas);
         this._sendCanvas(canvas);
         this.setState({canvas: canvas});
     },
@@ -70,19 +68,6 @@ var ObjectController = React.createClass({
         canvas._objects = this.state.objects;
         canvas.renderAll();
     },
-
-    // componentDidUpdate: function() {
-    //     canvas.clear();
-
-    //     var json = {};
-    //     json["objects"] = this.state.objects;
-    //     json["background"] = "rgba(0, 0, 0, 0)";
-    //     var json = JSON.stringify(json);
-
-    //     canvas.loadFromJSON(json);
-    //     console.log(json);
-    //     console.log(canvas);
-    // },
 
     componentWillUnmount: function() {
         ObjectStore.removeChangeListener(this._onChange);

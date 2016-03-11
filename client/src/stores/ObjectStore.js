@@ -7,8 +7,6 @@ var FrameStore = require('./FrameStore');
 var LayerStore = require('./LayerStore');
 var AssetStore = require('./AssetStore');
 
-
-
 var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
@@ -36,7 +34,7 @@ function _markOnlyAllInLayerSelectable(layerID) {
         } else {
             object.selectable = false;
             object.evented = false;
-            object.opacity = 0.5;
+            object.opacity = 0.9;
         }
     }
 }
@@ -56,10 +54,6 @@ function _destroyAllInLayer(layerID) {
             delete _objects[id];
         }
     }
-    // var orderedObjects = [];
-    // for (var id in _objects) {
-    //     orderedObjects.push(_objects[id]);
-    // }
 }
 
 var ObjectStore = assign({}, EventEmitter.prototype, {
@@ -98,27 +92,6 @@ var ObjectStore = assign({}, EventEmitter.prototype, {
             }
         }
         return animationObjects;
-    },
-
-    getAllOrdered: function() {
-        // var orderedObjects = [];
-        // for (var id in _objects) {
-        //     orderedObjects.push(_objects[id]);
-        // }
-        // orderedObjects.sort(function(a, b) {
-        //     return LayerStore.getIndexForID(a.layerID) - LayerStore.getIndexForID(b.layerID);
-        // });
-        // return orderedObjects;
-
-        var layers = LayerStore.getAllLayers();
-        var orderedObjects = layers.reduce(function(orderedObjects, layer) {
-            layer.objects.forEach(function(object) {
-                orderedObjects.push(object);
-            });
-            return orderedObjects;
-        }, []);
-
-        return orderedObjects;
     },
 
     getAllForFrame: function(frameID) {
@@ -166,6 +139,7 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
     switch(action.type) {
 
         case ActionTypes.RECEIVE_CANVAS:
+            AppDispatcher.waitFor([AnimationStore.dispatchToken]);
             var canvas = action.canvas;
             var objects = canvas._objects;
 
@@ -212,7 +186,6 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
             break;
 
 
-
         case ActionTypes.RECEIVE_CREATED_OBJECT:
             var object = action.object;
             _objects[object.id] = object;
@@ -246,12 +219,11 @@ ObjectStore.dispatchToken = AppDispatcher.register(function(action) {
         case ActionTypes.CLICK_ASSET:
             AppDispatcher.waitFor([AssetStore.dispatchToken]);
             var rawObjects = AssetStore.getCurrentAsset().objects;
-            console.log('rawObjects', rawObjects);
+
             var objects = rawObjects.map(function(object) {
                 var clone = fabric.util.object.clone(object);
                 return AppObjectUtils.getCreatedObjectData(clone, AnimationStore.getCurrentID(), LayerStore.getCurrentID(), FrameStore.getCurrentID());
             });
-            console.log('mapped objects', objects);
 
             objects.forEach(function(object) {
                 _objects[object.id] = object;

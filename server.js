@@ -8,7 +8,13 @@ app.get('/', function(req, res) {
 
 app.use(express.static('client/build'));
 
-var server = app.listen(3000, function() {
+// app.use(function(req, res, next) {
+//     res.setHeader('Access-Control-Allow-Origin', '*'); // Or can specify 'http://localhost:3000'
+//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+//     next();
+// });
+
+var server = app.listen(5000, function() {
     var host = server.address().address;
     var port = server.address().port;
 
