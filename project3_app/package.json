@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cd client && npm test",
     "app-serv": "node server.js",
-    "api-serv": "cd ../project3_api && rails s"
+    "api-serv": "cd ../project3_api && rails s",
+    "webpack": "cd client && webpack -w"
   },
   "author": "Sky Su",
   "license": "ISC",
