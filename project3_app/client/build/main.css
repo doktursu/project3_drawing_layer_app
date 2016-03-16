@@ -1,20 +1,22 @@
+body {
+  color: white;
+  background-color: #333; }
+
 #canvases {
-    position: relative;
-    border: 2px solid green;
-    width: 200px;
-    height: 200px;
-}
+  position: relative;
+  border: 2px solid green;
+  width: 200px;
+  height: 200px; }
 
 .fabric-canvas {
-    position: absolute;
-    top: 20;
-    left: 20;
-}
+  position: absolute;
+  top: 20;
+  left: 20; }
 
 .layer-active {
-    color: red;
-}
+  color: red; }
 
 #assetCanvas {
-    display: none;
-}
+  display: none; }
+
+/*# sourceMappingURL=main.css.map */

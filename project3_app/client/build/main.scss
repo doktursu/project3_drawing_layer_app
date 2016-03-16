@@ -1,0 +1,28 @@
+$primary-color: #333;
+$secondary-color: #666;
+
+body {
+    color: white;
+    background-color: $primary-color;
+}
+
+#canvases {
+    position: relative;
+    border: 2px solid green;
+    width: 200px;
+    height: 200px;
+}
+
+.fabric-canvas {
+    position: absolute;
+    top: 20;
+    left: 20;
+}
+
+.layer-active {
+    color: red;
+}
+
+#assetCanvas {
+    display: none;
+}
