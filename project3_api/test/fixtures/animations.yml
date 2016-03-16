@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  frameOrder: MyText
+  frameInterval: 1
+  layerOrder: MyText
+  layerInfo: MyText
+  canvasJSON: MyText
+
+two:
+  frameOrder: MyText
+  frameInterval: 1
+  layerOrder: MyText
+  layerInfo: MyText
+  canvasJSON: MyText
