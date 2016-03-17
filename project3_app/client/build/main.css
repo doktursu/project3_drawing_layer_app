@@ -19,4 +19,7 @@ body {
 #assetCanvas {
   display: none; }
 
+.assets li {
+  border: 1px solid white; }
+
 /*# sourceMappingURL=main.css.map */

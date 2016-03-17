@@ -95,7 +95,7 @@ var AssetSection = React.createClass({
                     width={300}
                     height={300}>
                 </canvas>
-                <ul>
+                <ul className="assets">
                     {assetListItems}
                 </ul>
             </div>

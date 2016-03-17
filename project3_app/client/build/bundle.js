@@ -23112,7 +23112,7 @@
 	                height: 300 }),
 	            React.createElement(
 	                'ul',
-	                null,
+	                { className: 'assets' },
 	                assetListItems
 	            )
 	        );

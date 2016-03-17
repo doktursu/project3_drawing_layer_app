@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "cd client && npm test",
-    "dev": "npm run api-serv & npm run app-serv & npm run webpack & npm run open & wait",
+    "dev": "npm run api-serv & npm run app-serv & npm run webpack & npm run sass-watch & npm run open & wait",
     "app-serv": "node server.js",
     "api-serv": "cd ../project3_api && rails s",
     "webpack": "cd client && webpack -w",
-    "open": "open http://localhost:5000"
+    "open": "open http://localhost:5000",
+    "sass-watch": "cd client/build && sass --watch main.scss:main.css"
   },
   "author": "Sky Su",
   "license": "ISC",
