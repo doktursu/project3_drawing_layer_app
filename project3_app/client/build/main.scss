@@ -1,10 +1,10 @@
 $primary-color: #333;
 $secondary-color: #666;
 
-body {
-    color: white;
-    background-color: $primary-color;
-}
+// body {
+//     color: white;
+//     background-color: $primary-color;
+// }
 
 #canvases {
     position: relative;
@@ -27,8 +27,8 @@ body {
     display: none;
 }
 
-.assets {
-    li {
-        border: 1px solid white;
-    }
-}
+// .assets {
+//     li {
+//         border: 1px solid white;
+//     }
+// }
